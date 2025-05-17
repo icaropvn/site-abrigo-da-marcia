@@ -20,15 +20,22 @@ body {
 header {
     background-color: var(--firstColor);
     display: flex;
+    justify-content: center;
+    padding: 20px 30px;
+}
+
+header div#containerHeader {
+    display: flex;
     justify-content: space-between;
-    padding: 20px 40px;
+    width: 100%;
+    max-width: 1300px;
 }
 
 header img {
     height: 70px;
 }
 
-header div {
+header div#containerHeaderNav {
     display: flex;
     align-items:center;
     gap: 60px;
