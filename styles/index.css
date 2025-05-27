@@ -1,0 +1,127 @@
+@charset "UTF-8";
+
+/* Import da fonte Afacad */
+@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Arapey:ital@0;1&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --vermelhoPrincipal: #F15A55;
+    --pretoPrincipal: #0F0F0F;
+    --brancoPrincipal: #F6F6F6;
+}
+
+body {
+    font-family: afacad, arial, sans-serif;
+}
+
+header {
+    background-color: var(--vermelhoPrincipal);
+    display: flex;
+    justify-content: center;
+    padding: 20px 30px;
+    position: fixed;
+    width: 100%;
+}
+
+header div#container-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1300px;
+}
+
+header img {
+    height: 70px;
+}
+
+header div#container-header-nav {
+    display: flex;
+    align-items:center;
+    gap: 60px;
+}
+
+header ul {
+    display: flex;
+    gap: 60px;
+    list-style: none;
+    font-size: 22px;
+}
+
+header li a {
+    color: var(--brancoPrincipal);
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+header li a:hover {
+    /* fazer animação do sublinhado */
+}
+
+header button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: var(--brancoPrincipal);
+    color: var(--vermelhoPrincipal);
+    font-family: afacad, arial, sans-serif;
+    font-size: 22px;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+header button:hover{
+    background-color: var(--pretoPrincipal);
+    color: var(--brancoPrincipal);
+}
+
+main #main-section {
+    display: flex;
+    padding: 180px 10% 0 10%;
+    font-size: 24px;
+}
+
+main #main-section h1 {
+    font-size: 120px;
+    line-height: 110px;
+    margin-bottom: 70px;
+}
+
+main #main-section p {
+    max-width: 800px;
+    text-align: justify;
+}
+
+main #main-section p:first-of-type {
+    margin-bottom: 20px;
+}
+
+main #main-section img {
+    max-width: 600px;
+}
+
+main #main-section button {
+    border: none;
+    padding: 10px 40px;
+    margin: 50px 0 80px 0;
+    border-radius: 10px;
+    background-color: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    font-family: afacad, arial, sans-serif;
+    font-size: 26px;
+    font-weight: 100;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+main #main-section button:hover {
+    background-color: var(--pretoPrincipal);
+}
+
+main #adoption-section {
+    background-color: var(--vermelhoPrincipal);
+}
