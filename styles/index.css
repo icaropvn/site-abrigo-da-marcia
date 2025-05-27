@@ -197,3 +197,65 @@ main #adoption-section button:hover {
     background-color: var(--pretoPrincipal);
     color: var(--brancoPrincipal);
 }
+
+main #care-approach-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 24px;
+    padding: 120px 300px 200px 300px;
+}
+
+main #care-approach-section #cares-container {
+    display: flex;
+    gap: 50px;
+    margin-top: 50px;
+}
+
+main #care-approach-section h2 {
+    font-size: 100px;
+}
+
+main #care-approach-section .care-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+}
+
+main #care-approach-section .care-card:first-of-type, main #care-approach-section .care-card:last-of-type {
+    margin-top: 80px;
+}
+
+main #care-approach-section .care-card img {
+    width: 250px;
+}
+
+main #care-approach-section .card-title {
+    text-align: center;
+    font-size: 50px;
+    font-weight: 900;
+    line-height: 50px;
+    margin-top: 30px;
+}
+
+main #care-approach-section .card-description {
+    text-align: center;
+    margin-top: 20px;
+    line-height: 28px;
+    max-width: 300px;
+}
+
+main #care-approach-section > img {
+    position: absolute;
+    bottom: -25%;
+    height: 400px;
+    width: 950px;
+    z-index: -1;
+}
+
+main #donation-section {
+    position: relative;
+    background-color: var(--vermelhoPrincipal);
+}
