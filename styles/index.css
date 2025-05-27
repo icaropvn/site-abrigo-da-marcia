@@ -15,8 +15,13 @@
     --brancoPrincipal: #F6F6F6;
 }
 
+html, body {
+    overflow-x: hidden;
+}
+
 body {
     font-family: afacad, arial, sans-serif;
+    overflow-y: hidden;
 }
 
 header {
@@ -26,6 +31,7 @@ header {
     padding: 20px 30px;
     position: fixed;
     width: 100%;
+    z-index: 1;
 }
 
 header div#container-header {
@@ -83,6 +89,10 @@ main #main-section {
     display: flex;
     padding: 180px 10% 0 10%;
     font-size: 24px;
+    z-index: 0;
+
+    position: relative;
+    overflow: visible;
 }
 
 main #main-section h1 {
@@ -92,7 +102,7 @@ main #main-section h1 {
 }
 
 main #main-section p {
-    max-width: 800px;
+    max-width: 700px;
     text-align: justify;
 }
 
@@ -101,7 +111,16 @@ main #main-section p:first-of-type {
 }
 
 main #main-section img {
-    max-width: 600px;
+    position: absolute;
+    bottom: -30%;
+    right: -10%;
+    flex: 0 0 auto;
+    max-height: 1000px;
+    width: auto;
+    height: auto;
+    transform: rotate(-10deg);
+    transform-origin: center center;
+    z-index: -1;
 }
 
 main #main-section button {
@@ -123,5 +142,58 @@ main #main-section button:hover {
 }
 
 main #adoption-section {
+    position: relative;
+    display: flex;
     background-color: var(--vermelhoPrincipal);
+    font-size: 24px;
+    padding: 120px 300px;
+    z-index: 0;
+}
+
+main #adoption-section img {
+    position: absolute;
+    bottom: 0;
+    left: -10%;
+    flex: 0 0 auto;
+    max-width: 900px;
+    width: auto;
+    height: auto;
+}
+
+main #adoption-section div {
+    margin-left: auto;
+}
+
+main #adoption-section h2 {
+    font-size: 100px;
+    color: var(--brancoPrincipal);
+    margin-bottom: 50px;
+    text-align: right;
+}
+
+main #adoption-section p {
+    color: var(--brancoPrincipal);
+    margin: 0 0 20px auto;
+    text-align: justify;
+    max-width: 800px;
+}
+
+main #adoption-section button {
+    display: block;
+    border: none;
+    padding: 10px 40px;
+    margin: 80px 30px 0 auto;
+    border-radius: 10px;
+    background-color: var(--brancoPrincipal);
+    color: var(--pretoPrincipal);
+    font-family: afacad, arial, sans-serif;
+    font-size: 26px;
+    font-weight: 100;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+main #adoption-section button:hover {
+    background-color: var(--pretoPrincipal);
+    color: var(--brancoPrincipal);
 }
