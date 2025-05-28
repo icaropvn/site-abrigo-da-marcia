@@ -44,7 +44,7 @@ header div#container-header {
 }
 
 header img {
-    height: 70px;
+    height: 55px;
 }
 
 header div#container-header-nav {
@@ -318,10 +318,24 @@ main #donation-section #donation-buttons-container button {
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
+main #donation-section #donation-buttons-container button:hover {
+    background-color: var(--pretoPrincipal);
+    color: var(--brancoPrincipal);
+}
+
 main #donation-section #donation-buttons-container #donation-button-generic {
     background-color: transparent;
-    border: 2px solid var(--brancoPrincipal);
+    outline-color: var(--brancoPrincipal);
+    outline-width: 2px;
+    outline-style: solid;
     color: var(--brancoPrincipal);
+    transition: outline-width 0.1s ease-in-out;
+}
+
+main #donation-section #donation-buttons-container #donation-button-generic:hover {
+    background-color: var(--pretoPrincipal);
+    color: var(--brancoPrincipal);
+    outline-width: 0;
 }
 
 main #donation-section #donation-buttons-container .donation-button-most-chosen {
@@ -407,6 +421,11 @@ main #volunteer-section button {
     font-weight: 100;
     cursor: pointer;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+main #volunteer-section button:hover {
+    background-color: var(--pretoPrincipal);
+    color: var(--brancoPrincipal);
 }
 
 main #gallery-section {
