@@ -1,0 +1,200 @@
+@charset "UTF-8";
+
+/* Import da fonte Afacad */
+@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Arapey:ital@0;1&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --vermelhoPrincipal: #F15A55;
+    --vermelhoSecundario: #ffd7d7;
+    --pretoPrincipal: #0F0F0F;
+    --brancoPrincipal: #F6F6F6;
+    --amareloDestaque: #FFAD28;
+    --cinzaFooter: #868686;
+}
+
+html, body {
+    overflow-x: hidden;
+}
+
+body {
+    font-family: afacad, arial, sans-serif;
+}
+
+header {
+    background-color: var(--vermelhoPrincipal);
+    display: flex;
+    justify-content: center;
+    padding: 20px 30px;
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+}
+
+header div#container-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1300px;
+}
+
+header img {
+    height: 55px;
+}
+
+header div#container-header-nav {
+    display: flex;
+    align-items:center;
+    gap: 60px;
+}
+
+header ul {
+    display: flex;
+    gap: 60px;
+    list-style: none;
+    font-size: 22px;
+}
+
+header li a {
+    color: var(--brancoPrincipal);
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+header li a:hover {
+    /* fazer animação do sublinhado */
+}
+
+header button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: var(--brancoPrincipal);
+    color: var(--vermelhoPrincipal);
+    font-family: afacad, arial, sans-serif;
+    font-size: 22px;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+header button:hover{
+    background-color: var(--pretoPrincipal);
+    color: var(--brancoPrincipal);
+}
+
+/* =============================================================== */
+
+.dog-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px 28px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 8px;
+}
+
+.dog-card {
+    background-color: var(--brancoPrincipal);
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
+    overflow: hidden;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .2s;
+}
+
+.dog-card:hover {
+    box-shadow: 0 8px 36px rgba(229, 94, 94, 0.14);
+}
+
+.dog-card img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    border: 2px solid var(--vermelhoPrincipal);
+    box-sizing: border-box;
+}
+
+.dog-card-info {
+    padding: 32px 28px 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.dog-card-info h2 {
+    color: var(--vermelhoPrincipal);
+    font-size: 2.3rem;
+    margin: 0 0 8px 0;
+    font-family: inherit;
+    font-weight: bold;
+}
+
+.dog-card-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: var(--vermelhoSecundario);
+    color: var(--vermelhoPrincipal);
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 1.13rem;
+    font-weight: 500;
+}
+
+.dog-card-info p {
+    color: var(--pretoPrincipal);
+    font-size: 1.15rem;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.adopt-btn {
+    background: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    font-size: 1.7rem;
+    font-weight: 400;
+    border: none;
+    border-radius: 16px;
+    padding: 18px 0;
+    margin-top: 18px;
+    cursor: pointer;
+    transition: background 0.18s;
+    width: 100%;
+}
+
+.adopt-btn:hover {
+    background: var(--pretoPrincipal);
+}
+
+@media (max-width: 600px) {
+    .dog-card {
+        max-width: 98vw;
+    }
+    .dog-card img {
+        height: 180px;
+    }
+    .dog-card-info {
+        padding: 20px 10px;
+        gap: 10px
+    }
+    .dog-card-info h2 {
+        font-size: 1.3rem;
+    }
+    .adopt-btn {
+        font-size: 1.1rem;
+        padding: 13px 0;
+    }
+}
