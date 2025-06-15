@@ -19,6 +19,7 @@
 
 html, body {
     overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -127,6 +128,10 @@ main #main-section img {
     z-index: -1;
 }
 
+main #main-section a {
+    text-decoration: none;
+}
+
 main #main-section button {
     border: none;
     padding: 10px 40px;
@@ -183,11 +188,15 @@ main #adoption-section p {
     max-width: 800px;
 }
 
+main #adoption-section a {
+    text-decoration: none;
+}
+
 main #adoption-section button {
     display: block;
     border: none;
     padding: 10px 40px;
-    margin: 80px 30px 0 auto;
+    margin: 80px 0 0 auto;
     border-radius: 10px;
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
@@ -420,7 +429,7 @@ main #volunteer-section p {
 main #volunteer-section button {
     border: none;
     padding: 10px 40px;
-    margin: 80px 0 0 30px;
+    margin: 80px 0 0 0;
     border-radius: 10px;
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);

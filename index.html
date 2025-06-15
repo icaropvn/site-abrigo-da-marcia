@@ -7,7 +7,8 @@
     <title>Abrigo da Márcia</title>
 
     <link rel="stylesheet" href="styles/index.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite"/>
 </head>
 <body>
     <header>
@@ -17,10 +18,10 @@
             <div id="container-header-nav">
                 <nav>
                     <ul>
-                        <li><a href="#">Adoção</a></li>
-                        <li><a href="#">Doação</a></li>
-                        <li><a href="#">Voluntários</a></li>
-                        <li><a href="#">Sobre nós</a></li>
+                        <li><a href="#adoption-section">Adoção</a></li>
+                        <li><a href="#donation-section">Doação</a></li>
+                        <li><a href="#about-us-section">Sobre nós</a></li>
+                        <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
                 </nav>
                 <button>Doe Agora</button>
@@ -33,11 +34,13 @@
         </div>
     </header>
 
+    <!-- Menu mobile -->
+
     <input type="checkbox" id="menu-toggle" hidden>
     <div class="menu">
         <nav>
             <ul>
-                <li><a href="#">Adoção</a></li>
+                <li><a href="#adoption-section">Adoção</a></li>
                 <li><a href="#">Doação</a></li>
                 <li><a href="#">Voluntários</a></li>
                 <li><a href="#">Sobre nós</a></li>
@@ -47,13 +50,15 @@
     </div>
     <label for="menu-toggle" class="menu-overlay"></label>
     
+    <!-- ========================== -->
+
     <main>
         <section id="main-section">
             <div>
                 <h1>Adotar é bom para cachorro!</h1>
                 <p>No Abrigo da Márcia, nos dedicamos a cuidar e alimentar cães em situação de vulnerabilidade, oferecendo a eles um lar temporário seguro e cheio de amor.</p>
                 <p>Com o seu apoio, podemos continuar proporcionando bem-estar, cuidados veterinários e a esperança de um novo lar para esses animais. Faça parte dessa missão!</p>
-                <button>Faça uma doação</button>
+                <a href="#donation-section"><button>Faça uma doação</button></a>
             </div>
             <img src="assets/images/icone-abrigo-secao-inicial.png" alt="Ícone do abrigo. Uma pata em formato de coração na cor vermelha.">
         </section>
@@ -64,7 +69,7 @@
                 <p>Nossos cães estão em busca de um lar cheio de amor e carinho!</p>
                 <p>Cada um deles carrega uma história única, muitas vezes marcada por desafios e dificuldades. No Abrigo da Márcia, fazemos todo o possível para proporcionar cuidados, proteção, alimentação e atenção veterinária aos nossos cães, garantindo que se sintam amados e seguros enquanto aguardam por uma nova família.</p>
                 <p>Nosso maior sonho é que cada cãozinho encontre seu final feliz em um lar onde possa receber o afeto e a dedicação que merece.</p>
-                <button>Adote agora</button>
+                <a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSfPT81eNs2MQZ69NhkJFvOCrjS2AJ6LcagrB5uphpGIycb73g/formResponse"><button>Adote agora</button></a>
             </div>
         </section>
         <section id="care-approach-section">
@@ -157,7 +162,7 @@
                     </div>
                     <div>
                         <img src="assets/images/mail.png" alt="Ícone de e-mail">
-                        <a href="mailto:">abrigodamarcia@gmail.com</a>
+                        <a href="mailto:abrigodamarcia@gmail.com">abrigodamarcia@gmail.com</a>
                     </div>
                 </div>
             </div>
@@ -165,17 +170,17 @@
                 <div id="section-links">
                     <span>LINKS</span>
                     <ul>
-                        <li><a href="#">Adoção</a></li>
-                        <li><a href="#">Doação</a></li>
-                        <li><a href="#">Sobre Nós</a></li>
-                        <li><a href="#">Voluntários</a></li>
+                        <li><a href="#adoption-section">Adoção</a></li>
+                        <li><a href="#donation-section">Doação</a></li>
+                        <li><a href="#about-us-section">Sobre Nós</a></li>
+                        <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
                 </div>
                 <div id="social-media-links">
-                    <a href="#">
+                    <a target="_blank" href="https://www.facebook.com/abrigodamarcia">
                         <img src="assets/images/facebook-logo.png" alt="Logo do Facebook">
                     </a>
-                    <a href="#">
+                    <a target="_blank" href="https://www.instagram.com/abrigodamarcia/">
                         <img src="assets/images/instagram-logo.png" alt="Logo do Instagram">
                     </a>
                 </div>
@@ -183,7 +188,7 @@
         </div>
         <div id="footer-credits">
             <span>&copy; 2025 Abrigo da Márcia.</span>
-            <span>Site criado por <a href="">Ícaro C. Pavan</a> e <a href="">Jeferson T. Querino</a></span>
+            <span>Site criado por <a target="_blank" href="https://www.linkedin.com/in/icaro-pavan/">Ícaro C. Pavan</a> e <a target="_blank" href="https://www.linkedin.com/in/jeferson-tomaz-2a901b83/">Jeferson T. Querino</a></span>
         </div>
     </footer>
 </body>
