@@ -12,7 +12,7 @@
 <body>
     <header>
         <div id="container-header">
-            <a href="#"><img src="assets/Images/AbrigodaMarcia_logo.png"></a>
+            <a href="#"><img src="assets/images/AbrigodaMarcia_logo.png"></a>
 
             <div id="container-header-nav">
                 <nav>
@@ -25,12 +25,32 @@
                 </nav>
                 <button>Doe Agora</button>
             </div>
+            <div id="menu-mobile">
+                <label for="menu-toggle">
+                    <img id="menu-icon-mobile" src="assets/images/icone-menu.png" alt="Ícone menu">
+                </label>
+            </div>
         </div>
     </header>
+
+    <input type="checkbox" id="menu-toggle" hidden>
+    <div class="menu">
+        <nav>
+            <ul>
+                <li><a href="#">Adoção</a></li>
+                <li><a href="#">Doação</a></li>
+                <li><a href="#">Voluntários</a></li>
+                <li><a href="#">Sobre nós</a></li>
+            </ul>
+        </nav>
+        <button>Doe Agora</button>
+    </div>
+    <label for="menu-toggle" class="menu-overlay"></label>
+    
     <main>
         <section id="main-section">
             <div>
-                <h1>Adotar é bom para<br>cachorro!</h1>
+                <h1>Adotar é bom para cachorro!</h1>
                 <p>No Abrigo da Márcia, nos dedicamos a cuidar e alimentar cães em situação de vulnerabilidade, oferecendo a eles um lar temporário seguro e cheio de amor.</p>
                 <p>Com o seu apoio, podemos continuar proporcionando bem-estar, cuidados veterinários e a esperança de um novo lar para esses animais. Faça parte dessa missão!</p>
                 <button>Faça uma doação</button>
@@ -51,17 +71,26 @@
             <h2>Nossos Cuidados</h2>
             <div id="cares-container">
                 <div class="care-card">
-                    <img src="assets/images/icone-esquerda2.png" alt="Moldura em vermelho retirada do ícone do abrigo com um ícone em branco dentro.">
+                    <picture>
+                        <source media="(max-width: 800px)" srcset="assets/images/icone-vacina-inclinado.png">
+                        <img src="assets/images/icone-esquerda.png" alt="Moldura em vermelho retirada do ícone do abrigo com um ícone de vacina branco dentro.">
+                    </picture>
                     <span class="card-title">Vacinação Anual</span>
                     <span class="card-description">Todos os animais possuem um ciclo anual de vacinação</span>
                 </div>
                 <div class="care-card">
-                    <img src="assets/images/icone-centro2.png" alt="Moldura em vermelho retirada do ícone do abrigo com um ícone em branco dentro.">
+                    <picture>
+                        <source media="(max-width: 800px)" srcset="assets/images/icone-pote-inclinado.png">
+                        <img src="assets/images/icone-centro.png" alt="Moldura em vermelho retirada do ícone do abrigo com um ícone de pote de comida de cachorro branco dentro.">
+                    </picture>
                     <span class="card-title">Controle de alimentação</span>
                     <span class="card-description">Todos os animais possuem seus hábitos alimentares personalizados e regrados</span>
                 </div>
                 <div class="care-card">
-                    <img src="assets/images/icone-direita2.png" alt="Moldura em vermelho retirada do ícone do abrigo com um ícone em branco dentro.">
+                    <picture>
+                        <source media="(max-width: 800px)" srcset="assets/images/icone-carrapato-inclinado.png">
+                        <img src="assets/images/icone-direita.png" alt="Moldura em vermelho retirada do ícone do abrigo com um ícone de carrapato branco dentro.">
+                    </picture>
                     <span class="card-title">Tratamento contra carrapatos</span>
                     <span class="card-description">Verificação frequente e tratamento imediato</span>
                 </div>
@@ -87,7 +116,7 @@
         </section>
         <section id="about-us-section">
             <img src="assets/images/cachorros-brincando-no-abrigo.png" alt="Três cachorros correndo em direção à câmera. Dois voluntários aparecem ao fundo.">
-            <div>
+            <div id="about-us-content">
                 <h2>Conheça o abrigo</h2>
                 <p>O Abrigo da Márcia, fundado há mais de 20 anos, resgata cães abandonados em Ribeirão Preto, no estado de São Paulo.</p>
                 <p>Iniciado pela própria Márcia e auxiliado com a ajuda de voluntários, o abrigo já oferece um lar, cuidado, amor e adoção responsável para mais de 120 cães, além de ter salvado incontáveis animais ao longo das últimas duas décadas.</p>
@@ -118,39 +147,41 @@
         </section>
     </main>
     <footer>
-        <div id="footer-line1">
-            <img src="assets/images/AbrigodaMarcia_logo.png" alt="Logo do Abrigo da Márcia">
-            <div>
-                <span>LINKS</span>
-                <ul>
-                    <li><a href="#">Adoção</a></li>
-                    <li><a href="#">Doação</a></li>
-                    <li><a href="#">Sobre Nós</a></li>
-                    <li><a href="#">Voluntários</a></li>
-                </ul>
-            </div>
-        </div>
-        <div id="footer-line2">
-            <div id="contact-info">
-                <div>
-                    <img src="assets/images/location.png" alt="Ícone de localização">
-                    <address>Ribeirão Preto, São Paulo, Brasil</address>
-                </div>
-                <div>
-                    <img src="assets/images/mail.png" alt="Ícone de e-mail">
-                    <a href="mailto:">abrigodamarcia@gmail.com</a>
+        <div id="footer-main-content">
+            <div id="footer-info">
+                <img src="assets/images/AbrigodaMarcia_logo.png" alt="Logo do Abrigo da Márcia">
+                <div id="contact-info">
+                    <div>
+                        <img src="assets/images/location.png" alt="Ícone de localização">
+                        <address>Ribeirão Preto, São Paulo, Brasil</address>
+                    </div>
+                    <div>
+                        <img src="assets/images/mail.png" alt="Ícone de e-mail">
+                        <a href="mailto:">abrigodamarcia@gmail.com</a>
+                    </div>
                 </div>
             </div>
-            <div id="social-media-links">
-                <a href="#">
-                    <img src="assets/images/facebook-logo.png" alt="Logo do Facebook">
-                </a>
-                <a href="#">
-                    <img src="assets/images/instagram-logo.png" alt="Logo do Instagram">
-                </a>
+            <div id="footer-links">
+                <div id="section-links">
+                    <span>LINKS</span>
+                    <ul>
+                        <li><a href="#">Adoção</a></li>
+                        <li><a href="#">Doação</a></li>
+                        <li><a href="#">Sobre Nós</a></li>
+                        <li><a href="#">Voluntários</a></li>
+                    </ul>
+                </div>
+                <div id="social-media-links">
+                    <a href="#">
+                        <img src="assets/images/facebook-logo.png" alt="Logo do Facebook">
+                    </a>
+                    <a href="#">
+                        <img src="assets/images/instagram-logo.png" alt="Logo do Instagram">
+                    </a>
+                </div>
             </div>
         </div>
-        <div id="footer-line3">
+        <div id="footer-credits">
             <span>&copy; 2025 Abrigo da Márcia.</span>
             <span>Site criado por <a href="">Ícaro C. Pavan</a> e <a href="">Jeferson T. Querino</a></span>
         </div>

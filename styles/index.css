@@ -33,7 +33,7 @@ header {
     padding: 20px 30px;
     position: fixed;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
 }
 
 header div#container-header {
@@ -87,9 +87,15 @@ header button:hover{
     color: var(--brancoPrincipal);
 }
 
+header #menu-mobile, .menu {
+    display: none;
+}
+
 main #main-section {
     display: flex;
-    padding: 180px 10vw 0 10vw;
+    width: 110%;
+    gap: 100px;
+    padding: 10vw 0px 0px 8vw;
     font-size: 24px;
     z-index: 0;
     position: relative;
@@ -97,9 +103,10 @@ main #main-section {
 }
 
 main #main-section h1 {
-    font-size: clamp(60px, 6.5vw, 200px);
+    font-size: clamp(60px, 7.5vw, 200px);
     line-height: 110px;
     margin-bottom: 70px;
+    flex-grow: 2;
 }
 
 main #main-section p {
@@ -112,14 +119,10 @@ main #main-section p:first-of-type {
 }
 
 main #main-section img {
-    position: absolute;
-    bottom: -30%;
-    right: -10%;
-    flex: 0 0 auto;
-    max-height: 1000px;
-    width: 55%;
-    height: auto;
-    transform: rotate(-10deg);
+    width: auto;
+    max-height: 800px;
+    height: 50vw;
+    transform: translateY(50px) rotate(-10deg);
     transform-origin: center center;
     z-index: -1;
 }
@@ -145,20 +148,20 @@ main #main-section button:hover {
 main #adoption-section {
     position: relative;
     display: flex;
+    gap: 100px;
+    width: 110%;
+    margin-left: -10%;
     background-color: var(--vermelhoPrincipal);
     font-size: 24px;
-    padding: 120px 300px;
+    padding: 120px 300px 120px 0;
     z-index: 0;
 }
 
 main #adoption-section img {
-    position: absolute;
-    bottom: 0;
-    left: -10%;
     flex: 0 0 auto;
-    max-width: 900px;
-    width: auto;
-    height: auto;
+    align-self: center;
+    width: 50%;
+    height: 50%;
 }
 
 main #adoption-section div {
@@ -167,6 +170,7 @@ main #adoption-section div {
 
 main #adoption-section h2 {
     font-size: 100px;
+    line-height: 80px;
     color: var(--brancoPrincipal);
     margin-bottom: 50px;
     text-align: right;
@@ -210,12 +214,16 @@ main #care-approach-section {
 
 main #care-approach-section #cares-container {
     display: flex;
-    gap: 50px;
-    margin-top: 50px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 100px;
 }
 
 main #care-approach-section h2 {
     font-size: 100px;
+    text-align: center;
+    line-height: 90px
 }
 
 main #care-approach-section .care-card {
@@ -223,10 +231,6 @@ main #care-approach-section .care-card {
     flex-direction: column;
     align-items: center;
     width: 400px;
-}
-
-main #care-approach-section .care-card:first-of-type, main #care-approach-section .care-card:last-of-type {
-    margin-top: 80px;
 }
 
 main #care-approach-section .care-card img {
@@ -258,10 +262,12 @@ main #care-approach-section > img {
 
 main #donation-section {
     display: flex;
+    gap: 50px;
+    width: 110%;
     position: relative;
     background-color: var(--vermelhoPrincipal);
     font-size: 24px;
-    padding: 120px 300px 160px 300px;
+    padding: 120px 0 160px 300px;
 }
 
 main #donation-section > div {
@@ -270,6 +276,7 @@ main #donation-section > div {
 
 main #donation-section h2 {
     font-size: 100px;
+    line-height: 90px;
     color: var(--brancoPrincipal);
 }
 
@@ -281,14 +288,10 @@ main #donation-section p {
 }
 
 main #donation-section img {
-    flex: 1 1 0;
-    position: absolute;
-    bottom: 0;
-    right: -10%;
     flex: 0 0 auto;
-    max-width: 850px;
-    width: auto;
-    height: auto;
+    align-self: center;
+    width: 50%;
+    height: 50%;
 }
 
 main #donation-section #donation-buttons-container {
@@ -355,20 +358,21 @@ main #donation-section #donation-buttons-container .donation-button-most-chosen:
 }
 
 main #about-us-section {
-    display: flex;
-    font-size: 24px;
-    padding: 120px 300px 160px 300px;
     position: relative;
+    display: flex;
+    width: 108%;
+    margin-left: -8%;
+    gap: 100px;
+    font-size: 24px;
+    padding: 120px 300px 160px 0;
 }
 
 main #about-us-section img {
-    flex: 1 1 0;
-    position: absolute;
-    top: 100px;
-    left: -80px;
     max-width: 750px;
-    width: auto;
-    height: auto;
+    min-width: 400px;
+    width: 50%;
+    height: 50%;
+    align-self: center;
 }
 
 main #about-us-section > div {
@@ -377,6 +381,7 @@ main #about-us-section > div {
 
 main #about-us-section h2 {
     color: var(--vermelhoPrincipal);
+    line-height: 90px;
     font-size: 100px;
     text-align: right;
     margin-bottom: 50px;
@@ -391,14 +396,17 @@ main #about-us-section p {
 main #volunteer-section {
     position: relative;
     display: flex;
+    gap: 100px;
+    width: 110%;
     background-color: var(--vermelhoPrincipal);
     font-size: 24px;
-    padding: 120px 300px 160px 300px;
+    padding: 120px 0 160px 300px;
 }
 
 main #volunteer-section h2 {
     color: var(--brancoPrincipal);
     font-size: 100px;
+    line-height: 90px;
     margin-bottom: 50px;
 }
 
@@ -429,13 +437,11 @@ main #volunteer-section button:hover {
 }
 
 main #volunteer-section img {
-    flex: 1 1 0;
-    position: absolute;
-    top: 16x0px;
-    right: -20px;
+    align-self: center;
     max-width: 750px;
-    width: auto;
-    height: auto;
+    min-width: 600px;
+    width: 50%;
+    height: 50%;
 }
 
 main #gallery-section {
@@ -452,8 +458,10 @@ main #gallery-section h2 {
 
 main #gallery-section #photos-gallery-container {
     display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 40px;
     width: 100%;
-    justify-content: space-between;
     margin-top: 70px;
 }
 
@@ -480,6 +488,7 @@ main #gallery-photo3 {
 main #donation-cta-section {
     display: flex;
     justify-content: space-between;
+    gap: 30px;
     background-color: var(--vermelhoPrincipal);
     padding: 60px 300px;
 }
@@ -513,50 +522,24 @@ footer {
     padding: 80px 300px;
 }
 
-footer #footer-line1 {
+footer #footer-main-content {
     display: flex;
+    align-items: start;
     justify-content: space-between;
-    width: 100%;
 }
 
-footer #footer-line1 img {
+footer #footer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+}
+
+footer #footer-info img {
     flex: 0 0 auto;
-    height: 80px;
+    width: 190px;
 }
 
-footer #footer-line1 span {
-    display: block;
-    font-size: 30px;
-    font-weight: 900;
-    text-align: right;
-    color: var(--brancoPrincipal);
-}
-
-footer #footer-line1 ul {
-    display: flex;
-    gap: 30px;
-    list-style-type: none;
-    font-size: 22px;
-    margin-top: 10px;
-}
-
-footer #footer-line1 ul a {
-    color: var(--brancoPrincipal);
-    text-underline-offset: 5px;
-}
-
-footer #footer-line1 ul a:hover {
-    color: var(--vermelhoPrincipal);
-}
-
-footer #footer-line2 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 60px;
-}
-
-footer #footer-line2 #contact-info {
+footer #footer-info #contact-info {
     display: flex;
     flex-direction: column;
     color: var(--brancoPrincipal);
@@ -564,35 +547,68 @@ footer #footer-line2 #contact-info {
     gap: 10px;
 }
 
-footer #footer-line2 #contact-info div {
+footer #footer-info #contact-info div {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-footer #footer-line2 #contact-info img {
+footer #footer-info #contact-info img {
     width: 20px;
 }
 
-footer #footer-line2 #contact-info address {
+footer #footer-info #contact-info address {
     display: inline;
 }
 
-footer #footer-line2 #contact-info a {
+footer #footer-info #contact-info a {
     color: var(--brancoPrincipal);
     text-underline-offset: 6px;
 }
 
-footer #footer-line2 #contact-info a:hover {
+footer #footer-info #contact-info a:hover {
     color: var(--vermelhoPrincipal);
 }
 
-footer #footer-line2 #social-media-links {
+footer #footer-links {
     display: flex;
-    gap: 20px;
+    gap: 40px;
+    flex-direction: column;
+    align-items: end;
 }
 
-footer #footer-line2 #social-media-links a {
+footer #footer-links span {
+    display: block;
+    font-size: 30px;
+    font-weight: 900;
+    text-align: right;
+    color: var(--brancoPrincipal);
+}
+
+footer #footer-links ul {
+    display: flex;
+    gap: 30px;
+    list-style-type: none;
+    font-size: 22px;
+    margin-top: 10px;
+}
+
+footer #footer-links ul a {
+    color: var(--brancoPrincipal);
+    text-underline-offset: 5px;
+}
+
+footer #footer-links ul a:hover {
+    color: var(--vermelhoPrincipal);
+}
+
+footer #footer-links #social-media-links {
+    display: flex;
+    gap: 20px;
+    
+}
+
+footer #footer-links #social-media-links a {
     display: inline-flex;
     background-color: var(--brancoPrincipal);
     border-radius: 10px;
@@ -603,15 +619,15 @@ footer #footer-line2 #social-media-links a {
     transition: background-color 0.2s ease-out;
 }
 
-footer #footer-line2 #social-media-links a:hover {
+footer #footer-links #social-media-links a:hover {
     background-color: var(--vermelhoPrincipal);
 }
 
-footer #footer-line2 #social-media-links a img {
+footer #footer-links #social-media-links a img {
     width: 30px;
 }
 
-footer #footer-line3 {
+footer #footer-credits {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -619,29 +635,398 @@ footer #footer-line3 {
     color: var(--cinzaFooter);
 }
 
-footer #footer-line3 a {
+footer #footer-credits a {
     color: var(--cinzaFooter);
     text-underline-offset: 4px;
 }
 
-footer #footer-line3 a:hover {
+footer #footer-credits a:hover {
     color: var(--vermelhoPrincipal);
 }
 
-/* Media Query de CELULARES (dispositivos pequenos) */
-
-@media (width < 576px) {
-
+@media (width >= 1880px) {
+  main #care-approach-section .care-card:first-of-type,
+  main #care-approach-section .care-card:last-of-type {
+    margin-top: 80px;
+  }
 }
 
-/* Media Query de TABLETS (dispositivos médios) */
 
-@media (width < 1024px) {
-    
-}
 
-/* Media Query de TELEVISÕES (dispositivos grandes) */
+/* ========= MEDIA QUERIES DE TELA ========= */
+
+
+/* Media Query de dispositivos GRANDES */
 
 @media (width > 1920px) {
     
+}
+
+/* Media Query de dispositivos MÉDIOS */
+
+@media (width < 1300px) {
+    main #main-section {
+        width: 100%;
+        flex-direction: column;
+        gap: 0;
+        padding: 180px 5vw 0 5vw;
+    }
+
+    main #main-section h1 {
+        font-size: 100px;
+        line-height: 90px;
+    }
+
+    main #main-section img {
+        align-self: center;
+        width: 600px;
+        height: 500px;
+        transform: translate(0) rotate(0);
+    }
+
+    main #adoption-section {
+        padding: 100px 8vw 100px 0;
+        margin-top: -150px;
+    }
+
+    main #adoption-section h2 {
+        font-size: 70px;
+    }
+
+    main #care-approach-section {
+        padding: 100px 8vw 100px 8vw;
+    }
+
+    main #care-approach-section h2 {
+        font-size: 70px;
+    }
+
+    main #care-approach-section #cares-container {
+        margin-top: 50px;
+    }
+
+    main #care-approach-section .care-card {
+        margin-top: 30px;
+    }
+
+    main #care-approach-section .care-card:first-of-type, main #care-approach-section .care-card:last-of-type {
+        margin-top: 30px;
+    }
+
+    main #care-approach-section > img {
+        display: none;
+    }
+
+    main #donation-section {
+        padding: 100px 0 100px 8vw;
+    }
+
+    main #donation-section h2 {
+        font-size: 70px;
+        line-height: 70px
+    }
+
+    main #about-us-section {
+        padding: 100px 8vw 100px 0;
+    }
+
+    main #about-us-section h2 {
+        font-size: 70px;
+        line-height: 70px
+    }
+
+    main #volunteer-section {
+        padding: 100px 0 100px 8vw;
+    }
+
+    main #volunteer-section h2 {
+        font-size: 70px;
+        line-height: 70px
+    }
+
+    main #gallery-section {
+        padding: 100px 8vw 100px 8vw;
+    }
+
+    main #gallery-section h2 {
+        font-size: 70px;
+        line-height: 70px;
+    }
+
+    main #gallery-section .gallery-photo {
+        height: 350px;
+    }
+
+    main #gallery-photo2 {
+        background-position: 50% -80px;
+    }
+
+    main #gallery-photo3 {
+        background-position: 50% -100px;
+    }
+
+    main #donation-cta-section {
+        padding: 60px 8vw;
+    }
+
+    footer {
+        padding: 80px 8vw;
+    }
+}
+
+/* Media Query de dispositivos PEQUENOS (mobile) */
+
+@media (width < 800px) {
+    header {
+        padding: 15px 5vw;
+    }
+
+    header #container-header-nav nav, header #container-header-nav button {
+        display: none;
+    }
+
+    header #menu-mobile {
+        display: flex;
+        align-items: center;
+    }
+
+    header #menu-icon-mobile {
+        width: 30px;
+        height: auto;
+    }
+
+    .menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .menu {
+        display: block;
+        position: fixed;
+        top: 90px;
+        right: -220px;
+        width: 220px;
+        height: 100%;
+        background-color: var(--vermelhoPrincipal);
+        color: var(--brancoPrincipal);
+        transition: right 0.3s cubic-bezier(.63,-0.01,.09,1);
+        z-index: 3;
+        padding: 10px 0 0 20px;
+    }
+
+    .menu nav ul {
+        list-style: none;
+    }
+
+    .menu ul li {
+       margin-top: 20px;
+    }
+
+    .menu ul li a {
+        font-size: 25px;
+        text-decoration: none;
+        color: var(--brancoPrincipal);
+    }
+
+    .menu button {
+        border: none;
+        border-radius: 10px;
+        font-family: afacad, arial, sans-serif;
+        font-size: 20px;
+        padding: 10px 20px;
+        margin-top: 40px;
+        transition: background-color 0.1s ease-in-out;
+        cursor: pointer;
+    }
+
+    .menu button:hover {
+        background-color: var(--pretoPrincipal);
+        color: var(--brancoPrincipal);
+    }
+
+    #menu-toggle:checked ~ .menu {
+        right: 0;
+    }   
+
+    #menu-toggle:checked ~ .menu-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    main #main-section h1 {
+        font-size: 60px;
+        line-height: 60px;
+        width: 100%;
+        text-align: center;
+    }
+
+    main #main-section p {
+        width: 100%;
+    }
+
+    main #main-section button {
+        display: block;
+        margin: 50px auto 80px auto;
+    }
+
+    main #main-section img {
+        margin-top: 50px;
+        width: 400px;
+        height: 330px;
+        transform: translateY(-50px) rotate(0);
+    }
+
+    main #adoption-section {
+        width: 100%;
+        margin-left: 0;
+        padding-left: 5vw;
+        padding-right: 5vw;
+        flex-direction: column-reverse;
+    }
+
+    main #adoption-section h2 {
+        font-size: 60px;
+        line-height: 60px;
+        text-align: center;
+    }
+
+    main #adoption-section button {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    main #adoption-section img {
+        width: 400px;
+    }
+
+    main #care-approach-section h2 {
+        font-size: 60px;
+        line-height: 60px;
+        text-align: center;
+    }
+
+    main #donation-section {
+        flex-direction: column;
+        width: 100%;
+        padding-right: 5vw;
+        padding-left: 5vw;
+    }
+
+    main #donation-section h2 {
+        font-size: 60px;
+        line-height: 60px;
+        text-align: center;
+    }
+
+    main #donation-section #donation-buttons-container {
+        gap: 25px;
+        margin-top: 60px;
+    }
+
+    main #donation-section #donation-buttons-container button {
+        padding: 10px;
+        font-size: 20px;
+    }
+
+    main #donation-section img {
+        width: 400px;
+    }
+
+    main #about-us-section {
+        flex-direction: column-reverse;
+        width: 100%;
+        margin-left: 0;
+        padding-left: 5vw;
+        padding-right: 5vw;
+    }
+
+    main #about-us-section h2 {
+        font-size: 60px;
+        line-height: 60px;
+        text-align: center;
+    }
+
+    main #about-us-section img {
+        width: 400px;
+    }
+
+    main #volunteer-section {
+        flex-direction: column;
+        width: 100%;
+        padding-right: 5vw;
+        padding-left: 5vw;
+    }
+
+    main #volunteer-section h2 {
+        font-size: 60px;
+        line-height: 60px;
+        text-align: center;
+    }
+
+    main #volunteer-section button {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    main #volunteer-section img {
+        width: 400px;
+        min-width: 400px;
+    }
+
+    main #donation-cta-section {
+        flex-direction: column;
+    }
+
+    main #donation-cta-section span {
+        text-align: center;
+    }
+
+    main #donation-cta-section button {
+        width: 200px;
+        margin: 0 auto;
+    }
+
+    footer #footer-main-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 80px;
+    }
+
+    footer #footer-info {
+        align-items: center;
+    }
+
+    footer #contact-info {
+        align-items: center;
+    }
+
+    footer #footer-links {
+        align-items: center;
+    }
+
+    footer #section-links span {
+        display: block;
+        width: fit-content;
+        margin: 0 auto;
+    }
+
+    footer #section-links ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    footer #footer-credits {
+        flex-direction: column;
+        gap: 30px;
+    }
 }
