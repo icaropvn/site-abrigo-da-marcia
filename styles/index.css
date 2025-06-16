@@ -310,6 +310,10 @@ main #donation-section p {
     margin: 50px 0 0 0;
 }
 
+main #donation-section #donation-disclaimer {
+    font-size: 20px;
+}
+
 main #donation-section img {
     flex: 0 0 auto;
     align-self: center;
@@ -337,7 +341,7 @@ main #donation-section #donation-buttons-container button {
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
     font-family: afacad, arial, sans-serif;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 100;
     cursor: pointer;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
