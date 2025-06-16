@@ -24,7 +24,7 @@
                         <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
                 </nav>
-                <button>Doe Agora</button>
+                <a href="#donation-section"><button>Doe Agora</button></a>
             </div>
             <div id="menu-mobile">
                 <label for="menu-toggle">
@@ -41,12 +41,12 @@
         <nav>
             <ul>
                 <li><a href="#adoption-section">Adoção</a></li>
-                <li><a href="#">Doação</a></li>
-                <li><a href="#">Voluntários</a></li>
-                <li><a href="#">Sobre nós</a></li>
+                <li><a href="#donation-section">Doação</a></li>
+                <li><a href="#volunteer-section">Voluntários</a></li>
+                <li><a href="#about-us-section">Sobre nós</a></li>
             </ul>
         </nav>
-        <button>Doe Agora</button>
+        <a href="#donation-section"><button>Doe Agora</button></a>
     </div>
     <label for="menu-toggle" class="menu-overlay"></label>
     
@@ -69,7 +69,7 @@
                 <p>Nossos cães estão em busca de um lar cheio de amor e carinho!</p>
                 <p>Cada um deles carrega uma história única, muitas vezes marcada por desafios e dificuldades. No Abrigo da Márcia, fazemos todo o possível para proporcionar cuidados, proteção, alimentação e atenção veterinária aos nossos cães, garantindo que se sintam amados e seguros enquanto aguardam por uma nova família.</p>
                 <p>Nosso maior sonho é que cada cãozinho encontre seu final feliz em um lar onde possa receber o afeto e a dedicação que merece.</p>
-                <a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSfPT81eNs2MQZ69NhkJFvOCrjS2AJ6LcagrB5uphpGIycb73g/formResponse"><button>Adote agora</button></a>
+                <a target="_self" href="pages/catalogo.html"><button>Adote agora</button></a>
             </div>
         </section>
         <section id="care-approach-section">
@@ -148,7 +148,7 @@
         </section>
         <section id="donation-cta-section">
             <span>Faça uma doação e ajude a manter nosso trabalho!</span>
-            <button>Doe agora</button>
+            <a href="#donation-section"><button>Doe agora</button></a>
         </section>
     </main>
     <footer>
@@ -187,9 +187,11 @@
             </div>
         </div>
         <div id="footer-credits">
-            <span>&copy; 2025 Abrigo da Márcia.</span>
+            <span id="copyright-text">&copy; 2025 Abrigo da Márcia.</span>
             <span>Site criado por <a target="_blank" href="https://www.linkedin.com/in/icaro-pavan/">Ícaro C. Pavan</a> e <a target="_blank" href="https://www.linkedin.com/in/jeferson-tomaz-2a901b83/">Jeferson T. Querino</a></span>
         </div>
     </footer>
+
+    <script src="js/date.js"></script>
 </body>
 </html>

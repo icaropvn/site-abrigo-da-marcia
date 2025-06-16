@@ -62,13 +62,27 @@ header ul {
 }
 
 header li a {
+    position: relative;
     color: var(--brancoPrincipal);
     text-decoration: none;
     transition: color 0.3s ease-in-out;
 }
 
-header li a:hover {
-    /* fazer animação do sublinhado */
+header li a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    height: 2px;
+    width: 100%;
+    background-color: var(--brancoPrincipal);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(.63,-0.01,.09,1);
+}
+
+header li a:hover::after {
+    transform: scaleX(1);
 }
 
 header button {
