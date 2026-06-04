@@ -6,11 +6,19 @@
 
     <title>Abrigo da Márcia</title>
 
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="styles/index.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite"/>
 </head>
 <body>
+    <a href="#main-content" class="skip-to-main">Pular para conteúdo principal</a>
     <header>
         <div id="container-header">
             <a href="#"><img src="assets/images/AbrigodaMarcia_logo.png"></a>
@@ -24,9 +32,11 @@
                         <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
                 </nav>
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
                 <a href="#donation-section"><button>Doe Agora</button></a>
             </div>
             <div id="menu-mobile">
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
                 <label for="menu-toggle">
                     <img id="menu-icon-mobile" src="assets/images/icone-menu.png" alt="Ícone menu">
                 </label>
@@ -52,7 +62,7 @@
     
     <!-- ========================== -->
 
-    <main>
+    <main id="main-content">
         <section id="main-section">
             <div>
                 <h1>Adotar é bom para cachorro!</h1>
@@ -60,10 +70,16 @@
                 <p>Com o seu apoio, podemos continuar proporcionando bem-estar, cuidados veterinários e a esperança de um novo lar para esses animais. Faça parte dessa missão!</p>
                 <a href="#donation-section"><button>Faça uma doação</button></a>
             </div>
-            <img src="assets/images/icone-abrigo-secao-inicial.png" alt="Ícone do abrigo. Uma pata em formato de coração na cor vermelha.">
+            <picture>
+                <source srcset="assets/images/icone-abrigo-secao-inicial.webp" type="image/webp">
+                <img src="assets/images/icone-abrigo-secao-inicial.png" alt="Ícone do abrigo. Uma pata em formato de coração na cor vermelha.">
+            </picture>
         </section>
         <section id="adoption-section">
-            <img src="assets/images/cachorro-secao-adocao.png" alt="Imagem de um dos cachorros do abrigo. Ele possui pelos amarronzados com manchas mais claras no peito. Com a boca levemente aberta, ele olha para a direita.">
+            <picture>
+                <source srcset="assets/images/cachorro-secao-adocao.webp" type="image/webp">
+                <img src="assets/images/cachorro-secao-adocao.png" alt="Imagem de um dos cachorros do abrigo. Ele possui pelos amarronzados com manchas mais claras no peito. Com a boca levemente aberta, ele olha para a direita." loading="lazy">
+            </picture>
             <div>
                 <h2>Adote um amigo</h2>
                 <p>Nossos cães estão em busca de um lar cheio de amor e carinho!</p>
@@ -118,10 +134,16 @@
                     </div>
                 </div>
             </div>
-            <img src="assets/images/cachorro-secao-doacao.png" alt="Imagem de um cachorro do abrigo. Ele está sendo abraçado por uma pessoa. Sua cor é caramelo com manchas brancas pelo corpo.">
+            <picture>
+                <source srcset="assets/images/cachorro-secao-doacao.webp" type="image/webp">
+                <img src="assets/images/cachorro-secao-doacao.png" alt="Imagem de um cachorro do abrigo. Ele está sendo abraçado por uma pessoa. Sua cor é caramelo com manchas brancas pelo corpo." loading="lazy">
+            </picture>
         </section>
         <section id="about-us-section">
-            <img src="assets/images/cachorros-brincando-no-abrigo.png" alt="Três cachorros correndo em direção à câmera. Dois voluntários aparecem ao fundo.">
+            <picture>
+                <source srcset="assets/images/cachorros-brincando-no-abrigo.webp" type="image/webp">
+                <img src="assets/images/cachorros-brincando-no-abrigo.png" alt="Três cachorros correndo em direção à câmera. Dois voluntários aparecem ao fundo." loading="lazy">
+            </picture>
             <div id="about-us-content">
                 <h2>Conheça o abrigo</h2>
                 <p>O Abrigo da Márcia, fundado há mais de 20 anos, resgata cães abandonados em Ribeirão Preto, no estado de São Paulo.</p>
@@ -135,16 +157,28 @@
                 <p>Não pode adotar um cão nem doar agora? Faça parte do abrigo!</p>
                 <p>Há diversas formas de ajudar a cuidar do abrigo: limpeza, auxílio em campanhas de arrecadação, participação nas redes sociais e muito mais.</p>
                 <p>Você pode ajudar o abrigo da sua maneira e deixar a vida dos nossos cães cada vez melhor.</p>
-                <button>Voluntarie-se agora</button>
+                <a href="https://docs.google.com/forms/d/1dxCq2TutTT5Y78cq6SXBdqMvRVqSzvORznuwah3NDUc/viewform" target="_blank"><button type="button">Voluntarie-se agora</button></a>
             </div>
-            <img src="assets/images/voluntarios-abrigo.png" alt="Foto dos voluntários do abrigo.">
+            <picture>
+                <source srcset="assets/images/voluntarios-abrigo.webp" type="image/webp">
+                <img src="assets/images/voluntarios-abrigo.png" alt="Foto dos voluntários do abrigo." loading="lazy">
+            </picture>
         </section>
         <section id="gallery-section">
             <h2>Galeria</h2>
             <div id="photos-gallery-container">
-                <div id="gallery-photo1" class="gallery-photo"></div>
-                <div id="gallery-photo2" class="gallery-photo"></div>
-                <div id="gallery-photo3" class="gallery-photo"></div>
+                <picture class="gallery-photo">
+                    <source srcset="assets/images/gallery-photo1.webp" type="image/webp">
+                    <img src="assets/images/gallery-photo1.jpg" alt="Foto da galeria do abrigo." loading="lazy">
+                </picture>
+                <picture class="gallery-photo" id="gallery-photo2">
+                    <source srcset="assets/images/gallery-photo2.webp" type="image/webp">
+                    <img src="assets/images/gallery-photo2.jpg" alt="Foto da galeria do abrigo." loading="lazy">
+                </picture>
+                <picture class="gallery-photo" id="gallery-photo3">
+                    <source srcset="assets/images/gallery-photo3.webp" type="image/webp">
+                    <img src="assets/images/gallery-photo3.jpg" alt="Foto da galeria do abrigo." loading="lazy">
+                </picture>
             </div>
         </section>
         <section id="donation-cta-section">
@@ -193,6 +227,9 @@
         </div>
     </footer>
 
+    <script src="js/theme-toggle.js"></script>
     <script src="js/date.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/animations.js"></script>
 </body>
 </html>

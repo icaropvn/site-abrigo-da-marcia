@@ -6,11 +6,19 @@
 
     <title>Abrigo da Márcia - Catálogo de Animais</title>
 
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="../styles/catalogo.css">
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite"/>
 </head>
 <body>
+    <a href="#main-content" class="skip-to-main">Pular para conteúdo principal</a>
     <header>
         <div id="container-header">
             <a href="../index.html"><img src="../assets/images/AbrigodaMarcia_logo.png"></a>
@@ -24,9 +32,11 @@
                         <li><a href="../index.html#volunteer-section">Voluntários</a></li>
                     </ul>
                 </nav>
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
                 <a href="../index.html#donation-section"><button>Doe Agora</button></a>
             </div>
             <div id="menu-mobile">
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
                 <label for="menu-toggle">
                     <img id="menu-icon-mobile" src="../assets/images/icone-menu.png" alt="Ícone menu">
                 </label>
@@ -52,12 +62,36 @@
     
     <!-- ========================== -->
 
-    <main>
+    <main id="main-content">
         <h1>Adote um amigo</h1>
         <p>Seu próximo companheiro está esperando por você!</p>
 
+        <div id="filters-container">
+            <div class="filter-group">
+                <label for="filter-gender">Gênero</label>
+                <select id="filter-gender">
+                    <option value="">Todos</option>
+                    <option value="Macho">Macho</option>
+                    <option value="Fêmea">Fêmea</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-size">Tamanho</label>
+                <select id="filter-size">
+                    <option value="">Todos</option>
+                    <option value="Porte pequeno">Pequeno</option>
+                    <option value="Porte médio">Médio</option>
+                    <option value="Porte grande">Grande</option>
+                </select>
+            </div>
+            <button id="filter-reset">Limpar filtros</button>
+        </div>
+        <div id="filter-results" style="display: none;">
+            <p id="filter-results-text"></p>
+        </div>
+
         <div id="catalog">
-            <div class="catalog-card" data-img="../assets/images/catalogo/foto-charlie.jpg">
+            <div class="catalog-card" data-img="../assets/images/catalogo/foto-charlie.webp">
                 <div class="catalog-card-img"></div>
                 <div class="catalog-card-content">
                     <span class="catalog-card-name">Charlie</span>
@@ -71,7 +105,7 @@
                 </div>
             </div>
 
-            <div class="catalog-card" data-img="../assets/images/catalogo/foto-meg.jpg">
+            <div class="catalog-card" data-img="../assets/images/catalogo/foto-meg.webp">
                 <div class="catalog-card-img"></div>
                 <div class="catalog-card-content">
                     <span class="catalog-card-name">Meg</span>
@@ -85,7 +119,7 @@
                 </div>
             </div>
 
-            <div class="catalog-card" data-img="../assets/images/catalogo/foto-negao.jpg">
+            <div class="catalog-card" data-img="../assets/images/catalogo/foto-negao.webp">
                 <div class="catalog-card-img"></div>
                 <div class="catalog-card-content">
                     <span class="catalog-card-name">Negão</span>
@@ -99,7 +133,7 @@
                 </div>
             </div>
 
-            <div class="catalog-card" data-img="../assets/images/catalogo/foto-thor.jpg">
+            <div class="catalog-card" data-img="../assets/images/catalogo/foto-thor.webp">
                 <div class="catalog-card-img"></div>
                 <div class="catalog-card-content">
                     <span class="catalog-card-name">Thor</span>
@@ -113,7 +147,7 @@
                 </div>
             </div>
 
-            <div class="catalog-card" data-img="../assets/images/catalogo/foto-zeca.jpg">
+            <div class="catalog-card" data-img="../assets/images/catalogo/foto-zeca.webp">
                 <div class="catalog-card-img"></div>
                 <div class="catalog-card-content">
                     <span class="catalog-card-name">Zeca</span>
@@ -127,7 +161,7 @@
                 </div>
             </div>
 
-            <div class="catalog-card" data-img="../assets/images/catalogo/foto-zuzu.jpg">
+            <div class="catalog-card" data-img="../assets/images/catalogo/foto-zuzu.webp">
                 <div class="catalog-card-img"></div>
                 <div class="catalog-card-content">
                     <div class="catalog-card-text">
@@ -186,7 +220,29 @@
         </div>
     </footer>
 
+    <div id="dog-detail-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Fechar">&times;</button>
+            <img id="modal-dog-image" src="" alt="">
+            <div id="modal-dog-info">
+                <h2 id="modal-dog-name"></h2>
+                <div class="modal-tags">
+                    <span id="modal-dog-gender"></span>
+                    <span id="modal-dog-age"></span>
+                    <span id="modal-dog-size"></span>
+                </div>
+                <p id="modal-dog-description"></p>
+                <a id="modal-dog-button" href="" target="_blank" class="catalog-card-button">Quero adotar</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/theme-toggle.js"></script>
     <script src="../js/catalogo.js"></script>
+    <script src="../js/lazy-load.js"></script>
     <script src="../js/date.js"></script>
+    <script src="../js/mobile-menu.js"></script>
+    <script src="../js/catalog-filters.js"></script>
+    <script src="../js/dog-modal.js"></script>
 </body>
 </html>
