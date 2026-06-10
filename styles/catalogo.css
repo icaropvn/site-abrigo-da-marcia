@@ -213,6 +213,14 @@ main #catalog {
     margin-top: 70px;
 }
 
+main .catalog-loading {
+    width: 100%;
+    text-align: center;
+    color: var(--cinzaFooter, #868686);
+    font-size: 20px;
+    padding: 40px 0;
+}
+
 main .catalog-card {
     width: 300px;
     border-radius: 10px;
