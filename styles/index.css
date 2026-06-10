@@ -166,7 +166,7 @@ main #main-section {
 
 main #main-section h1 {
     font-size: clamp(60px, 7.5vw, 200px);
-    line-height: 110px;
+    line-height: 1.1;
     margin-bottom: 70px;
     flex-grow: 2;
 }
@@ -995,6 +995,16 @@ main #donation-section button:focus-visible {
         line-height: 70px;
     }
 
+    main #volunteer-section img {
+        min-width: unset;
+        width: 45%;
+    }
+
+    main #about-us-section img {
+        min-width: unset;
+        width: 45%;
+    }
+
     main #gallery-section {
         padding: 80px 10vw;
     }
@@ -1104,54 +1114,66 @@ main #donation-section button:focus-visible {
     }
 
     main #main-section h1 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(30px, 9.5vw, 44px);
+        line-height: 1.1;
+        margin-bottom: 16px;
         width: 100%;
         text-align: center;
     }
 
     main #main-section p {
         width: 100%;
+        text-align: left;
+        font-size: 17px;
+        line-height: 1.6;
     }
 
     main #main-section button {
         display: block;
-        margin: 50px auto 80px auto;
+        margin: 20px auto 0 auto;
+        font-size: 20px;
+        padding: 12px 32px;
     }
 
     main #main-section img {
-        margin-top: 50px;
-        width: min(400px, 90vw);
+        margin-top: 28px;
+        width: min(220px, 60vw);
         height: auto;
-        transform: translateY(-50px) rotate(0);
+        transform: none;
     }
 
     main #adoption-section {
         width: 100%;
         margin-left: 0;
+        margin-top: 0;
         padding-left: 5vw;
         padding-right: 5vw;
-        flex-direction: column-reverse;
+        flex-direction: column;
+        gap: 40px;
     }
 
     main #adoption-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
+        margin-bottom: 16px;
     }
 
     main #adoption-section button {
         margin-left: auto;
         margin-right: auto;
+        font-size: 20px;
+        padding: 10px 32px;
+        margin-top: 20px;
     }
 
     main #adoption-section img {
-        width: min(400px, 90vw);
+        width: min(240px, 68vw);
     }
 
     main #care-approach-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
     }
 
@@ -1167,21 +1189,22 @@ main #donation-section button:focus-visible {
     }
 
     main #donation-section {
-        flex-direction: column;
+        flex-direction: column-reverse;
+        gap: 40px;
         width: 100%;
         padding-right: 5vw;
         padding-left: 5vw;
     }
 
     main #donation-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
     }
 
     main #donation-section #donation-buttons-container {
-        gap: 25px;
-        margin-top: 60px;
+        gap: 14px;
+        margin-top: 28px;
     }
 
     main #donation-section #donation-buttons-container .donation-buttons-container-line {
@@ -1197,11 +1220,12 @@ main #donation-section button:focus-visible {
     }
 
     main #donation-section img {
-        width: min(400px, 90vw);
+        width: min(240px, 68vw);
     }
 
     main #about-us-section {
-        flex-direction: column-reverse;
+        flex-direction: column;
+        gap: 40px;
         width: 100%;
         margin-left: 0;
         padding-left: 5vw;
@@ -1209,49 +1233,59 @@ main #donation-section button:focus-visible {
     }
 
     main #about-us-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
+        margin-bottom: 16px;
     }
 
     main #about-us-section img {
-        width: min(400px, 90vw);
+        width: min(240px, 68vw);
     }
 
     main #volunteer-section {
-        flex-direction: column;
+        flex-direction: column-reverse;
+        gap: 40px;
         width: 100%;
         padding-right: 5vw;
         padding-left: 5vw;
     }
 
     main #volunteer-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
+        margin-bottom: 16px;
     }
 
     main #volunteer-section button {
         display: block;
         margin-left: auto;
         margin-right: auto;
+        font-size: 20px;
+        padding: 10px 32px;
+        margin-top: 20px;
     }
 
     main #volunteer-section img {
-        width: min(400px, 90vw);
+        width: min(240px, 68vw);
         min-width: unset;
     }
 
     main #donation-cta-section {
         flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     main #donation-cta-section span {
+        font-size: 20px;
         text-align: center;
     }
 
     main #donation-cta-section button {
-        width: 200px;
+        font-size: 18px;
+        width: 180px;
         margin: 0 auto;
     }
 
@@ -1269,6 +1303,10 @@ main #donation-section button:focus-visible {
         align-items: center;
     }
 
+    /* Fonte do rodapé herdava tamanhos de desktop (22/30px) — grande demais no mobile */
+    footer #footer-info #contact-info { font-size: 18px; }
+    footer #footer-links ul { font-size: 18px; }
+
     footer #footer-links {
         align-items: center;
     }
@@ -1277,6 +1315,7 @@ main #donation-section button:focus-visible {
         display: block;
         width: fit-content;
         margin: 0 auto;
+        font-size: 22px;
     }
 
     footer #section-links ul {
@@ -1289,4 +1328,71 @@ main #donation-section button:focus-visible {
         flex-direction: column;
         gap: 30px;
     }
+
+    /* Padding top do hero ajustado ao header menor no mobile;
+       padding-bottom contém a pata decorativa dentro do fundo escuro */
+    main #main-section {
+        padding-top: 110px;
+        padding-bottom: 48px;
+    }
+
+    /* Ritmo vertical consistente: espaço uniforme entre imagem e texto */
+    main #adoption-section,
+    main #donation-section,
+    main #about-us-section,
+    main #volunteer-section { gap: 32px; }
+
+    /* Padding vertical reduzido e uniforme em todas as seções */
+    main #adoption-section   { padding-top: 56px; padding-bottom: 56px; }
+    main #care-approach-section { padding: 56px 6vw; }
+    main #donation-section   { padding-top: 56px; padding-bottom: 56px; }
+    main #about-us-section   { padding-top: 56px; padding-bottom: 56px; }
+    main #volunteer-section  { padding-top: 56px; padding-bottom: 56px; }
+    main #gallery-section    { padding: 56px 6vw; }
+    main #donation-cta-section { padding: 36px 5vw; gap: 14px; }
+
+    /* Texto do corpo das seções — herança de 24px do desktop é grande demais.
+       Alinhamento à esquerda evita os vãos irregulares do "justify" em telas estreitas */
+    main #adoption-section p,
+    main #donation-section p,
+    main #about-us-section p,
+    main #volunteer-section p { font-size: 17px; line-height: 1.6; text-align: left; }
+
+    main #donation-section #donation-disclaimer { font-size: 15px; opacity: 0.9; }
+
+    /* Botões de ação — tamanho único (18px) em todo o site, bom alvo de toque */
+    main #main-section button,
+    main #adoption-section button,
+    main #volunteer-section button,
+    main #donation-section #donation-buttons-container button {
+        font-size: 18px;
+    }
+
+    /* Imagens das seções — tamanho único e consistente entre seções */
+    main #adoption-section img,
+    main #donation-section img,
+    main #about-us-section img,
+    main #volunteer-section img {
+        width: min(230px, 64vw);
+        min-width: unset;
+        max-width: unset;
+    }
+
+    /* Gallery h2 */
+    main #gallery-section h2 { font-size: clamp(26px, 8vw, 38px); line-height: 1.1; }
+
+    /* Selo "mais escolhido!" — centralizado sobre o botão (empilhados no mobile) */
+    main #donation-section #donation-buttons-container .donation-button-most-chosen::before {
+        top: -11px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 13px;
+    }
+
+    /* Cards de cuidados — ícone, título e descrição compactos */
+    main #care-approach-section #cares-container { gap: 24px; margin-top: 28px; }
+    main #care-approach-section .care-card img   { width: 100px; }
+    main #care-approach-section .card-title      { font-size: 18px; line-height: 1.2; margin-top: 10px; }
+    main #care-approach-section .card-description { font-size: 15px; margin-top: 6px; }
 }

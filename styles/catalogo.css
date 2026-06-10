@@ -783,23 +783,38 @@ main .catalog-card {
         pointer-events: auto;
     }
 
+    main {
+        padding: 110px 4vw 60px 4vw;
+    }
+
     main h1 {
-        font-size: 60px;
+        font-size: clamp(30px, 9vw, 44px);
         text-align: center;
     }
 
     main p {
-        margin-top: 10px;
-        font-size: 20px;
+        margin-top: 8px;
+        font-size: 17px;
         text-align: center;
     }
 
     main #catalog {
-        margin-top: 50px;
+        margin-top: 36px;
+        column-gap: 16px;
+    }
+
+    main .catalog-card {
+        width: min(300px, 88vw);
     }
 
     main .catalog-card:hover {
         transform: none;
+    }
+
+    /* Justify cria vãos irregulares em colunas estreitas — alinha à esquerda */
+    main .catalog-card-description,
+    #modal-dog-description {
+        text-align: left;
     }
 
     footer #footer-main-content {
