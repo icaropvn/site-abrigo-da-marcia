@@ -21,10 +21,14 @@ function renderDogs(dogs) {
     dogs.forEach(function(dog) {
         var card = document.createElement('div');
         card.className = 'catalog-card';
-        card.setAttribute('data-img', dog.image);
+        // data-index permite o modal buscar o objeto completo do cão
+        card.dataset.index = dogs.indexOf(dog);
 
-        var imgDiv = document.createElement('div');
-        imgDiv.className = 'catalog-card-img';
+        // Carrossel de fotos (buildCarousel definido em carousel.js)
+        var photos = dog.photos && dog.photos.length ? dog.photos
+                   : dog.image ? [dog.image] : [];
+        var carousel = buildCarousel(photos, dog.name, { containerClass: 'catalog-card-img', lazy: true });
+        card.appendChild(carousel);
 
         var contentDiv = document.createElement('div');
         contentDiv.className = 'catalog-card-content';
@@ -35,7 +39,6 @@ function renderDogs(dogs) {
 
         var tagsDiv = document.createElement('div');
         tagsDiv.className = 'catalog-card-tags';
-
         ['gender', 'age', 'size'].forEach(function(field) {
             var tag = document.createElement('span');
             tag.textContent = dog[field];
@@ -58,17 +61,24 @@ function renderDogs(dogs) {
         contentDiv.appendChild(descEl);
         contentDiv.appendChild(adoptLink);
 
-        card.appendChild(imgDiv);
         card.appendChild(contentDiv);
         catalog.appendChild(card);
     });
 
+    // Lazy-load para imagens do carrossel
     if (typeof initLazyLoad === 'function') initLazyLoad();
     if (typeof initFavorites === 'function') initFavorites();
+
+    // Expõe a lista para o modal
+    window._catalogDogs = dogs;
 }
 
-// Normaliza campos Supabase (snake_case) e dogs.json (camelCase) para um formato comum
 function normalizeDog(dog) {
+    var photos = (dog.photos || []).filter(Boolean);
+    // Garante que image (capa) apareça como primeira foto se não estiver no array
+    if (dog.image && !photos.includes(dog.image)) {
+        photos = [dog.image].concat(photos);
+    }
     return {
         name:        dog.name,
         gender:      dog.gender,
@@ -76,6 +86,7 @@ function normalizeDog(dog) {
         size:        dog.size,
         description: dog.description,
         image:       dog.image,
+        photos:      photos,
         formUrl:     dog.form_url || dog.formUrl || ''
     };
 }
@@ -110,7 +121,6 @@ async function fetchFromSupabase() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // 1. Tentar Supabase (se configurado)
     if (isSupabaseConfigured()) {
         try {
             var dogs = await fetchFromSupabase();
@@ -118,21 +128,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                 renderDogs(dogs);
                 return;
             }
-        } catch (_) {
-            // Supabase indisponível ou sem dados — usar fallback
-        }
+        } catch (_) {}
     }
 
-    // 2. Fallback: backend Express local (3s timeout)
     var apiBase = (typeof window !== 'undefined' && window.ABRIGO_API_URL) || 'http://localhost:5000';
     try {
         var controller = new AbortController();
         var timeoutId  = setTimeout(function() { controller.abort(); }, 3000);
-        var apiResponse = await fetch(apiBase + '/api/public/dogs-data', {
-            signal: controller.signal
-        });
+        var apiResponse = await fetch(apiBase + '/api/public/dogs-data', { signal: controller.signal });
         clearTimeout(timeoutId);
-
         if (apiResponse.ok) {
             var apiData = await apiResponse.json();
             if (apiData.dogs && apiData.dogs.length > 0) {
@@ -140,11 +144,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return;
             }
         }
-    } catch (_) {
-        // Backend local indisponível
-    }
+    } catch (_) {}
 
-    // 3. Fallback final: dogs.json local
     try {
         var localResponse = await fetch('../data/dogs.json');
         var localData     = await localResponse.json();

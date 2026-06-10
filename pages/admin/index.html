@@ -11,7 +11,7 @@
             document.documentElement.setAttribute('data-theme', t);
         })();
     </script>
-    <link rel="stylesheet" href="../../styles/admin.css?v=4">
+    <link rel="stylesheet" href="../../styles/admin.css?v=5">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
 </head>
@@ -168,16 +168,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Foto do cão</label>
-                    <div class="img-preview-wrap" id="img-preview-wrap">
-                        <div class="img-preview-placeholder">
-                            <span>📷</span>
-                            Clique para selecionar uma imagem
-                        </div>
-                    </div>
-                    <input type="file" id="f-image" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none">
-                    <input type="hidden" id="f-image-current">
-                    <small style="color:#868686">Formatos: JPG, PNG, WebP. Máximo 5 MB.</small>
+                    <label>Fotos <span class="photos-counter" id="photos-counter">(0/5)</span></label>
+                    <div class="photos-grid" id="photos-grid"></div>
+                    <input type="file" id="f-photos" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">
+                    <small style="color:#868686">Até 5 fotos. A primeira é usada como capa. Formatos: JPG, PNG, WebP. Máximo 5 MB cada.</small>
                 </div>
 
                 <div class="modal-footer">
@@ -208,8 +202,10 @@
         let allDogs = [];
         let pendingDeleteId = null;
         let editingId = null;
-        let selectedFile = null;
         let showArchived = false;
+        let photoItems = []; // { url: string|null, file: File|null, preview: string }
+
+        const MAX_PHOTOS = 5;
 
         const CURRENT_YEAR = new Date().getFullYear();
         document.getElementById('f-birth-year').max = CURRENT_YEAR;
@@ -387,19 +383,19 @@
         });
 
         function openModal(dog) {
-            editingId    = dog ? dog.id : null;
-            selectedFile = null;
+            editingId  = dog ? dog.id : null;
+            photoItems = [];
 
-            document.getElementById('modal-title').textContent    = dog ? 'Editar cão' : 'Adicionar cão';
-            document.getElementById('dog-id').value             = dog ? dog.id : '';
-            document.getElementById('f-name').value             = dog ? dog.name : '';
-            document.getElementById('f-slug').value             = dog ? dog.slug : '';
-            document.getElementById('f-gender').value           = dog ? dog.gender : '';
-            document.getElementById('f-size').value             = dog ? dog.size : '';
-            document.getElementById('f-birth-year').value       = dog ? (dog.birth_year || '') : '';
-            document.getElementById('f-age-quick').value        = '';
+            document.getElementById('modal-title').textContent = dog ? 'Editar cão' : 'Adicionar cão';
+            document.getElementById('dog-id').value            = dog ? dog.id : '';
+            document.getElementById('f-name').value            = dog ? dog.name : '';
+            document.getElementById('f-slug').value            = dog ? dog.slug : '';
+            document.getElementById('f-gender').value          = dog ? dog.gender : '';
+            document.getElementById('f-size').value            = dog ? dog.size : '';
+            document.getElementById('f-birth-year').value      = dog ? (dog.birth_year || '') : '';
+            document.getElementById('f-age-quick').value       = '';
             const dogInactive = dog && isInactive(dog);
-            document.getElementById('f-status').value           = (dog && !dogInactive) ? dog.status : 'available';
+            document.getElementById('f-status').value          = (dog && !dogInactive) ? dog.status : 'available';
             const notice = document.getElementById('inactive-status-notice');
             if (dogInactive) {
                 notice.textContent = 'Status atual: ' + (dog.status === 'adopted' ? 'Adotado' : 'Falecido') + '. Salvar irá reverter este cão para Disponível.';
@@ -407,27 +403,31 @@
             } else {
                 notice.style.display = 'none';
             }
-            document.getElementById('f-description').value      = dog ? dog.description : '';
-            document.getElementById('f-form-url').value         = dog ? (dog.form_url || '') : 'https://forms.gle/nLSjXJyeLGUJXZj27';
-            document.getElementById('f-featured').checked       = dog ? !!dog.featured : false;
-            document.getElementById('f-image-current').value    = dog ? (dog.image || '') : '';
-            document.getElementById('f-image').value            = '';
-            document.getElementById('form-alert').className     = 'alert';
-            document.getElementById('slug-hint').style.display  = 'none';
+            document.getElementById('f-description').value = dog ? dog.description : '';
+            document.getElementById('f-form-url').value    = dog ? (dog.form_url || '') : 'https://forms.gle/nLSjXJyeLGUJXZj27';
+            document.getElementById('f-featured').checked  = dog ? !!dog.featured : false;
+            document.getElementById('f-photos').value      = '';
+            document.getElementById('form-alert').className = 'alert';
+            document.getElementById('slug-hint').style.display = 'none';
             updateAgePreview();
 
-            // Preview de imagem existente
-            const wrap = document.getElementById('img-preview-wrap');
-            const src  = dog ? resolveImgSrc(dog.image) : null;
-            setImgPreview(src);
+            // Preenche fotos: photos[] tem prioridade; image entra se não estiver no array
+            const existingPhotos = dog ? (dog.photos || []).filter(Boolean) : [];
+            if (dog && dog.image && !existingPhotos.includes(dog.image)) {
+                existingPhotos.unshift(dog.image);
+            }
+            photoItems = existingPhotos.map(function(url) {
+                return { url: url, file: null, preview: url };
+            });
+            renderPhotos();
 
             document.getElementById('dog-modal').classList.add('open');
         }
 
         function closeModal() {
             document.getElementById('dog-modal').classList.remove('open');
-            editingId    = null;
-            selectedFile = null;
+            editingId  = null;
+            photoItems = [];
         }
 
         document.getElementById('modal-close').addEventListener('click', closeModal);
@@ -479,36 +479,57 @@
             }
         });
 
-        // ── Image picker ─────────────────────────────────────────
-        document.getElementById('img-preview-wrap').addEventListener('click', function() {
-            document.getElementById('f-image').click();
-        });
-
-        document.getElementById('f-image').addEventListener('change', function() {
-            const file = this.files[0];
-            if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-                showFormAlert('A imagem deve ter no máximo 5 MB.', 'error');
-                this.value = '';
-                return;
+        // ── Photos grid ──────────────────────────────────────────
+        function renderPhotos() {
+            const grid = document.getElementById('photos-grid');
+            grid.innerHTML = '';
+            photoItems.forEach(function(item, i) {
+                const cell = document.createElement('div');
+                cell.className = 'photo-thumb';
+                cell.innerHTML = `
+                    <img src="${esc(item.preview)}" alt="Foto ${i + 1}">
+                    <button type="button" class="photo-remove" data-index="${i}" aria-label="Remover foto">&times;</button>`;
+                grid.appendChild(cell);
+            });
+            if (photoItems.length < MAX_PHOTOS) {
+                const add = document.createElement('button');
+                add.type = 'button';
+                add.className = 'photos-add';
+                add.id = 'photos-add-btn';
+                add.innerHTML = '<span>+</span>Adicionar';
+                grid.appendChild(add);
             }
-            selectedFile = file;
-            const reader = new FileReader();
-            reader.onload = function(ev) { setImgPreview(ev.target.result); };
-            reader.readAsDataURL(file);
-        });
-
-        function setImgPreview(src) {
-            const wrap = document.getElementById('img-preview-wrap');
-            if (src) {
-                wrap.innerHTML = `<img src="${src}" alt="Preview">`;
-            } else {
-                wrap.innerHTML = `
-                    <div class="img-preview-placeholder">
-                        <span>📷</span>Clique para selecionar uma imagem
-                    </div>`;
-            }
+            document.getElementById('photos-counter').textContent = '(' + photoItems.length + '/' + MAX_PHOTOS + ')';
         }
+
+        document.getElementById('photos-grid').addEventListener('click', function(e) {
+            const removeBtn = e.target.closest('.photo-remove');
+            const addBtn    = e.target.closest('#photos-add-btn');
+            if (removeBtn) {
+                photoItems.splice(parseInt(removeBtn.dataset.index, 10), 1);
+                renderPhotos();
+            } else if (addBtn) {
+                document.getElementById('f-photos').click();
+            }
+        });
+
+        document.getElementById('f-photos').addEventListener('change', function() {
+            const files = Array.from(this.files || []);
+            this.value = '';
+            files.forEach(function(file) {
+                if (photoItems.length >= MAX_PHOTOS) return;
+                if (file.size > 5 * 1024 * 1024) {
+                    showFormAlert('Cada imagem deve ter no máximo 5 MB. "' + file.name + '" foi ignorada.', 'error');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    photoItems.push({ url: null, file: file, preview: ev.target.result });
+                    renderPhotos();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
 
         // ── Save dog ─────────────────────────────────────────────
         document.getElementById('dog-form').addEventListener('submit', async function(e) {
@@ -518,29 +539,26 @@
             saveBtn.textContent = 'Salvando…';
 
             try {
-                let imageUrl = document.getElementById('f-image-current').value;
+                const slug = document.getElementById('f-slug').value.trim();
+                const photos = [];
 
-                // Upload de imagem (se arquivo selecionado)
-                if (selectedFile) {
-                    const slug = document.getElementById('f-slug').value.trim();
-                    const ext  = selectedFile.name.split('.').pop().toLowerCase();
-                    const path = `${slug}-${Date.now()}.${ext}`;
-
-                    const { error: uploadErr } = await sb.storage
-                        .from('dog-photos')
-                        .upload(path, selectedFile, { upsert: true });
-
-                    if (uploadErr) throw uploadErr;
-
-                    const { data: urlData } = sb.storage
-                        .from('dog-photos')
-                        .getPublicUrl(path);
-
-                    imageUrl = urlData.publicUrl;
+                for (const item of photoItems) {
+                    if (item.file) {
+                        const ext  = item.file.name.split('.').pop().toLowerCase();
+                        const path = `${slug}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+                        const { error: uploadErr } = await sb.storage
+                            .from('dog-photos')
+                            .upload(path, item.file, { upsert: true });
+                        if (uploadErr) throw uploadErr;
+                        const { data: urlData } = sb.storage.from('dog-photos').getPublicUrl(path);
+                        photos.push(urlData.publicUrl);
+                    } else if (item.url) {
+                        photos.push(item.url);
+                    }
                 }
 
                 const payload = {
-                    slug:        document.getElementById('f-slug').value.trim(),
+                    slug:        slug,
                     name:        document.getElementById('f-name').value.trim(),
                     gender:      document.getElementById('f-gender').value,
                     size:        document.getElementById('f-size').value,
@@ -549,7 +567,8 @@
                     description: document.getElementById('f-description').value.trim(),
                     form_url:    document.getElementById('f-form-url').value.trim() || null,
                     featured:    document.getElementById('f-featured').checked,
-                    image:       imageUrl || null
+                    photos:      photos,
+                    image:       photos[0] || null   // primeira foto = capa (retrocompatível)
                 };
 
                 let error;

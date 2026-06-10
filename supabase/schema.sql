@@ -166,6 +166,9 @@ on conflict (slug) do nothing;
 -- Adiciona colunas novas (seguro rodar mais de uma vez)
 alter table dogs add column if not exists birth_year integer;
 
+-- Múltiplas fotos por cão (até 5 URLs); image continua como capa/fallback
+alter table dogs add column if not exists photos text[] not null default '{}';
+
 -- Remove coluna archived (substituída por status 'adopted'/'deceased')
 alter table dogs drop column if exists archived;
 
