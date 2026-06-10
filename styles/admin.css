@@ -498,13 +498,13 @@ tbody tr:hover td {
     justify-content: center;
 }
 
-/* ─── Archive ─── */
+/* ─── Archive (adopted / deceased) ─── */
 .btn-warning       { background: var(--warning); color: #fff; }
 .btn-success       { background: var(--success); color: #fff; }
-.badge-archived    { background: #f3f4f6; color: #6b7280; }
-.row-archived td   { opacity: .45; }
-.row-archived:hover td { opacity: .7; }
-.stat-card.archived .stat-value { color: var(--gray); }
+.badge-deceased    { background: #f3f4f6; color: #6b7280; }
+.row-inactive td   { opacity: .45; }
+.row-inactive:hover td { opacity: .7; }
+.stat-card.deceased .stat-value { color: var(--gray); }
 
 /* ─── Birth year / age input ─── */
 .birth-year-row             { display: flex; align-items: center; gap: 10px; }

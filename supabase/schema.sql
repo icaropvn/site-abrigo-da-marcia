@@ -19,8 +19,7 @@ create table if not exists dogs (
   image       text,
   form_url    text        default 'https://forms.gle/nLSjXJyeLGUJXZj27',
   featured    boolean     default false,
-  archived    boolean     default false not null,
-  status      text        default 'available' check (status in ('available', 'adopted', 'pending')),
+  status      text        default 'available' check (status in ('available', 'pending', 'adopted', 'deceased')),
   created_at  timestamptz default now(),
   updated_at  timestamptz default now()
 );
@@ -45,12 +44,12 @@ create trigger dogs_updated_at
 
 alter table dogs enable row level security;
 
--- Visitantes: somente leitura de cães disponíveis e não arquivados
+-- Visitantes: somente leitura de cães disponíveis
 drop policy if exists "Público lê cães disponíveis" on dogs;
 create policy "Público lê cães disponíveis"
   on dogs for select
   to anon
-  using (status = 'available' and archived = false);
+  using (status = 'available');
 
 -- Admin autenticado: leitura total
 drop policy if exists "Admin lê todos" on dogs;
@@ -169,7 +168,14 @@ on conflict (slug) do nothing;
 
 -- Adiciona colunas novas (seguro rodar mais de uma vez)
 alter table dogs add column if not exists birth_year integer;
-alter table dogs add column if not exists archived   boolean default false not null;
+
+-- Remove coluna archived (substituída por status 'adopted'/'deceased')
+alter table dogs drop column if exists archived;
+
+-- Atualiza check constraint para incluir 'deceased'
+alter table dogs drop constraint if exists dogs_status_check;
+alter table dogs add constraint dogs_status_check
+  check (status in ('available', 'pending', 'adopted', 'deceased'));
 
 -- Converte age texto → birth_year para os cães do seed
 update dogs set birth_year = 2025 where slug = 'charlie' and birth_year is null;

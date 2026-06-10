@@ -89,7 +89,7 @@ function isSupabaseConfigured() {
 
 async function fetchFromSupabase() {
     var url = SUPABASE_URL +
-        '/rest/v1/dogs?status=eq.available&archived=eq.false&order=featured.desc,created_at.desc';
+        '/rest/v1/dogs?status=eq.available&order=featured.desc,created_at.desc';
 
     var controller = new AbortController();
     var timeoutId  = setTimeout(function() { controller.abort(); }, 5000);
