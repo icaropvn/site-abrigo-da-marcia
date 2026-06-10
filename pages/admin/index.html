@@ -291,8 +291,10 @@
                 const actionBtns = inactive
                     ? `<button class="btn btn-ghost btn-sm js-edit" data-id="${esc(dog.id)}">Editar</button>`
                     : `<button class="btn btn-ghost btn-sm js-edit" data-id="${esc(dog.id)}">Editar</button>
-                       <button class="btn btn-success btn-sm js-set-adopted" data-id="${esc(dog.id)}">Adotado</button>
-                       <button class="btn btn-ghost btn-sm js-set-deceased" data-id="${esc(dog.id)}">Falecido</button>`;
+                       <div class="btn-group">
+                           <button class="btn btn-adopt js-set-adopted" data-id="${esc(dog.id)}">Adotado</button>
+                           <button class="btn btn-deceased-opt js-set-deceased" data-id="${esc(dog.id)}">Falecido</button>
+                       </div>`;
                 tr.innerHTML = `
                     <td>
                         ${imgSrc ? `<img class="dog-thumb" src="${esc(imgSrc)}" alt="${esc(dog.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}

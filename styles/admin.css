@@ -341,7 +341,32 @@ tbody tr:hover td {
 .actions {
     display: flex;
     gap: 8px;
+    align-items: center;
 }
+
+/* ─── Segmented / mutually exclusive button group ─── */
+.btn-group {
+    display: inline-flex;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+    border: none;
+    border-right: 1.5px solid var(--border);
+    font-size: 12px;
+    padding: 5px 10px;
+    background: transparent;
+}
+
+.btn-group .btn:last-child { border-right: none; }
+
+.btn-group .btn-adopt   { color: #16a34a; }
+.btn-group .btn-adopt:hover   { background: #f0fdf4; }
+.btn-group .btn-deceased-opt  { color: #6b7280; }
+.btn-group .btn-deceased-opt:hover { background: #f3f4f6; }
 
 /* ─── Status badges ─── */
 .badge {
