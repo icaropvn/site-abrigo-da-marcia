@@ -34,7 +34,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="styles/index.css?v=4">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -46,8 +46,9 @@
             <div id="container-header-nav">
                 <nav>
                     <ul>
-                        <li><a href="#adoption-section">Adoção</a></li>
+                        <li><a href="pages/catalogo.html">Adoção</a></li>
                         <li><a href="#donation-section">Doação</a></li>
+                        <li><a href="pages/historias.html">Histórias</a></li>
                         <li><a href="#about-us-section">Sobre nós</a></li>
                         <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
@@ -70,8 +71,9 @@
     <div class="menu">
         <nav>
             <ul>
-                <li><a href="#adoption-section">Adoção</a></li>
+                <li><a href="pages/catalogo.html">Adoção</a></li>
                 <li><a href="#donation-section">Doação</a></li>
+                <li><a href="pages/historias.html">Histórias</a></li>
                 <li><a href="#volunteer-section">Voluntários</a></li>
                 <li><a href="#about-us-section">Sobre nós</a></li>
             </ul>
@@ -107,6 +109,12 @@
                 <p>Nosso maior sonho é que cada cãozinho encontre seu final feliz em um lar onde possa receber o afeto e a dedicação que merece.</p>
                 <a target="_self" href="pages/catalogo.html"><button>Adote agora</button></a>
             </div>
+        </section>
+        <section id="stories-section">
+            <h2>Histórias do Abrigo</h2>
+            <p>Cães que encontraram um lar e ganharam um final feliz.</p>
+            <div id="stories-preview"></div>
+            <a href="pages/historias.html"><button>Ver todas as histórias</button></a>
         </section>
         <section id="care-approach-section">
             <h2>Nossos Cuidados</h2>
@@ -184,23 +192,6 @@
                 <img src="assets/images/voluntarios-abrigo.png" alt="Foto dos voluntários do abrigo." loading="lazy">
             </picture>
         </section>
-        <section id="gallery-section">
-            <h2>Galeria</h2>
-            <div id="photos-gallery-container">
-                <picture class="gallery-photo">
-                    <source srcset="assets/images/gallery-photo1.webp" type="image/webp">
-                    <img src="assets/images/gallery-photo1.jpg" alt="Foto da galeria do abrigo." loading="lazy">
-                </picture>
-                <picture class="gallery-photo" id="gallery-photo2">
-                    <source srcset="assets/images/gallery-photo2.webp" type="image/webp">
-                    <img src="assets/images/gallery-photo2.jpg" alt="Foto da galeria do abrigo." loading="lazy">
-                </picture>
-                <picture class="gallery-photo" id="gallery-photo3">
-                    <source srcset="assets/images/gallery-photo3.webp" type="image/webp">
-                    <img src="assets/images/gallery-photo3.jpg" alt="Foto da galeria do abrigo." loading="lazy">
-                </picture>
-            </div>
-        </section>
         <section id="donation-cta-section">
             <span>Faça uma doação e ajude a manter nosso trabalho!</span>
             <a href="#donation-section"><button>Doe agora</button></a>
@@ -225,8 +216,9 @@
                 <div id="section-links">
                     <span>LINKS</span>
                     <ul>
-                        <li><a href="#adoption-section">Adoção</a></li>
+                        <li><a href="pages/catalogo.html">Adoção</a></li>
                         <li><a href="#donation-section">Doação</a></li>
+                        <li><a href="pages/historias.html">Histórias</a></li>
                         <li><a href="#about-us-section">Sobre Nós</a></li>
                         <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
@@ -247,9 +239,11 @@
         </div>
     </footer>
 
+    <script src="js/supabase-config.js"></script>
     <script src="js/theme-toggle.js"></script>
     <script src="js/date.js"></script>
     <script src="js/mobile-menu.js"></script>
     <script src="js/animations.js"></script>
+    <script src="js/render-stories.js?v=4"></script>
 </body>
 </html>

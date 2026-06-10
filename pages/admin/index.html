@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin — Abrigo da Márcia</title>
     <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="../../styles/admin.css">
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="../../styles/admin.css?v=4">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
 </head>
@@ -16,9 +22,14 @@
         <div class="admin-header-left">
             <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
             <h1>Painel Admin</h1>
+            <nav class="admin-nav">
+                <a href="index.html" class="active">Cães</a>
+                <a href="historias.html">Histórias</a>
+            </nav>
         </div>
         <div class="admin-header-right">
             <span class="admin-email" id="admin-email"></span>
+            <button class="theme-toggle" aria-label="Alternar tema"></button>
             <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
         </div>
     </header>
@@ -595,5 +606,6 @@
         init();
     })();
     </script>
+    <script src="../../js/theme-toggle.js"></script>
 </body>
 </html>

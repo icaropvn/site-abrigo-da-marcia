@@ -90,29 +90,26 @@ insert into storage.buckets (id, name, public)
 values ('dog-photos', 'dog-photos', true)
 on conflict (id) do nothing;
 
+-- Leitura pública das fotos do bucket
 drop policy if exists "Público lê fotos" on storage.objects;
 create policy "Público lê fotos"
   on storage.objects for select
   to anon
   using (bucket_id = 'dog-photos');
 
-drop policy if exists "Admin faz upload" on storage.objects;
-create policy "Admin faz upload"
-  on storage.objects for insert
-  to authenticated
-  with check (bucket_id = 'dog-photos' and auth.uid() = 'ADMIN-UUID'::uuid);
-
+-- Admin: qualquer usuário AUTENTICADO gerencia as fotos do bucket dog-photos
+-- (só o admin consegue logar — cadastro público desabilitado). Evita o foot-gun
+-- de fixar o ADMIN-UUID. Remove as políticas antigas baseadas em ADMIN-UUID:
+drop policy if exists "Admin faz upload"    on storage.objects;
 drop policy if exists "Admin atualiza foto" on storage.objects;
-create policy "Admin atualiza foto"
-  on storage.objects for update
-  to authenticated
-  using (bucket_id = 'dog-photos' and auth.uid() = 'ADMIN-UUID'::uuid);
+drop policy if exists "Admin deleta foto"   on storage.objects;
 
-drop policy if exists "Admin deleta foto" on storage.objects;
-create policy "Admin deleta foto"
-  on storage.objects for delete
+drop policy if exists "Admin gerencia fotos" on storage.objects;
+create policy "Admin gerencia fotos"
+  on storage.objects for all
   to authenticated
-  using (bucket_id = 'dog-photos' and auth.uid() = 'ADMIN-UUID'::uuid);
+  using (bucket_id = 'dog-photos')
+  with check (bucket_id = 'dog-photos');
 
 -- ──────────────────────────────────────────────────────────
 -- 4. SEED: dados iniciais dos cães
@@ -191,7 +188,60 @@ update dogs set birth_year = 2020 where slug = 'zuzu'    and birth_year is null;
 --   check (birth_year >= 1995 and birth_year <= extract(year from now())::integer);
 
 -- ──────────────────────────────────────────────────────────
--- 6. USUÁRIO ADMIN
+-- 6. TABELA: stories (Histórias do Abrigo)
+-- Cães adotados com história + até 5 fotos, gerenciados no admin.
+-- Bloco idempotente: seguro rodar mais de uma vez.
+-- IMPORTANTE: substitua 'ADMIN-UUID' pelo MESMO UID usado nas
+-- políticas de dogs (Authentication → Users → User UID).
+-- As fotos reutilizam o bucket público 'dog-photos' (seção 3),
+-- então não há novas políticas de Storage a criar.
+-- ──────────────────────────────────────────────────────────
+
+create table if not exists stories (
+  id          uuid        primary key default gen_random_uuid(),
+  dog_name    text        not null,
+  description text        not null,
+  photos      text[]      not null default '{}',   -- URLs das fotos (até 5)
+  featured    boolean     default false,           -- aparece na prévia da home
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now(),
+  constraint stories_photos_max check (coalesce(array_length(photos, 1), 0) <= 5)
+);
+
+-- Auto-atualiza updated_at (reutiliza a função criada na seção 1)
+drop trigger if exists stories_updated_at on stories;
+create trigger stories_updated_at
+  before update on stories
+  for each row execute function update_updated_at();
+
+-- RLS
+alter table stories enable row level security;
+
+-- Visitantes (anon): leitura de todas as histórias
+drop policy if exists "Público lê histórias" on stories;
+create policy "Público lê histórias"
+  on stories for select
+  to anon
+  using (true);
+
+-- Admin: qualquer usuário AUTENTICADO gerencia (só o admin consegue logar —
+-- cadastro público desabilitado). Evita o foot-gun de fixar o ADMIN-UUID e
+-- mantém a feature funcionando independentemente do UID.
+-- Remove políticas antigas baseadas em ADMIN-UUID, se existirem:
+drop policy if exists "Admin lê histórias"      on stories;
+drop policy if exists "Admin insere história"   on stories;
+drop policy if exists "Admin atualiza história" on stories;
+drop policy if exists "Admin deleta história"   on stories;
+
+drop policy if exists "Admin gerencia histórias" on stories;
+create policy "Admin gerencia histórias"
+  on stories for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- ──────────────────────────────────────────────────────────
+-- 7. USUÁRIO ADMIN
 -- NÃO crie o usuário admin por SQL (senha em texto puro).
 -- Use o painel do Supabase:
 --   Authentication → Users → Add user

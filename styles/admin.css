@@ -153,6 +153,13 @@ body {
     border-color: var(--red);
 }
 
+/* Checkbox não deve esticar 100% — senão empurra o texto do label pra fora */
+.form-group input[type="checkbox"] {
+    width: auto;
+    flex-shrink: 0;
+    margin: 0;
+}
+
 .form-group textarea {
     resize: vertical;
     min-height: 90px;
@@ -572,6 +579,83 @@ tbody tr:hover td {
 }
 .age-quick-row input:focus { outline: none; border-color: var(--red); }
 
+/* ─── Navegação entre painéis (Cães / Histórias) ─── */
+.admin-nav {
+    display: flex;
+    gap: 4px;
+    margin-left: 12px;
+}
+.admin-nav a {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--gray);
+    transition: background .15s, color .15s;
+}
+.admin-nav a:hover { background: #f3f4f6; color: var(--dark); }
+.admin-nav a.active { background: var(--red); color: #fff; }
+
+/* ─── Grade de fotos (histórias, até 5) ─── */
+.photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.photo-thumb {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    background: #fafafa;
+}
+.photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.photo-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.photo-remove:hover { background: var(--danger); }
+.photos-add {
+    aspect-ratio: 1 / 1;
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    background: #fafafa;
+    color: var(--gray);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: border-color .15s, color .15s;
+}
+.photos-add:hover { border-color: var(--red); color: var(--red); }
+.photos-add span { font-size: 26px; }
+.photos-add:disabled { opacity: .4; cursor: not-allowed; }
+.photos-counter { font-size: 13px; color: var(--gray); }
+
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
     .admin-header       { padding: 0 16px; }
@@ -579,8 +663,76 @@ tbody tr:hover td {
     .form-row           { grid-template-columns: 1fr; }
     .modal-box          { padding: 24px 20px; }
     .admin-email        { display: none; }
+    .admin-header h1    { display: none; }
     thead th:nth-child(3),
     tbody td:nth-child(3),
     thead th:nth-child(4),
     tbody td:nth-child(4) { display: none; }
 }
+
+/* ─── Theme toggle (claro/escuro) ─── */
+.theme-toggle {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color .15s, border-color .15s;
+    padding: 0;
+}
+.theme-toggle::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    background-color: var(--dark);
+    -webkit-mask: url(../assets/images/icon-moon.svg) center / contain no-repeat;
+    mask: url(../assets/images/icon-moon.svg) center / contain no-repeat;
+}
+[data-theme="dark"] .theme-toggle::before {
+    -webkit-mask-image: url(../assets/images/icon-sun.svg);
+    mask-image: url(../assets/images/icon-sun.svg);
+}
+.theme-toggle:hover { background: #f3f4f6; }
+.auth-page .theme-toggle { position: fixed; top: 16px; right: 16px; }
+
+/* ─── Dark mode ─── */
+[data-theme="dark"] {
+    --dark:   #ededed;
+    --gray:   #9aa0aa;
+    --border: #34363f;
+}
+[data-theme="dark"] body { background: #14151a; }
+[data-theme="dark"] .auth-card,
+[data-theme="dark"] .admin-header,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .table-wrap,
+[data-theme="dark"] .modal-box,
+[data-theme="dark"] .confirm-box { background: #1e1f26; }
+[data-theme="dark"] .auth-card   { box-shadow: 0 4px 24px rgba(0,0,0,.45); }
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .table-wrap  { box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+[data-theme="dark"] thead th     { background: #262830; }
+[data-theme="dark"] tbody td     { border-bottom-color: #2a2c34; }
+[data-theme="dark"] tbody tr:hover td { background: #262830; }
+[data-theme="dark"] .dog-no-img,
+[data-theme="dark"] .img-preview-wrap,
+[data-theme="dark"] .photos-add,
+[data-theme="dark"] .photo-thumb,
+[data-theme="dark"] .age-preview-badge,
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-group textarea,
+[data-theme="dark"] .age-quick-row input { background: #262830; color: var(--dark); }
+[data-theme="dark"] .form-group input::placeholder,
+[data-theme="dark"] .form-group textarea::placeholder { color: #6b7079; }
+[data-theme="dark"] .admin-nav a:hover,
+[data-theme="dark"] .theme-toggle:hover { background: #262830; }
+[data-theme="dark"] .btn-group .btn-adopt:hover        { background: rgba(34,197,94,.18); }
+[data-theme="dark"] .btn-group .btn-deceased-opt:hover { background: rgba(255,255,255,.08); }
+[data-theme="dark"] .badge-deceased { background: #2a2c34; color: #9aa0aa; }

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Histórias do Abrigo — Abrigo da Márcia</title>
+    <meta name="description" content="Conheça as histórias dos cães do Abrigo da Márcia que foram adotados e encontraram um lar cheio de amor em Ribeirão Preto.">
+    <meta name="keywords" content="histórias de adoção, cães adotados, abrigo de animais, Ribeirão Preto">
+    <meta name="author" content="Abrigo da Márcia">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="https://abrigodamarcia.com.br/pages/historias.html">
+    <meta property="og:title"       content="Histórias do Abrigo — Abrigo da Márcia">
+    <meta property="og:description" content="Cães que encontraram um lar e ganharam um final feliz.">
+    <meta property="og:image"       content="https://abrigodamarcia.com.br/assets/images/AbrigodaMarcia_logo.png">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://abrigodamarcia.com.br/pages/historias.html">
+
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../styles/catalogo.css?v=3">
+    <link rel="stylesheet" href="../styles/historias.css?v=4">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <a href="#main-content" class="skip-to-main">Pular para conteúdo principal</a>
+    <header>
+        <div id="container-header">
+            <a href="../index.html"><img src="../assets/images/AbrigodaMarcia_logo.png"></a>
+
+            <div id="container-header-nav">
+                <nav>
+                    <ul>
+                        <li><a href="catalogo.html">Adoção</a></li>
+                        <li><a href="../index.html#donation-section">Doação</a></li>
+                        <li><a href="historias.html">Histórias</a></li>
+                        <li><a href="../index.html#about-us-section">Sobre nós</a></li>
+                        <li><a href="../index.html#volunteer-section">Voluntários</a></li>
+                    </ul>
+                </nav>
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
+                <a href="../index.html#donation-section"><button>Doe Agora</button></a>
+            </div>
+            <div id="menu-mobile">
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
+                <label for="menu-toggle">
+                    <img id="menu-icon-mobile" src="../assets/images/icone-menu.png" alt="Ícone menu">
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu mobile -->
+
+    <input type="checkbox" id="menu-toggle" hidden>
+    <div class="menu">
+        <nav>
+            <ul>
+                <li><a href="catalogo.html">Adoção</a></li>
+                <li><a href="../index.html#donation-section">Doação</a></li>
+                <li><a href="historias.html">Histórias</a></li>
+                <li><a href="../index.html#volunteer-section">Voluntários</a></li>
+                <li><a href="../index.html#about-us-section">Sobre nós</a></li>
+            </ul>
+        </nav>
+        <a href="../index.html#donation-section"><button>Doe Agora</button></a>
+    </div>
+    <label for="menu-toggle" class="menu-overlay"></label>
+
+    <!-- ========================== -->
+
+    <main id="main-content">
+        <h1>Histórias do Abrigo</h1>
+        <p>Cães que encontraram um lar e ganharam um final feliz.</p>
+
+        <div id="stories-list">
+            <p class="stories-empty">Carregando histórias…</p>
+        </div>
+    </main>
+
+    <footer>
+        <div id="footer-main-content">
+            <div id="footer-info">
+                <img src="../assets/images/AbrigodaMarcia_logo.png" alt="Logo do Abrigo da Márcia">
+                <div id="contact-info">
+                    <div>
+                        <img src="../assets/images/location.png" alt="Ícone de localização">
+                        <address>Ribeirão Preto, São Paulo, Brasil</address>
+                    </div>
+                    <div>
+                        <img src="../assets/images/mail.png" alt="Ícone de e-mail">
+                        <a href="mailto:abrigodamarcia@gmail.com">abrigodamarcia@gmail.com</a>
+                    </div>
+                </div>
+            </div>
+            <div id="footer-links">
+                <div id="section-links">
+                    <span>LINKS</span>
+                    <ul>
+                        <li><a href="catalogo.html">Adoção</a></li>
+                        <li><a href="../index.html#donation-section">Doação</a></li>
+                        <li><a href="historias.html">Histórias</a></li>
+                        <li><a href="../index.html#about-us-section">Sobre Nós</a></li>
+                        <li><a href="../index.html#volunteer-section">Voluntários</a></li>
+                    </ul>
+                </div>
+                <div id="social-media-links">
+                    <a target="_blank" href="https://www.facebook.com/abrigodamarcia">
+                        <img src="../assets/images/facebook-logo.png" alt="Logo do Facebook">
+                    </a>
+                    <a target="_blank" href="https://www.instagram.com/abrigodamarcia/">
+                        <img src="../assets/images/instagram-logo.png" alt="Logo do Instagram">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="footer-credits">
+            <span id="copyright-text">&copy; 2025 Abrigo da Márcia.</span>
+            <span>Site criado por <a target="_blank" href="https://www.linkedin.com/in/icaro-pavan/">Ícaro C. Pavan</a> e <a target="_blank" href="https://www.linkedin.com/in/jeferson-tomaz-2a901b83/">Jeferson T. Querino</a></span>
+        </div>
+    </footer>
+
+    <!-- Modal: história completa -->
+    <div id="story-modal" class="story-modal" style="display: none;">
+        <div class="story-modal-content">
+            <button class="story-modal-close" id="story-modal-close" aria-label="Fechar">&times;</button>
+            <div class="story-modal-media" id="story-modal-media"></div>
+            <div class="story-modal-info">
+                <h2 id="story-modal-name"></h2>
+                <p id="story-modal-text"></p>
+                <button type="button" class="story-modal-back" id="story-modal-back">Fechar História</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/theme-toggle.js"></script>
+    <script src="../js/render-stories.js?v=4"></script>
+    <script src="../js/date.js"></script>
+    <script src="../js/mobile-menu.js"></script>
+</body>
+</html>

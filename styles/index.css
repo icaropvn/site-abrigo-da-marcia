@@ -27,6 +27,23 @@ body {
     --brancoPrincipal: #F6F6F6;
     --amareloDestaque: #FFAD28;
     --cinzaFooter: #868686;
+
+    /* Sistema de layout desktop */
+    --content-max: 1440px;                          /* largura da coluna de conteúdo (header + seções + hero) */
+    --gutter: clamp(24px, 5vw, 80px);               /* respiro lateral fluido */
+    --space-section: clamp(88px, 9vw, 132px);       /* ritmo vertical padrão */
+}
+
+/* Container: fundo full-bleed, conteúdo centralizado numa coluna de --content-max */
+main #adoption-section,
+main #care-approach-section,
+main #donation-section,
+main #about-us-section,
+main #volunteer-section,
+main #stories-section,
+main #donation-cta-section,
+footer {
+    padding-inline: max(var(--gutter), calc((100% - var(--content-max)) / 2));
 }
 
 [data-theme="dark"] body {
@@ -42,13 +59,21 @@ html {
 body {
     font-family: afacad, arial, sans-serif;
     scroll-behavior: smooth;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Empurra o footer para o fim quando o conteúdo é curto (sticky footer) */
+body > main {
+    flex: 1 0 auto;
 }
 
 header {
     background-color: var(--vermelhoPrincipal);
     display: flex;
     justify-content: center;
-    padding: 20px 30px;
+    padding: 20px max(var(--gutter), calc((100% - var(--content-max)) / 2));
     position: fixed;
     width: 100%;
     z-index: 2;
@@ -58,7 +83,6 @@ header div#container-header {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1300px;
 }
 
 header img {
@@ -124,8 +148,8 @@ header #menu-mobile, .menu {
 }
 
 .theme-toggle {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
+    background: rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 50%;
     width: 44px;
     height: 44px;
@@ -140,24 +164,28 @@ header #menu-mobile, .menu {
 }
 
 .theme-toggle::before {
-    font-size: 18px;
-    content: '🌙';
-    line-height: 1;
+    content: '';
+    width: 22px;
+    height: 22px;
+    background-color: var(--brancoPrincipal);
+    -webkit-mask: url(../assets/images/icon-moon.svg) center / contain no-repeat;
+    mask: url(../assets/images/icon-moon.svg) center / contain no-repeat;
 }
 
 [data-theme="dark"] .theme-toggle::before {
-    content: '☀️';
+    -webkit-mask-image: url(../assets/images/icon-sun.svg);
+    mask-image: url(../assets/images/icon-sun.svg);
 }
 
 .theme-toggle:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.45);
 }
 
 main #main-section {
     display: flex;
     width: 110%;
     gap: 100px;
-    padding: 10vw 0px 0px 8vw;
+    padding: 10vw 0 0 max(var(--gutter), calc((100% - var(--content-max)) / 2));
     font-size: 24px;
     z-index: 0;
     position: relative;
@@ -172,8 +200,10 @@ main #main-section h1 {
 }
 
 main #main-section p {
-    max-width: 700px;
-    text-align: justify;
+    max-width: 640px;
+    text-align: left;
+    line-height: 1.6;
+    font-size: clamp(18px, 1.4vw, 22px);
 }
 
 main #main-section p:first-of-type {
@@ -215,19 +245,18 @@ main #adoption-section {
     position: relative;
     display: flex;
     gap: 100px;
-    width: 110%;
-    margin-left: -10%;
     background-color: var(--vermelhoPrincipal);
-    font-size: 24px;
-    padding: 120px 300px 120px 0;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
     z-index: 0;
 }
 
 main #adoption-section img {
     flex: 0 0 auto;
     align-self: center;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 560px;
+    height: auto;
 }
 
 main #adoption-section div {
@@ -235,18 +264,19 @@ main #adoption-section div {
 }
 
 main #adoption-section h2 {
-    font-size: 100px;
-    line-height: 80px;
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
     color: var(--brancoPrincipal);
-    margin-bottom: 50px;
+    margin-bottom: clamp(24px, 3vw, 48px);
     text-align: right;
 }
 
 main #adoption-section p {
     color: var(--brancoPrincipal);
-    margin: 0 0 20px auto;
-    text-align: justify;
-    max-width: 800px;
+    margin: 0 0 16px auto;
+    text-align: left;
+    line-height: 1.6;
+    max-width: 640px;
 }
 
 main #adoption-section a {
@@ -257,12 +287,12 @@ main #adoption-section button {
     display: block;
     border: none;
     padding: 10px 40px;
-    margin: 80px 0 0 auto;
+    margin: clamp(32px, 4vw, 56px) 0 0 auto;
     border-radius: 10px;
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
     font-family: afacad, arial, sans-serif;
-    font-size: 26px;
+    font-size: clamp(20px, 1.6vw, 24px);
     font-weight: 100;
     cursor: pointer;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -278,8 +308,8 @@ main #care-approach-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 24px;
-    padding: 120px 300px 200px 300px;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section) clamp(140px, 14vw, 200px);
 }
 
 main #care-approach-section #cares-container {
@@ -291,9 +321,9 @@ main #care-approach-section #cares-container {
 }
 
 main #care-approach-section h2 {
-    font-size: 100px;
+    font-size: clamp(56px, 6.5vw, 100px);
     text-align: center;
-    line-height: 90px
+    line-height: 1.02;
 }
 
 main #care-approach-section .care-card {
@@ -309,9 +339,9 @@ main #care-approach-section .care-card img {
 
 main #care-approach-section .card-title {
     text-align: center;
-    font-size: 50px;
+    font-size: clamp(30px, 3vw, 44px);
     font-weight: 900;
-    line-height: 50px;
+    line-height: 1.05;
     margin-top: 30px;
 }
 
@@ -327,17 +357,18 @@ main #care-approach-section > img {
     bottom: -25%;
     height: 400px;
     width: 950px;
+    max-width: 90%;
+    object-fit: contain;
     z-index: -1;
 }
 
 main #donation-section {
     display: flex;
     gap: 50px;
-    width: 110%;
     position: relative;
     background-color: var(--vermelhoPrincipal);
-    font-size: 24px;
-    padding: 120px 0 160px 300px;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
 }
 
 main #donation-section > div {
@@ -345,34 +376,36 @@ main #donation-section > div {
 }
 
 main #donation-section h2 {
-    font-size: 100px;
-    line-height: 90px;
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
     color: var(--brancoPrincipal);
 }
 
 main #donation-section p {
     color: var(--brancoPrincipal);
-    text-align: justify;
-    max-width: 700px;
-    margin: 50px 0 0 0;
+    text-align: left;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: clamp(24px, 3vw, 40px) 0 0 0;
 }
 
 main #donation-section #donation-disclaimer {
-    font-size: 20px;
+    font-size: clamp(15px, 1.1vw, 18px);
 }
 
 main #donation-section img {
     flex: 0 0 auto;
     align-self: center;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 520px;
+    height: auto;
 }
 
 main #donation-section #donation-buttons-container {
     display: flex;
     flex-direction: column;
-    gap: 50px;
-    margin-top: 80px;
+    gap: clamp(20px, 2.5vw, 40px);
+    margin-top: clamp(32px, 4vw, 56px);
 }
 
 main #donation-section #donation-buttons-container .donation-buttons-container-line {
@@ -434,18 +467,15 @@ main #donation-section #donation-buttons-container .donation-button-most-chosen:
 main #about-us-section {
     position: relative;
     display: flex;
-    width: 108%;
-    margin-left: -8%;
     gap: 100px;
-    font-size: 24px;
-    padding: 120px 300px 160px 0;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
 }
 
 main #about-us-section img {
-    max-width: 750px;
-    min-width: 400px;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 560px;
+    height: auto;
     align-self: center;
 }
 
@@ -455,51 +485,52 @@ main #about-us-section > div {
 
 main #about-us-section h2 {
     color: var(--vermelhoPrincipal);
-    line-height: 90px;
-    font-size: 100px;
+    line-height: 1.02;
+    font-size: clamp(56px, 6.5vw, 100px);
     text-align: right;
-    margin-bottom: 50px;
+    margin-bottom: clamp(24px, 3vw, 48px);
 }
 
 main #about-us-section p {
-    max-width: 800px;
-    text-align: justify;
-    margin: 0 0 20px auto;
+    max-width: 640px;
+    text-align: left;
+    line-height: 1.6;
+    margin: 0 0 16px auto;
 }
 
 main #volunteer-section {
     position: relative;
     display: flex;
     gap: 100px;
-    width: 110%;
     background-color: var(--vermelhoPrincipal);
-    font-size: 24px;
-    padding: 120px 0 160px 300px;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
 }
 
 main #volunteer-section h2 {
     color: var(--brancoPrincipal);
-    font-size: 100px;
-    line-height: 90px;
-    margin-bottom: 50px;
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
+    margin-bottom: clamp(24px, 3vw, 48px);
 }
 
 main #volunteer-section p {
     color: var(--brancoPrincipal);
-    text-align: justify;
-    max-width: 700px;
-    margin: 0 0 20px 0;
+    text-align: left;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 0 16px 0;
 }
 
 main #volunteer-section button {
     border: none;
     padding: 10px 40px;
-    margin: 80px 0 0 0;
+    margin: clamp(32px, 4vw, 56px) 0 0 0;
     border-radius: 10px;
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
     font-family: afacad, arial, sans-serif;
-    font-size: 26px;
+    font-size: clamp(20px, 1.6vw, 24px);
     font-weight: 100;
     cursor: pointer;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -512,31 +543,149 @@ main #volunteer-section button:hover {
 
 main #volunteer-section img {
     align-self: center;
-    max-width: 750px;
-    min-width: 600px;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 560px;
+    height: auto;
 }
 
-main #gallery-section {
-    font-size: 24px;
-    padding: 120px 300px 160px 300px;
+main #stories-section {
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
+    text-align: center;
 }
 
-main #gallery-section h2 {
-    font-size: 100px;
+main #stories-section h2 {
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
     color: var(--vermelhoPrincipal);
     width: fit-content;
     margin: 0 auto;
 }
 
-main #gallery-section #photos-gallery-container {
+main #stories-section > p {
+    margin: 16px auto 0 auto;
+    max-width: 700px;
+    color: var(--pretoPrincipal);
+}
+
+main #stories-section #stories-preview {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 40px;
     width: 100%;
     margin-top: 70px;
+}
+
+main #stories-section .story-card {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    max-width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--brancoPrincipal);
+    box-shadow: 0 0 20px 2px #0000002c;
+    text-decoration: none;
+    text-align: left;
+    transition: transform 0.1s ease-out;
+}
+
+main #stories-section .story-card:hover {
+    transform: translateY(-10px);
+}
+
+main #stories-section .story-card-photo {
+    background-color: #e8e8e8;
+    height: 220px;
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+
+main #stories-section .story-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+main #stories-section .story-card-photo.is-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+}
+
+main #stories-section .story-card-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 25px 25px 20px;
+}
+
+main #stories-section .story-card-name {
+    display: block;
+    font-size: 25px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--vermelhoPrincipal);
+}
+
+main #stories-section .story-card-desc {
+    margin: 15px 0 20px 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--pretoPrincipal);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+main #stories-section .story-card-button {
+    display: block;
+    margin-top: auto;
+    font-size: 18px;
+    background-color: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    border-radius: 10px;
+    padding: 8px 0;
+    text-align: center;
+    transition: background-color 0.1s ease-out;
+}
+
+main #stories-section .story-card:hover .story-card-button {
+    background-color: var(--pretoPrincipal);
+}
+
+[data-theme="dark"] main #stories-section .story-card {
+    background-color: #1e1e1e;
+}
+
+[data-theme="dark"] main #stories-section .story-card-desc {
+    color: #d8d8d8;
+}
+
+main #stories-section > a {
+    display: inline-block;
+    text-decoration: none;
+    margin-top: 60px;
+}
+
+main #stories-section > a button {
+    border: none;
+    padding: 12px 40px;
+    border-radius: 10px;
+    background-color: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    font-family: afacad, arial, sans-serif;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+main #stories-section > a button:hover {
+    background-color: var(--pretoPrincipal);
 }
 
 main #main-section picture,
@@ -547,41 +696,18 @@ main #volunteer-section picture {
     display: contents;
 }
 
-main #gallery-section .gallery-photo {
-    background-color: #101010;
-    border-radius: 10px;
-    width: 375px;
-    height: 550px;
-    overflow: hidden;
-    display: block;
-}
-
-main #gallery-section .gallery-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center center;
-    display: block;
-}
-
-main #gallery-photo2 img {
-    object-position: center 13%;
-}
-
-main #gallery-photo3 img {
-    object-position: center 16%;
-}
 
 main #donation-cta-section {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 30px;
     background-color: var(--vermelhoPrincipal);
-    padding: 60px 300px;
+    padding-block: clamp(48px, 6vw, 72px);
 }
 
 main #donation-cta-section span {
-    font-size: 40px;
+    font-size: clamp(26px, 3vw, 38px);
     font-weight: 900;
     color: var(--brancoPrincipal);
 }
@@ -593,9 +719,10 @@ main #donation-cta-section button {
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
     font-family: afacad, arial, sans-serif;
-    font-size: 26px;
+    font-size: clamp(20px, 1.6vw, 24px);
     font-weight: 100;
     cursor: pointer;
+    white-space: nowrap;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
@@ -606,7 +733,7 @@ main #donation-cta-section button:hover {
 
 footer {
     background-color: var(--pretoPrincipal);
-    padding: 80px 300px;
+    padding-block: clamp(64px, 8vw, 96px);
 }
 
 footer #footer-main-content {
@@ -898,25 +1025,13 @@ main #donation-section button:focus-visible {
         line-height: 70px
     }
 
-    main #gallery-section {
+    main #stories-section {
         padding: 100px 8vw 100px 8vw;
     }
 
-    main #gallery-section h2 {
+    main #stories-section h2 {
         font-size: 70px;
         line-height: 70px;
-    }
-
-    main #gallery-section .gallery-photo {
-        height: 350px;
-    }
-
-    main #gallery-photo2 img {
-        object-position: center 13%;
-    }
-
-    main #gallery-photo3 img {
-        object-position: center 16%;
     }
 
     main #donation-cta-section {
@@ -1005,11 +1120,11 @@ main #donation-section button:focus-visible {
         width: 45%;
     }
 
-    main #gallery-section {
+    main #stories-section {
         padding: 80px 10vw;
     }
 
-    main #gallery-section h2 {
+    main #stories-section h2 {
         font-size: 80px;
     }
 
@@ -1039,6 +1154,7 @@ main #donation-section button:focus-visible {
     header #menu-mobile {
         display: flex;
         align-items: center;
+        gap: 14px;
     }
 
     header #menu-icon-mobile {
@@ -1182,10 +1298,8 @@ main #donation-section button:focus-visible {
         max-width: 400px;
     }
 
-    main #gallery-section .gallery-photo {
-        width: 90vw;
-        height: auto;
-        aspect-ratio: 375 / 550;
+    main #stories-section .story-card {
+        width: min(300px, 88vw);
     }
 
     main #donation-section {
@@ -1348,7 +1462,7 @@ main #donation-section button:focus-visible {
     main #donation-section   { padding-top: 56px; padding-bottom: 56px; }
     main #about-us-section   { padding-top: 56px; padding-bottom: 56px; }
     main #volunteer-section  { padding-top: 56px; padding-bottom: 56px; }
-    main #gallery-section    { padding: 56px 6vw; }
+    main #stories-section    { padding: 56px 6vw; }
     main #donation-cta-section { padding: 36px 5vw; gap: 14px; }
 
     /* Texto do corpo das seções — herança de 24px do desktop é grande demais.
@@ -1378,8 +1492,9 @@ main #donation-section button:focus-visible {
         max-width: unset;
     }
 
-    /* Gallery h2 */
-    main #gallery-section h2 { font-size: clamp(26px, 8vw, 38px); line-height: 1.1; }
+    /* Stories h2 */
+    main #stories-section h2 { font-size: clamp(26px, 8vw, 38px); line-height: 1.1; }
+    main #stories-section > a button { font-size: 18px; }
 
     /* Selo "mais escolhido!" — centralizado sobre o botão (empilhados no mobile) */
     main #donation-section #donation-buttons-container .donation-button-most-chosen::before {
