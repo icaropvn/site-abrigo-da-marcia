@@ -67,7 +67,72 @@ body {
 .form-group label {
     font-size: 14px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
+
+/* ─── Tooltip ─── */
+.tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #c8c8c8;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: help;
+    position: relative;
+    line-height: 1;
+    user-select: none;
+}
+
+.tooltip-icon::before,
+.tooltip-icon::after {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 1000;
+}
+
+.tooltip-icon::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1a1a1a;
+}
+
+.tooltip-icon::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    white-space: normal;
+    width: 230px;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.tooltip-icon:hover::before,
+.tooltip-icon:hover::after,
+.tooltip-icon:focus::before,
+.tooltip-icon:focus::after { opacity: 1; }
+
+.tooltip-icon:focus { outline: 2px solid var(--red); outline-offset: 2px; }
 
 .form-group input,
 .form-group select,

@@ -89,16 +89,12 @@
             <form id="dog-form">
                 <input type="hidden" id="dog-id">
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="f-name">Nome *</label>
-                        <input id="f-name" type="text" required placeholder="Ex: Thor">
-                    </div>
-                    <div class="form-group">
-                        <label for="f-slug">Slug (ID) *</label>
-                        <input id="f-slug" type="text" required placeholder="Ex: thor">
-                    </div>
+                <div class="form-group">
+                    <label for="f-name">Nome *</label>
+                    <input id="f-name" type="text" required placeholder="Ex: Thor">
+                    <small id="slug-hint" style="color:var(--gray);display:none">ID gerado: <strong id="slug-hint-value"></strong></small>
                 </div>
+                <input type="hidden" id="f-slug">
 
                 <div class="form-row">
                     <div class="form-group">
@@ -122,7 +118,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="f-birth-year">Ano de nascimento (aprox.) *</label>
+                        <label for="f-birth-year">Ano de nascimento (aprox.) * <span class="tooltip-icon" tabindex="0" data-tip="Informe o ano estimado de nascimento. A idade é calculada automaticamente e fica sempre atualizada — sem precisar editar o cadastro todo ano.">?</span></label>
                         <div class="birth-year-row">
                             <input id="f-birth-year" type="number" min="1995" required placeholder="Ex: 2021">
                             <span class="age-preview-badge" id="f-age-preview">—</span>
@@ -134,7 +130,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="f-status">Status *</label>
+                        <label for="f-status">Status * <span class="tooltip-icon" tabindex="0" data-tip="Disponível: aparece no catálogo para adoção. Em processo: adoção em andamento (oculto do catálogo). Adotado: já tem lar (oculto do catálogo).">?</span></label>
                         <select id="f-status" required>
                             <option value="available">Disponível</option>
                             <option value="pending">Em processo</option>
@@ -149,13 +145,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="f-form-url">Link do formulário de adoção</label>
+                    <label for="f-form-url">Link do formulário de adoção <span class="tooltip-icon" tabindex="0" data-tip="URL para onde o visitante é redirecionado ao clicar em "Quero adotar". Normalmente um link do Google Forms. Deixe em branco para usar o formulário padrão do abrigo.">?</span></label>
                     <input id="f-form-url" type="url" placeholder="https://forms.gle/…">
                 </div>
 
                 <div class="form-group">
-                    <label>
+                    <label style="flex-direction:row;cursor:pointer">
                         <input type="checkbox" id="f-featured"> Destaque no catálogo
+                        <span class="tooltip-icon" tabindex="0" data-tip="Cães em destaque aparecem no topo do catálogo público, antes dos demais.">?</span>
                     </label>
                 </div>
 
@@ -382,6 +379,7 @@
             document.getElementById('f-image-current').value    = dog ? (dog.image || '') : '';
             document.getElementById('f-image').value            = '';
             document.getElementById('form-alert').className     = 'alert';
+            document.getElementById('slug-hint').style.display  = 'none';
             updateAgePreview();
 
             // Preview de imagem existente
@@ -431,11 +429,19 @@
         // Auto-slug a partir do nome
         document.getElementById('f-name').addEventListener('input', function() {
             if (!editingId) {
-                document.getElementById('f-slug').value = this.value
+                const slug = this.value
                     .toLowerCase()
                     .normalize('NFD').replace(/[̀-ͯ]/g, '')
                     .replace(/\s+/g, '-')
                     .replace(/[^a-z0-9-]/g, '');
+                document.getElementById('f-slug').value = slug;
+                const hint = document.getElementById('slug-hint');
+                if (slug) {
+                    document.getElementById('slug-hint-value').textContent = slug;
+                    hint.style.display = 'block';
+                } else {
+                    hint.style.display = 'none';
+                }
             }
         });
 
