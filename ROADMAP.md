@@ -195,7 +195,7 @@ As fontes do Google Fonts estão carregando múltiplas variações que não são
 
 ---
 
-## FASE 2: VISUAL & UX
+## ✅ FASE 2: VISUAL & UX — CONCLUÍDA (2026-06-04)
 
 ### 2.1 | Melhorar Responsividade com Breakpoint Intermediário
 
@@ -593,7 +593,7 @@ main .catalog-card:nth-child(6) { animation-delay: 0.6s; }
 
 ---
 
-## FASE 3: FUNCIONALIDADES & DADOS
+## ✅ FASE 3: FUNCIONALIDADES & DADOS — CONCLUÍDA (2026-06-04)
 
 ### 3.1 | Estruturar Dados em JSON para Gerenciamento Futuro
 
@@ -1221,7 +1221,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 ---
 
-## FASE 4: PREPARAÇÃO PARA SISTEMA DE ADMIN (Gerenciamento Dinâmico)
+## ✅ FASE 4: PREPARAÇÃO PARA SISTEMA DE ADMIN — CONCLUÍDA (2026-06-04)
 
 ### 4.1 | Setup Firebase
 
@@ -1723,7 +1723,7 @@ document.addEventListener('DOMContentLoaded', loadAndRenderDogs);
 
 ---
 
-## 📱 FASE 5: FEATURES AVANÇADAS
+## FASE 5: FEATURES AVANÇADAS
 
 ### 5.1 | Sistema de Favoritos (localStorage)
 
@@ -1973,28 +1973,32 @@ Sitemap: https://abrigodamarcia.com/sitemap.xml
 | 1 | Lazy loading | ✅ Concluído |
 | 1 | Remover overflow | ✅ Concluído |
 | 1 | Otimizar fontes | ✅ Concluído |
-| 2 | Responsividade | Pronto para implementar |
-| 2 | Acessibilidade | Pronto para implementar |
-| 2 | Animações | Pronto para implementar |
-| 2 | Menu mobile | Pronto para implementar |
-| 3 | Estrutura JSON | Pronto para implementar |
-| 3 | Render dinâmico | Pronto para implementar |
-| 3 | Filtros | Pronto para implementar |
-| 3 | Modal de detalhes | Pronto para implementar |
-| 3 | Voluntários | Pronto para implementar |
-| 4 | Backend Express | Especificação completa |
-| 4 | API de cães | Especificação completa |
-| 4 | Autenticação | Especificação completa |
-| 5 | Favoritos | Pronto para implementar |
+| 2 | Responsividade | ✅ Concluído |
+| 2 | Dark mode + toggle manual | ✅ Concluído |
+| 2 | Acessibilidade | ✅ Concluído |
+| 2 | Animações | ✅ Concluído |
+| 2 | Menu mobile | ✅ Concluído |
+| 3 | Estrutura JSON | ✅ Concluído |
+| 3 | Filtros | ✅ Concluído |
+| 3 | Modal de detalhes | ✅ Concluído |
+| 3 | Voluntários | ✅ Concluído |
+| 4 | Backend Express | ✅ Concluído (legacy) |
+| 4 | API de cães | ✅ Concluído (legacy) |
+| 4 | Autenticação | ✅ Concluído (legacy) |
+| Supabase | Migração de plataforma (Firebase → Supabase) | ✅ Concluído (2026-06-09) |
+| Supabase | schema.sql + RLS + Storage bucket dog-photos | ✅ Concluído |
+| Supabase | render-dogs.js integrado (Supabase → backend → JSON) | ✅ Concluído |
+| Supabase | Painel admin — login.html + index.html (CRUD + upload) | ✅ Concluído |
+| 5 | Favoritos (localStorage) | ✅ Concluído |
+| 5 | SEO meta tags + sitemap.xml + robots.txt | ✅ Concluído |
 | 5 | Analytics | Pronto para implementar |
-| 5 | SEO | Pronto para implementar |
 
 ---
 
 **PRÓXIMOS PASSOS:**
-1. Escolher qual fase iniciar
-2. Executar uma fase por vez
-3. Testar em diferentes navegadores e dispositivos
-4. Recolher feedback dos usuários
-5. Iterar e melhorar conforme necessário
+1. Preencher `js/supabase-config.js` com URL e anon key do projeto Supabase
+2. Executar `supabase/schema.sql` no SQL Editor do Supabase
+3. Criar usuário admin via Authentication → Users → Add user
+4. Testar catálogo público e painel admin
+5. Implementar Analytics (Google Analytics ou Supabase Edge Functions)
 

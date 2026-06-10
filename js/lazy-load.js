@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+function initLazyLoad() {
     const imageObserver = new IntersectionObserver(function(entries, observer) {
         entries.forEach(function(entry) {
             if (entry.isIntersecting) {
@@ -22,4 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.catalog-card').forEach(function(card) {
         imageObserver.observe(card);
     });
-});
+}
+
+document.addEventListener('DOMContentLoaded', initLazyLoad);

@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('dog-detail-modal');
     const modalClose = document.querySelector('.modal-close');
+    const catalog = document.getElementById('catalog');
 
     function openModal(data) {
         document.getElementById('modal-dog-image').src = data.image;
@@ -20,20 +21,21 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
     }
 
-    document.querySelectorAll('.catalog-card').forEach(function(card) {
-        card.addEventListener('click', function(e) {
-            if (e.target.closest('.catalog-card-button')) return;
+    catalog.addEventListener('click', function(e) {
+        if (e.target.closest('.catalog-card-button')) return;
 
-            const tags = card.querySelectorAll('.catalog-card-tags span');
-            openModal({
-                name: card.querySelector('.catalog-card-name').textContent.trim(),
-                gender: tags[0] ? tags[0].textContent.trim() : '',
-                age: tags[1] ? tags[1].textContent.trim() : '',
-                size: tags[2] ? tags[2].textContent.trim() : '',
-                description: card.querySelector('.catalog-card-description').textContent.trim(),
-                image: card.getAttribute('data-img'),
-                formUrl: card.querySelector('.catalog-card-button').href
-            });
+        const card = e.target.closest('.catalog-card');
+        if (!card) return;
+
+        const tags = card.querySelectorAll('.catalog-card-tags span');
+        openModal({
+            name: card.querySelector('.catalog-card-name').textContent.trim(),
+            gender: tags[0] ? tags[0].textContent.trim() : '',
+            age: tags[1] ? tags[1].textContent.trim() : '',
+            size: tags[2] ? tags[2].textContent.trim() : '',
+            description: card.querySelector('.catalog-card-description').textContent.trim(),
+            image: card.getAttribute('data-img'),
+            formUrl: card.querySelector('.catalog-card-button').href
         });
     });
 

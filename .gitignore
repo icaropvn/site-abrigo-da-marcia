@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Node (backend legacy)
+backend/node_modules/
+backend/.env
+backend/uploads/
+
+# Logs
+*.log

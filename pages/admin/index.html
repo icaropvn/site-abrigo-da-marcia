@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Abrigo da Márcia</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../styles/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/supabase-config.js"></script>
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
+            <h1>Painel Admin</h1>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+        </div>
+    </header>
+
+    <!-- ── Main ── -->
+    <main class="admin-main">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">—</div>
+                <div class="stat-label">Total de cães</div>
+            </div>
+            <div class="stat-card available">
+                <div class="stat-value" id="stat-available">—</div>
+                <div class="stat-label">Disponíveis</div>
+            </div>
+            <div class="stat-card adopted">
+                <div class="stat-value" id="stat-adopted">—</div>
+                <div class="stat-label">Adotados</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-value" id="stat-pending">—</div>
+                <div class="stat-label">Em processo</div>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="section-header">
+            <h2>Cães cadastrados</h2>
+            <button class="btn btn-primary" id="add-dog-btn">+ Adicionar cão</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nome</th>
+                        <th>Gênero / Porte</th>
+                        <th>Idade</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="dogs-tbody">
+                    <tr class="loading-row"><td colspan="6">Carregando…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- ── Modal: formulário adicionar/editar ── -->
+    <div class="modal-overlay" id="dog-modal">
+        <div class="modal-box">
+            <button class="modal-close-btn" id="modal-close">&times;</button>
+            <h2 id="modal-title">Adicionar cão</h2>
+
+            <div id="form-alert" class="alert"></div>
+
+            <form id="dog-form">
+                <input type="hidden" id="dog-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="f-name">Nome *</label>
+                        <input id="f-name" type="text" required placeholder="Ex: Thor">
+                    </div>
+                    <div class="form-group">
+                        <label for="f-slug">Slug (ID) *</label>
+                        <input id="f-slug" type="text" required placeholder="Ex: thor">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="f-gender">Gênero *</label>
+                        <select id="f-gender" required>
+                            <option value="">Selecionar</option>
+                            <option value="Macho">Macho</option>
+                            <option value="Fêmea">Fêmea</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="f-size">Porte *</label>
+                        <select id="f-size" required>
+                            <option value="">Selecionar</option>
+                            <option value="Porte pequeno">Pequeno</option>
+                            <option value="Porte médio">Médio</option>
+                            <option value="Porte grande">Grande</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="f-age">Idade *</label>
+                        <input id="f-age" type="text" required placeholder="Ex: 2 anos">
+                    </div>
+                    <div class="form-group">
+                        <label for="f-status">Status *</label>
+                        <select id="f-status" required>
+                            <option value="available">Disponível</option>
+                            <option value="pending">Em processo</option>
+                            <option value="adopted">Adotado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="f-description">Descrição *</label>
+                    <textarea id="f-description" required placeholder="Conte um pouco sobre o cão…"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="f-form-url">Link do formulário de adoção</label>
+                    <input id="f-form-url" type="url" placeholder="https://forms.gle/…">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="f-featured"> Destaque no catálogo
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>Foto do cão</label>
+                    <div class="img-preview-wrap" id="img-preview-wrap">
+                        <div class="img-preview-placeholder">
+                            <span>📷</span>
+                            Clique para selecionar uma imagem
+                        </div>
+                    </div>
+                    <input type="file" id="f-image" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none">
+                    <input type="hidden" id="f-image-current">
+                    <small style="color:#868686">Formatos: JPG, PNG, WebP. Máximo 5 MB.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Confirm delete ── -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3>Remover cão?</h3>
+            <p id="confirm-msg">Esta ação não pode ser desfeita.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-ok">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allDogs = [];
+        let pendingDeleteId = null;
+        let editingId = null;
+        let selectedFile = null;
+
+        // ── Auth guard ──────────────────────────────────────────
+        async function init() {
+            const { data } = await sb.auth.getSession();
+            if (!data.session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('admin-email').textContent = data.session.user.email;
+            await loadDogs();
+            bindEvents();
+        }
+
+        // ── Logout ──────────────────────────────────────────────
+        document.getElementById('logout-btn').addEventListener('click', async function() {
+            await sb.auth.signOut();
+            window.location.href = 'login.html';
+        });
+
+        // ── Load dogs ───────────────────────────────────────────
+        async function loadDogs() {
+            const { data, error } = await sb
+                .from('dogs')
+                .select('*')
+                .order('featured', { ascending: false })
+                .order('created_at', { ascending: false });
+
+            if (error) { showTableError(error.message); return; }
+
+            allDogs = data || [];
+            renderTable(allDogs);
+            renderStats(allDogs);
+        }
+
+        function renderStats(dogs) {
+            document.getElementById('stat-total').textContent     = dogs.length;
+            document.getElementById('stat-available').textContent = dogs.filter(d => d.status === 'available').length;
+            document.getElementById('stat-adopted').textContent   = dogs.filter(d => d.status === 'adopted').length;
+            document.getElementById('stat-pending').textContent   = dogs.filter(d => d.status === 'pending').length;
+        }
+
+        function renderTable(dogs) {
+            const tbody = document.getElementById('dogs-tbody');
+            if (!dogs.length) {
+                tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Nenhum cão cadastrado.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = dogs.map(function(dog) {
+                const imgSrc  = resolveImgSrc(dog.image);
+                const imgTag  = imgSrc
+                    ? `<img class="dog-thumb" src="${imgSrc}" alt="${dog.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                    : '';
+                const noImg   = `<div class="dog-no-img" style="display:${imgSrc ? 'none' : 'flex'}">🐶</div>`;
+                const statusLabel = { available: 'Disponível', adopted: 'Adotado', pending: 'Em processo' };
+                return `
+                    <tr>
+                        <td>${imgTag}${noImg}</td>
+                        <td><strong>${dog.name}</strong>${dog.featured ? ' ⭐' : ''}</td>
+                        <td>${dog.gender} · ${dog.size}</td>
+                        <td>${dog.age}</td>
+                        <td><span class="badge badge-${dog.status}">${statusLabel[dog.status] || dog.status}</span></td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-ghost btn-sm" onclick="editDog('${dog.id}')">Editar</button>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDelete('${dog.id}','${dog.name}')">Remover</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function resolveImgSrc(img) {
+            if (!img) return null;
+            if (img.startsWith('http')) return img;
+            // caminhos relativos a pages/catalogo.html → ajustar para pages/admin/
+            return img.replace(/^\.\.\//, '../../');
+        }
+
+        function showTableError(msg) {
+            document.getElementById('dogs-tbody').innerHTML =
+                `<tr class="loading-row"><td colspan="6">Erro: ${msg}</td></tr>`;
+        }
+
+        // ── Add / Edit modal ─────────────────────────────────────
+        document.getElementById('add-dog-btn').addEventListener('click', function() {
+            openModal(null);
+        });
+
+        window.editDog = function(id) {
+            const dog = allDogs.find(d => d.id === id);
+            if (dog) openModal(dog);
+        };
+
+        function openModal(dog) {
+            editingId    = dog ? dog.id : null;
+            selectedFile = null;
+
+            document.getElementById('modal-title').textContent = dog ? 'Editar cão' : 'Adicionar cão';
+            document.getElementById('dog-id').value          = dog ? dog.id : '';
+            document.getElementById('f-name').value          = dog ? dog.name : '';
+            document.getElementById('f-slug').value          = dog ? dog.slug : '';
+            document.getElementById('f-gender').value        = dog ? dog.gender : '';
+            document.getElementById('f-size').value          = dog ? dog.size : '';
+            document.getElementById('f-age').value           = dog ? dog.age : '';
+            document.getElementById('f-status').value        = dog ? dog.status : 'available';
+            document.getElementById('f-description').value   = dog ? dog.description : '';
+            document.getElementById('f-form-url').value      = dog ? (dog.form_url || '') : 'https://forms.gle/nLSjXJyeLGUJXZj27';
+            document.getElementById('f-featured').checked    = dog ? !!dog.featured : false;
+            document.getElementById('f-image-current').value = dog ? (dog.image || '') : '';
+            document.getElementById('f-image').value         = '';
+            document.getElementById('form-alert').className  = 'alert';
+
+            // Preview de imagem existente
+            const wrap = document.getElementById('img-preview-wrap');
+            const src  = dog ? resolveImgSrc(dog.image) : null;
+            setImgPreview(src);
+
+            document.getElementById('dog-modal').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('dog-modal').classList.remove('open');
+            editingId    = null;
+            selectedFile = null;
+        }
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-cancel').addEventListener('click', closeModal);
+        document.getElementById('dog-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Auto-slug a partir do nome
+        document.getElementById('f-name').addEventListener('input', function() {
+            if (!editingId) {
+                document.getElementById('f-slug').value = this.value
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+            }
+        });
+
+        // ── Image picker ─────────────────────────────────────────
+        document.getElementById('img-preview-wrap').addEventListener('click', function() {
+            document.getElementById('f-image').click();
+        });
+
+        document.getElementById('f-image').addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                showFormAlert('A imagem deve ter no máximo 5 MB.', 'error');
+                this.value = '';
+                return;
+            }
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = function(ev) { setImgPreview(ev.target.result); };
+            reader.readAsDataURL(file);
+        });
+
+        function setImgPreview(src) {
+            const wrap = document.getElementById('img-preview-wrap');
+            if (src) {
+                wrap.innerHTML = `<img src="${src}" alt="Preview">`;
+            } else {
+                wrap.innerHTML = `
+                    <div class="img-preview-placeholder">
+                        <span>📷</span>Clique para selecionar uma imagem
+                    </div>`;
+            }
+        }
+
+        // ── Save dog ─────────────────────────────────────────────
+        document.getElementById('dog-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Salvando…';
+
+            try {
+                let imageUrl = document.getElementById('f-image-current').value;
+
+                // Upload de imagem (se arquivo selecionado)
+                if (selectedFile) {
+                    const slug = document.getElementById('f-slug').value.trim();
+                    const ext  = selectedFile.name.split('.').pop().toLowerCase();
+                    const path = `${slug}-${Date.now()}.${ext}`;
+
+                    const { error: uploadErr } = await sb.storage
+                        .from('dog-photos')
+                        .upload(path, selectedFile, { upsert: true });
+
+                    if (uploadErr) throw uploadErr;
+
+                    const { data: urlData } = sb.storage
+                        .from('dog-photos')
+                        .getPublicUrl(path);
+
+                    imageUrl = urlData.publicUrl;
+                }
+
+                const payload = {
+                    slug:        document.getElementById('f-slug').value.trim(),
+                    name:        document.getElementById('f-name').value.trim(),
+                    gender:      document.getElementById('f-gender').value,
+                    size:        document.getElementById('f-size').value,
+                    age:         document.getElementById('f-age').value.trim(),
+                    status:      document.getElementById('f-status').value,
+                    description: document.getElementById('f-description').value.trim(),
+                    form_url:    document.getElementById('f-form-url').value.trim() || null,
+                    featured:    document.getElementById('f-featured').checked,
+                    image:       imageUrl || null
+                };
+
+                let error;
+                if (editingId) {
+                    ({ error } = await sb.from('dogs').update(payload).eq('id', editingId));
+                } else {
+                    ({ error } = await sb.from('dogs').insert(payload));
+                }
+
+                if (error) throw error;
+
+                closeModal();
+                await loadDogs();
+            } catch (err) {
+                showFormAlert(err.message || 'Erro ao salvar.', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Salvar';
+            }
+        });
+
+        function showFormAlert(msg, type) {
+            const el = document.getElementById('form-alert');
+            el.textContent  = msg;
+            el.className    = `alert alert-${type} show`;
+        }
+
+        // ── Delete ───────────────────────────────────────────────
+        window.confirmDelete = function(id, name) {
+            pendingDeleteId = id;
+            document.getElementById('confirm-msg').textContent =
+                `Remover "${name}" permanentemente? Esta ação não pode ser desfeita.`;
+            document.getElementById('confirm-overlay').classList.add('open');
+        };
+
+        document.getElementById('confirm-cancel').addEventListener('click', function() {
+            document.getElementById('confirm-overlay').classList.remove('open');
+            pendingDeleteId = null;
+        });
+
+        document.getElementById('confirm-ok').addEventListener('click', async function() {
+            if (!pendingDeleteId) return;
+            document.getElementById('confirm-overlay').classList.remove('open');
+
+            const { error } = await sb.from('dogs').delete().eq('id', pendingDeleteId);
+            pendingDeleteId = null;
+
+            if (error) { alert('Erro ao remover: ' + error.message); return; }
+            await loadDogs();
+        });
+
+        function bindEvents() {
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.getElementById('confirm-overlay').classList.remove('open');
+                }
+            });
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>
