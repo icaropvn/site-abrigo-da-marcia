@@ -1,3 +1,10 @@
+function calcAge(birthYear) {
+    if (!birthYear) return '—';
+    var years = new Date().getFullYear() - birthYear;
+    if (years < 1) return 'menos de 1 ano';
+    return years === 1 ? '1 ano' : years + ' anos';
+}
+
 function safeUrl(url) {
     try {
         var u = new URL(url);
@@ -65,7 +72,7 @@ function normalizeDog(dog) {
     return {
         name:        dog.name,
         gender:      dog.gender,
-        age:         dog.age,
+        age:         dog.birth_year ? calcAge(dog.birth_year) : (dog.age || '—'),
         size:        dog.size,
         description: dog.description,
         image:       dog.image,
@@ -82,7 +89,7 @@ function isSupabaseConfigured() {
 
 async function fetchFromSupabase() {
     var url = SUPABASE_URL +
-        '/rest/v1/dogs?status=eq.available&order=featured.desc,created_at.desc';
+        '/rest/v1/dogs?status=eq.available&archived=eq.false&order=featured.desc,created_at.desc';
 
     var controller = new AbortController();
     var timeoutId  = setTimeout(function() { controller.abort(); }, 5000);

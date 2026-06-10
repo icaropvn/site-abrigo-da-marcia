@@ -44,12 +44,19 @@
                 <div class="stat-value" id="stat-pending">—</div>
                 <div class="stat-label">Em processo</div>
             </div>
+            <div class="stat-card archived">
+                <div class="stat-value" id="stat-archived">—</div>
+                <div class="stat-label">Arquivados</div>
+            </div>
         </div>
 
         <!-- Tabela -->
         <div class="section-header">
             <h2>Cães cadastrados</h2>
-            <button class="btn btn-primary" id="add-dog-btn">+ Adicionar cão</button>
+            <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn btn-ghost btn-sm" id="toggle-archived-btn">Mostrar arquivados</button>
+                <button class="btn btn-primary" id="add-dog-btn">+ Adicionar cão</button>
+            </div>
         </div>
 
         <div class="table-wrap">
@@ -115,8 +122,16 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="f-age">Idade *</label>
-                        <input id="f-age" type="text" required placeholder="Ex: 2 anos">
+                        <label for="f-birth-year">Ano de nascimento (aprox.) *</label>
+                        <div class="birth-year-row">
+                            <input id="f-birth-year" type="number" min="1995" required placeholder="Ex: 2021">
+                            <span class="age-preview-badge" id="f-age-preview">—</span>
+                        </div>
+                        <div class="age-quick-row">
+                            <span>Ou informe a idade:</span>
+                            <input id="f-age-quick" type="number" min="0" max="30" placeholder="0">
+                            <span>anos</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="f-status">Status *</label>
@@ -186,6 +201,17 @@
         let pendingDeleteId = null;
         let editingId = null;
         let selectedFile = null;
+        let showArchived = false;
+
+        const CURRENT_YEAR = new Date().getFullYear();
+        document.getElementById('f-birth-year').max = CURRENT_YEAR;
+
+        function calcAge(birthYear) {
+            if (!birthYear) return '—';
+            var years = CURRENT_YEAR - birthYear;
+            if (years < 1) return 'menos de 1 ano';
+            return years === 1 ? '1 ano' : years + ' anos';
+        }
 
         function esc(s) {
             return String(s == null ? '' : s)
@@ -230,38 +256,51 @@
         }
 
         function renderStats(dogs) {
-            document.getElementById('stat-total').textContent     = dogs.length;
-            document.getElementById('stat-available').textContent = dogs.filter(d => d.status === 'available').length;
-            document.getElementById('stat-adopted').textContent   = dogs.filter(d => d.status === 'adopted').length;
-            document.getElementById('stat-pending').textContent   = dogs.filter(d => d.status === 'pending').length;
+            const active = dogs.filter(d => !d.archived);
+            document.getElementById('stat-total').textContent     = active.length;
+            document.getElementById('stat-available').textContent = active.filter(d => d.status === 'available').length;
+            document.getElementById('stat-adopted').textContent   = active.filter(d => d.status === 'adopted').length;
+            document.getElementById('stat-pending').textContent   = active.filter(d => d.status === 'pending').length;
+            document.getElementById('stat-archived').textContent  = dogs.filter(d => d.archived).length;
         }
 
         function renderTable(dogs) {
             const tbody = document.getElementById('dogs-tbody');
             tbody.innerHTML = '';
-            if (!dogs.length) {
+            const visible = showArchived ? dogs : dogs.filter(d => !d.archived);
+            if (!visible.length) {
                 const tr = document.createElement('tr');
                 tr.className = 'loading-row';
-                tr.innerHTML = '<td colspan="6">Nenhum cão cadastrado.</td>';
+                const td = document.createElement('td');
+                td.setAttribute('colspan', '6');
+                td.textContent = showArchived ? 'Nenhum cão cadastrado.' : 'Nenhum cão ativo cadastrado.';
+                tr.appendChild(td);
                 tbody.appendChild(tr);
                 return;
             }
             const statusLabel = { available: 'Disponível', adopted: 'Adotado', pending: 'Em processo' };
-            dogs.forEach(function(dog) {
+            visible.forEach(function(dog) {
                 const imgSrc = resolveImgSrc(dog.image);
-                const tr = document.createElement('tr');
+                const age    = calcAge(dog.birth_year);
+                const tr     = document.createElement('tr');
+                if (dog.archived) tr.className = 'row-archived';
                 tr.innerHTML = `
                     <td>
                         ${imgSrc ? `<img class="dog-thumb" src="${esc(imgSrc)}" alt="${esc(dog.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
                         <div class="dog-no-img" style="display:${imgSrc ? 'none' : 'flex'}">🐶</div>
                     </td>
-                    <td><strong>${esc(dog.name)}</strong>${dog.featured ? ' ⭐' : ''}</td>
+                    <td>
+                        <strong>${esc(dog.name)}</strong>${dog.featured ? ' ⭐' : ''}
+                        ${dog.archived ? ' <span class="badge badge-archived">Arquivado</span>' : ''}
+                    </td>
                     <td>${esc(dog.gender)} · ${esc(dog.size)}</td>
-                    <td>${esc(dog.age)}</td>
+                    <td>${esc(age)}</td>
                     <td><span class="badge badge-${esc(dog.status)}">${esc(statusLabel[dog.status] || dog.status)}</span></td>
                     <td>
                         <div class="actions">
                             <button class="btn btn-ghost btn-sm js-edit" data-id="${esc(dog.id)}">Editar</button>
+                            <button class="btn ${dog.archived ? 'btn-success' : 'btn-ghost'} btn-sm js-archive"
+                                    data-id="${esc(dog.id)}" data-archived="${dog.archived}">${dog.archived ? 'Desarquivar' : 'Arquivar'}</button>
                             <button class="btn btn-danger btn-sm js-delete" data-id="${esc(dog.id)}" data-name="${esc(dog.name)}">Remover</button>
                         </div>
                     </td>`;
@@ -288,19 +327,35 @@
             tbody.appendChild(tr);
         }
 
-        // ── Table action delegation (evita onclick inline) ───────
-        document.getElementById('dogs-tbody').addEventListener('click', function(e) {
-            const editBtn   = e.target.closest('.js-edit');
-            const deleteBtn = e.target.closest('.js-delete');
+        // ── Table action delegation ──────────────────────────────
+        document.getElementById('dogs-tbody').addEventListener('click', async function(e) {
+            const editBtn    = e.target.closest('.js-edit');
+            const archiveBtn = e.target.closest('.js-archive');
+            const deleteBtn  = e.target.closest('.js-delete');
             if (editBtn) {
                 const dog = allDogs.find(d => d.id === editBtn.dataset.id);
                 if (dog) openModal(dog);
+            } else if (archiveBtn) {
+                archiveBtn.disabled = true;
+                const isArchived = archiveBtn.dataset.archived === 'true';
+                const { error } = await sb.from('dogs')
+                    .update({ archived: !isArchived })
+                    .eq('id', archiveBtn.dataset.id);
+                if (error) { alert('Erro: ' + error.message); }
+                await loadDogs();
             } else if (deleteBtn) {
                 pendingDeleteId = deleteBtn.dataset.id;
                 document.getElementById('confirm-msg').textContent =
                     'Remover "' + deleteBtn.dataset.name + '" permanentemente? Esta ação não pode ser desfeita.';
                 document.getElementById('confirm-overlay').classList.add('open');
             }
+        });
+
+        // ── Toggle arquivados ────────────────────────────────────
+        document.getElementById('toggle-archived-btn').addEventListener('click', function() {
+            showArchived = !showArchived;
+            this.textContent = showArchived ? 'Ocultar arquivados' : 'Mostrar arquivados';
+            renderTable(allDogs);
         });
 
         // ── Add / Edit modal ─────────────────────────────────────
@@ -312,20 +367,22 @@
             editingId    = dog ? dog.id : null;
             selectedFile = null;
 
-            document.getElementById('modal-title').textContent = dog ? 'Editar cão' : 'Adicionar cão';
-            document.getElementById('dog-id').value          = dog ? dog.id : '';
-            document.getElementById('f-name').value          = dog ? dog.name : '';
-            document.getElementById('f-slug').value          = dog ? dog.slug : '';
-            document.getElementById('f-gender').value        = dog ? dog.gender : '';
-            document.getElementById('f-size').value          = dog ? dog.size : '';
-            document.getElementById('f-age').value           = dog ? dog.age : '';
-            document.getElementById('f-status').value        = dog ? dog.status : 'available';
-            document.getElementById('f-description').value   = dog ? dog.description : '';
-            document.getElementById('f-form-url').value      = dog ? (dog.form_url || '') : 'https://forms.gle/nLSjXJyeLGUJXZj27';
-            document.getElementById('f-featured').checked    = dog ? !!dog.featured : false;
-            document.getElementById('f-image-current').value = dog ? (dog.image || '') : '';
-            document.getElementById('f-image').value         = '';
-            document.getElementById('form-alert').className  = 'alert';
+            document.getElementById('modal-title').textContent    = dog ? 'Editar cão' : 'Adicionar cão';
+            document.getElementById('dog-id').value             = dog ? dog.id : '';
+            document.getElementById('f-name').value             = dog ? dog.name : '';
+            document.getElementById('f-slug').value             = dog ? dog.slug : '';
+            document.getElementById('f-gender').value           = dog ? dog.gender : '';
+            document.getElementById('f-size').value             = dog ? dog.size : '';
+            document.getElementById('f-birth-year').value       = dog ? (dog.birth_year || '') : '';
+            document.getElementById('f-age-quick').value        = '';
+            document.getElementById('f-status').value           = dog ? dog.status : 'available';
+            document.getElementById('f-description').value      = dog ? dog.description : '';
+            document.getElementById('f-form-url').value         = dog ? (dog.form_url || '') : 'https://forms.gle/nLSjXJyeLGUJXZj27';
+            document.getElementById('f-featured').checked       = dog ? !!dog.featured : false;
+            document.getElementById('f-image-current').value    = dog ? (dog.image || '') : '';
+            document.getElementById('f-image').value            = '';
+            document.getElementById('form-alert').className     = 'alert';
+            updateAgePreview();
 
             // Preview de imagem existente
             const wrap = document.getElementById('img-preview-wrap');
@@ -345,6 +402,30 @@
         document.getElementById('modal-cancel').addEventListener('click', closeModal);
         document.getElementById('dog-modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
+        });
+
+        // ── Birth year preview + quick age input ─────────────────
+        function updateAgePreview() {
+            const year    = parseInt(document.getElementById('f-birth-year').value);
+            const badge   = document.getElementById('f-age-preview');
+            const valid   = year >= 1995 && year <= CURRENT_YEAR;
+            if (valid) {
+                badge.textContent = '~' + calcAge(year);
+                badge.classList.add('has-value');
+            } else {
+                badge.textContent = '—';
+                badge.classList.remove('has-value');
+            }
+        }
+
+        document.getElementById('f-birth-year').addEventListener('input', updateAgePreview);
+
+        document.getElementById('f-age-quick').addEventListener('input', function() {
+            const years = parseInt(this.value);
+            if (!isNaN(years) && years >= 0 && years <= 30) {
+                document.getElementById('f-birth-year').value = CURRENT_YEAR - years;
+                updateAgePreview();
+            }
         });
 
         // Auto-slug a partir do nome
@@ -423,7 +504,7 @@
                     name:        document.getElementById('f-name').value.trim(),
                     gender:      document.getElementById('f-gender').value,
                     size:        document.getElementById('f-size').value,
-                    age:         document.getElementById('f-age').value.trim(),
+                    birth_year:  parseInt(document.getElementById('f-birth-year').value),
                     status:      document.getElementById('f-status').value,
                     description: document.getElementById('f-description').value.trim(),
                     form_url:    document.getElementById('f-form-url').value.trim() || null,
