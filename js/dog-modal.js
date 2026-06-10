@@ -1,3 +1,10 @@
+function safeUrl(url) {
+    try {
+        var u = new URL(url);
+        return (u.protocol === 'https:' || u.protocol === 'http:') ? url : '#';
+    } catch (_) { return '#'; }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('dog-detail-modal');
     const modalClose = document.querySelector('.modal-close');
@@ -11,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modal-dog-age').textContent = data.age;
         document.getElementById('modal-dog-size').textContent = data.size;
         document.getElementById('modal-dog-description').textContent = data.description;
-        document.getElementById('modal-dog-button').href = data.formUrl;
+        document.getElementById('modal-dog-button').href = safeUrl(data.formUrl);
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }

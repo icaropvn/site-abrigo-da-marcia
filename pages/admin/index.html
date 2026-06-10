@@ -187,6 +187,15 @@
         let editingId = null;
         let selectedFile = null;
 
+        function esc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // ── Auth guard ──────────────────────────────────────────
         async function init() {
             const { data } = await sb.auth.getSession();
@@ -229,32 +238,35 @@
 
         function renderTable(dogs) {
             const tbody = document.getElementById('dogs-tbody');
+            tbody.innerHTML = '';
             if (!dogs.length) {
-                tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Nenhum cão cadastrado.</td></tr>';
+                const tr = document.createElement('tr');
+                tr.className = 'loading-row';
+                tr.innerHTML = '<td colspan="6">Nenhum cão cadastrado.</td>';
+                tbody.appendChild(tr);
                 return;
             }
-            tbody.innerHTML = dogs.map(function(dog) {
-                const imgSrc  = resolveImgSrc(dog.image);
-                const imgTag  = imgSrc
-                    ? `<img class="dog-thumb" src="${imgSrc}" alt="${dog.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-                    : '';
-                const noImg   = `<div class="dog-no-img" style="display:${imgSrc ? 'none' : 'flex'}">🐶</div>`;
-                const statusLabel = { available: 'Disponível', adopted: 'Adotado', pending: 'Em processo' };
-                return `
-                    <tr>
-                        <td>${imgTag}${noImg}</td>
-                        <td><strong>${dog.name}</strong>${dog.featured ? ' ⭐' : ''}</td>
-                        <td>${dog.gender} · ${dog.size}</td>
-                        <td>${dog.age}</td>
-                        <td><span class="badge badge-${dog.status}">${statusLabel[dog.status] || dog.status}</span></td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn btn-ghost btn-sm" onclick="editDog('${dog.id}')">Editar</button>
-                                <button class="btn btn-danger btn-sm" onclick="confirmDelete('${dog.id}','${dog.name}')">Remover</button>
-                            </div>
-                        </td>
-                    </tr>`;
-            }).join('');
+            const statusLabel = { available: 'Disponível', adopted: 'Adotado', pending: 'Em processo' };
+            dogs.forEach(function(dog) {
+                const imgSrc = resolveImgSrc(dog.image);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        ${imgSrc ? `<img class="dog-thumb" src="${esc(imgSrc)}" alt="${esc(dog.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+                        <div class="dog-no-img" style="display:${imgSrc ? 'none' : 'flex'}">🐶</div>
+                    </td>
+                    <td><strong>${esc(dog.name)}</strong>${dog.featured ? ' ⭐' : ''}</td>
+                    <td>${esc(dog.gender)} · ${esc(dog.size)}</td>
+                    <td>${esc(dog.age)}</td>
+                    <td><span class="badge badge-${esc(dog.status)}">${esc(statusLabel[dog.status] || dog.status)}</span></td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-ghost btn-sm js-edit" data-id="${esc(dog.id)}">Editar</button>
+                            <button class="btn btn-danger btn-sm js-delete" data-id="${esc(dog.id)}" data-name="${esc(dog.name)}">Remover</button>
+                        </div>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
         }
 
         function resolveImgSrc(img) {
@@ -265,19 +277,36 @@
         }
 
         function showTableError(msg) {
-            document.getElementById('dogs-tbody').innerHTML =
-                `<tr class="loading-row"><td colspan="6">Erro: ${msg}</td></tr>`;
+            const tbody = document.getElementById('dogs-tbody');
+            tbody.innerHTML = '';
+            const tr = document.createElement('tr');
+            tr.className = 'loading-row';
+            const td = document.createElement('td');
+            td.setAttribute('colspan', '6');
+            td.textContent = 'Erro: ' + msg;
+            tr.appendChild(td);
+            tbody.appendChild(tr);
         }
+
+        // ── Table action delegation (evita onclick inline) ───────
+        document.getElementById('dogs-tbody').addEventListener('click', function(e) {
+            const editBtn   = e.target.closest('.js-edit');
+            const deleteBtn = e.target.closest('.js-delete');
+            if (editBtn) {
+                const dog = allDogs.find(d => d.id === editBtn.dataset.id);
+                if (dog) openModal(dog);
+            } else if (deleteBtn) {
+                pendingDeleteId = deleteBtn.dataset.id;
+                document.getElementById('confirm-msg').textContent =
+                    'Remover "' + deleteBtn.dataset.name + '" permanentemente? Esta ação não pode ser desfeita.';
+                document.getElementById('confirm-overlay').classList.add('open');
+            }
+        });
 
         // ── Add / Edit modal ─────────────────────────────────────
         document.getElementById('add-dog-btn').addEventListener('click', function() {
             openModal(null);
         });
-
-        window.editDog = function(id) {
-            const dog = allDogs.find(d => d.id === id);
-            if (dog) openModal(dog);
-        };
 
         function openModal(dog) {
             editingId    = dog ? dog.id : null;
@@ -428,13 +457,6 @@
         }
 
         // ── Delete ───────────────────────────────────────────────
-        window.confirmDelete = function(id, name) {
-            pendingDeleteId = id;
-            document.getElementById('confirm-msg').textContent =
-                `Remover "${name}" permanentemente? Esta ação não pode ser desfeita.`;
-            document.getElementById('confirm-overlay').classList.add('open');
-        };
-
         document.getElementById('confirm-cancel').addEventListener('click', function() {
             document.getElementById('confirm-overlay').classList.remove('open');
             pendingDeleteId = null;

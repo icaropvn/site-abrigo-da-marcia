@@ -59,26 +59,28 @@ create policy "Admin lê todos"
   using (true);
 
 -- Admin autenticado: inserção
+-- IMPORTANTE: substitua 'ADMIN-UUID' pelo UID do seu usuário admin.
+-- Encontre em: Authentication → Users → copie o User UID.
 drop policy if exists "Admin insere" on dogs;
 create policy "Admin insere"
   on dogs for insert
   to authenticated
-  with check (true);
+  with check (auth.uid() = 'ADMIN-UUID'::uuid);
 
 -- Admin autenticado: atualização
 drop policy if exists "Admin atualiza" on dogs;
 create policy "Admin atualiza"
   on dogs for update
   to authenticated
-  using (true)
-  with check (true);
+  using (auth.uid() = 'ADMIN-UUID'::uuid)
+  with check (auth.uid() = 'ADMIN-UUID'::uuid);
 
 -- Admin autenticado: exclusão
 drop policy if exists "Admin deleta" on dogs;
 create policy "Admin deleta"
   on dogs for delete
   to authenticated
-  using (true);
+  using (auth.uid() = 'ADMIN-UUID'::uuid);
 
 -- ──────────────────────────────────────────────────────────
 -- 3. STORAGE: bucket dog-photos
@@ -98,19 +100,19 @@ drop policy if exists "Admin faz upload" on storage.objects;
 create policy "Admin faz upload"
   on storage.objects for insert
   to authenticated
-  with check (bucket_id = 'dog-photos');
+  with check (bucket_id = 'dog-photos' and auth.uid() = 'ADMIN-UUID'::uuid);
 
 drop policy if exists "Admin atualiza foto" on storage.objects;
 create policy "Admin atualiza foto"
   on storage.objects for update
   to authenticated
-  using (bucket_id = 'dog-photos');
+  using (bucket_id = 'dog-photos' and auth.uid() = 'ADMIN-UUID'::uuid);
 
 drop policy if exists "Admin deleta foto" on storage.objects;
 create policy "Admin deleta foto"
   on storage.objects for delete
   to authenticated
-  using (bucket_id = 'dog-photos');
+  using (bucket_id = 'dog-photos' and auth.uid() = 'ADMIN-UUID'::uuid);
 
 -- ──────────────────────────────────────────────────────────
 -- 4. SEED: dados iniciais dos cães

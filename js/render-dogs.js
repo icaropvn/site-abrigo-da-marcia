@@ -1,3 +1,10 @@
+function safeUrl(url) {
+    try {
+        var u = new URL(url);
+        return (u.protocol === 'https:' || u.protocol === 'http:') ? url : '#';
+    } catch (_) { return '#'; }
+}
+
 function renderDogs(dogs) {
     var catalog = document.getElementById('catalog');
     if (!catalog) return;
@@ -34,7 +41,7 @@ function renderDogs(dogs) {
 
         var adoptLink = document.createElement('a');
         adoptLink.className = 'catalog-card-button';
-        adoptLink.href = dog.formUrl;
+        adoptLink.href = safeUrl(dog.formUrl);
         adoptLink.target = '_blank';
         adoptLink.rel = 'noopener noreferrer';
         adoptLink.textContent = 'Quero adotar';
