@@ -668,6 +668,23 @@ tbody tr:hover td {
     tbody td:nth-child(3),
     thead th:nth-child(4),
     tbody td:nth-child(4) { display: none; }
+
+    /* Stats: 2 colunas, com o card de total ocupando a linha inteira */
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stats-grid .stat-card:first-child { grid-column: 1 / -1; }
+
+    /* Tabela compacta + ações empilhadas (sem corte horizontal) */
+    .table-wrap { overflow-x: auto; }
+    thead th, tbody td { padding: 12px 10px; }
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        min-width: 104px;
+    }
+    .actions > .btn { width: 100%; justify-content: center; }
+    .btn-group { display: flex; width: 100%; }
+    .btn-group .btn { flex: 1; justify-content: center; padding: 8px 6px; }
 }
 
 /* ─── Theme toggle (claro/escuro) ─── */
