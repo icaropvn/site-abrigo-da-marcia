@@ -393,8 +393,8 @@ tbody tr:hover td {
 .actions-col > .btn-group-vert,
 .actions-col > .btn-revert { flex: 1; }
 
-.btn-edit             { background: #e8eaed; color: var(--dark); }
-.btn-edit:hover       { background: #dce0e4; }
+.btn-edit             { background: #e4e7eb; color: #1f2937; }
+.btn-edit:hover       { background: #d5d9df; }
 .actions-col .btn-danger        { background: var(--red); }
 .actions-col .btn-danger:hover  { background: #db4a45; }
 .btn-revert           { background: var(--success); color: #fff; }
@@ -410,8 +410,8 @@ tbody tr:hover td {
 .btn-group-vert .btn      { border-radius: 0; flex: 1; }
 .btn-adopt                { background: var(--success); color: #fff; }
 .btn-adopt:hover          { background: #1faa4e; }
-.btn-deceased-opt         { background: #eceef0; color: var(--gray); }
-.btn-deceased-opt:hover   { background: #e2e5e8; }
+.btn-deceased-opt         { background: #6b7280; color: #fff; }
+.btn-deceased-opt:hover   { background: #5b626c; }
 
 /* ─── Status badges ─── */
 .badge {
@@ -703,10 +703,14 @@ tbody tr:hover td {
     .modal-box          { padding: 24px 20px; }
     .admin-email        { display: none; }
     .admin-header h1    { display: none; }
-    /* Só Foto, Nome e Ações no mobile (Gênero/Porte, Idade e Status ocultos) */
-    thead th:nth-child(3), tbody td:nth-child(3),
-    thead th:nth-child(4), tbody td:nth-child(4),
-    thead th:nth-child(5), tbody td:nth-child(5) { display: none; }
+    /* Cães (6 col): só Foto, Nome e Ações (Gênero/Porte, Idade e Status ocultos) */
+    .t-dogs thead th:nth-child(3), .t-dogs tbody td:nth-child(3),
+    .t-dogs thead th:nth-child(4), .t-dogs tbody td:nth-child(4),
+    .t-dogs thead th:nth-child(5), .t-dogs tbody td:nth-child(5) { display: none; }
+
+    /* Histórias (5 col): só Foto, Cão e Ações (Fotos e Destaque ocultos) */
+    .t-stories thead th:nth-child(3), .t-stories tbody td:nth-child(3),
+    .t-stories thead th:nth-child(4), .t-stories tbody td:nth-child(4) { display: none; }
 
     /* Stats da página de cães (5 cards): total ocupa a linha inteira;
        demais 2 colunas, rótulo à esquerda e número à direita. */
@@ -735,6 +739,10 @@ tbody tr:hover td {
     .actions-col { flex: 1 1 0; gap: 6px; min-width: 0; max-width: 100px; }
     .actions-col .btn { padding: 12px 4px; font-size: 11px; gap: 3px; white-space: nowrap; }
     .actions-col .btn svg { width: 14px; height: 14px; }
+
+    /* Histórias: Editar/Remover empilhados, alvo de toque alto */
+    .t-stories .actions { flex-direction: column; gap: 6px; align-items: stretch; max-width: 108px; margin-left: auto; }
+    .t-stories .actions .btn { width: 100%; padding: 12px 8px; font-size: 12px; white-space: nowrap; }
 }
 
 /* ─── Theme toggle (claro/escuro) ─── */
@@ -801,8 +809,8 @@ tbody tr:hover td {
 [data-theme="dark"] .admin-nav a:hover,
 [data-theme="dark"] .theme-toggle:hover { background: #262830; }
 [data-theme="dark"] .admin-header img        { filter: none; }
-[data-theme="dark"] .btn-edit                { background: #363842; color: var(--dark); }
-[data-theme="dark"] .btn-edit:hover          { background: #40434d; }
+[data-theme="dark"] .btn-edit                { background: #e4e7eb; color: #1f2937; }
+[data-theme="dark"] .btn-edit:hover          { background: #d5d9df; }
 [data-theme="dark"] .btn-deceased-opt        { background: #2a2c34; color: #9aa0aa; }
 [data-theme="dark"] .btn-deceased-opt:hover  { background: #34363f; }
 [data-theme="dark"] .badge-deceased { background: #2a2c34; color: #9aa0aa; }

@@ -56,7 +56,7 @@
         </div>
 
         <div class="table-wrap">
-            <table>
+            <table class="t-stories">
                 <thead>
                     <tr>
                         <th>Foto</th>
@@ -221,7 +221,7 @@
                     <td>${story.featured ? '⭐' : '—'}</td>
                     <td>
                         <div class="actions">
-                            <button class="btn btn-ghost btn-sm js-edit" data-id="${esc(story.id)}">Editar</button>
+                            <button class="btn btn-edit btn-sm js-edit" data-id="${esc(story.id)}">Editar</button>
                             <button class="btn btn-danger btn-sm js-delete" data-id="${esc(story.id)}" data-name="${esc(story.dog_name)}">Remover</button>
                         </div>
                     </td>`;
