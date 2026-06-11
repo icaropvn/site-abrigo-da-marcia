@@ -11,7 +11,7 @@
             document.documentElement.setAttribute('data-theme', t);
         })();
     </script>
-    <link rel="stylesheet" href="../../styles/admin.css?v=5">
+    <link rel="stylesheet" href="../../styles/admin.css?v=6">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
 </head>
@@ -185,7 +185,7 @@
     <!-- ── Confirm delete ── -->
     <div class="confirm-overlay" id="confirm-overlay">
         <div class="confirm-box">
-            <h3>Remover cão?</h3>
+            <h3 id="confirm-title">Remover cão?</h3>
             <p id="confirm-msg">Esta ação não pode ser desfeita.</p>
             <div class="confirm-actions">
                 <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
@@ -200,12 +200,20 @@
         const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let allDogs = [];
-        let pendingDeleteId = null;
+        let pendingAction = null; // { type: 'adopt'|'deceased'|'revert'|'delete', id }
         let editingId = null;
         let showArchived = false;
         let photoItems = []; // { url: string|null, file: File|null, preview: string }
 
         const MAX_PHOTOS = 5;
+
+        // Ícones inline (herdam a cor do botão via currentColor)
+        const ICON = {
+            edit:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942"/></svg>',
+            trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9"/><path d="M21 6L15.375 6M3 6L8.625 6M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6L15.375 6"/></svg>',
+            home:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 18V15C10 13.8954 10.8954 13 12 13C13.1046 13 14 13.8954 14 15V18"/><path d="M2 8L11.7317 3.13416C11.9006 3.04971 12.0994 3.0497 12.2683 3.13416L22 8"/><path d="M20 11V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V11"/></svg>',
+            eye:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 16L17.0248 12.6038"/><path d="M12 17.5V14"/><path d="M4.5 16L6.96895 12.6124"/><path d="M3 8C6.6 16 17.4 16 21 8"/></svg>'
+        };
 
         const CURRENT_YEAR = new Date().getFullYear();
         document.getElementById('f-birth-year').max = CURRENT_YEAR;
@@ -292,32 +300,36 @@
                 const inactive = isInactive(dog);
                 const tr       = document.createElement('tr');
                 if (inactive) tr.className = 'row-inactive';
-                const inactiveBadge = dog.status === 'deceased'
-                    ? '<span class="badge badge-deceased">Falecido</span>'
-                    : '';
-                const actionBtns = inactive
-                    ? `<button class="btn btn-ghost btn-sm js-edit" data-id="${esc(dog.id)}">Editar</button>`
-                    : `<button class="btn btn-ghost btn-sm js-edit" data-id="${esc(dog.id)}">Editar</button>
-                       <div class="btn-group">
-                           <button class="btn btn-adopt js-set-adopted" data-id="${esc(dog.id)}">Adotado</button>
-                           <button class="btn btn-deceased-opt js-set-deceased" data-id="${esc(dog.id)}">Falecido</button>
+                const badge = `<span class="badge badge-${esc(dog.status)}">${esc(statusLabel[dog.status] || dog.status)}</span>`;
+                const statusCol = inactive
+                    ? `<button class="btn btn-revert js-set-revert" data-id="${esc(dog.id)}" data-name="${esc(dog.name)}">${ICON.home}<span>Disponibilizar</span></button>`
+                    : `<div class="btn-group-vert">
+                           <button class="btn btn-adopt js-set-adopted" data-id="${esc(dog.id)}" data-name="${esc(dog.name)}">${ICON.home}<span>Adotado</span></button>
+                           <button class="btn btn-deceased-opt js-set-deceased" data-id="${esc(dog.id)}" data-name="${esc(dog.name)}">${ICON.eye}<span>Falecido</span></button>
                        </div>`;
                 tr.innerHTML = `
                     <td>
-                        ${imgSrc ? `<img class="dog-thumb" src="${esc(imgSrc)}" alt="${esc(dog.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
-                        <div class="dog-no-img" style="display:${imgSrc ? 'none' : 'flex'}">🐶</div>
+                        <div class="dog-photo s-${esc(dog.status)}">
+                            ${imgSrc ? `<img class="dog-thumb" src="${esc(imgSrc)}" alt="${esc(dog.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+                            <div class="dog-no-img" style="display:${imgSrc ? 'none' : 'flex'}">🐶</div>
+                            <span class="dog-photo-status">${badge}</span>
+                        </div>
                     </td>
                     <td>
                         <strong>${esc(dog.name)}</strong>${dog.featured ? ' ⭐' : ''}
-                        ${inactiveBadge}
                     </td>
                     <td>${esc(dog.gender)} · ${esc(dog.size)}</td>
                     <td>${esc(age)}</td>
-                    <td><span class="badge badge-${esc(dog.status)}">${esc(statusLabel[dog.status] || dog.status)}</span></td>
+                    <td>${badge}</td>
                     <td>
                         <div class="actions">
-                            ${actionBtns}
-                            <button class="btn btn-danger btn-sm js-delete" data-id="${esc(dog.id)}" data-name="${esc(dog.name)}">Remover</button>
+                            <div class="actions-col">
+                                <button class="btn btn-edit js-edit" data-id="${esc(dog.id)}">${ICON.edit}<span>Editar</span></button>
+                                <button class="btn btn-danger js-delete" data-id="${esc(dog.id)}" data-name="${esc(dog.name)}">${ICON.trash}<span>Remover</span></button>
+                            </div>
+                            <div class="actions-col">
+                                ${statusCol}
+                            </div>
                         </div>
                     </td>`;
                 tbody.appendChild(tr);
@@ -344,29 +356,23 @@
         }
 
         // ── Table action delegation ──────────────────────────────
-        document.getElementById('dogs-tbody').addEventListener('click', async function(e) {
+        document.getElementById('dogs-tbody').addEventListener('click', function(e) {
             const editBtn     = e.target.closest('.js-edit');
             const adoptedBtn  = e.target.closest('.js-set-adopted');
             const deceasedBtn = e.target.closest('.js-set-deceased');
+            const revertBtn   = e.target.closest('.js-set-revert');
             const deleteBtn   = e.target.closest('.js-delete');
             if (editBtn) {
                 const dog = allDogs.find(d => d.id === editBtn.dataset.id);
                 if (dog) openModal(dog);
             } else if (adoptedBtn) {
-                adoptedBtn.disabled = true;
-                const { error } = await sb.from('dogs').update({ status: 'adopted' }).eq('id', adoptedBtn.dataset.id);
-                if (error) { alert('Erro: ' + error.message); }
-                await loadDogs();
+                askConfirm('adopt', adoptedBtn.dataset.id, adoptedBtn.dataset.name);
             } else if (deceasedBtn) {
-                deceasedBtn.disabled = true;
-                const { error } = await sb.from('dogs').update({ status: 'deceased' }).eq('id', deceasedBtn.dataset.id);
-                if (error) { alert('Erro: ' + error.message); }
-                await loadDogs();
+                askConfirm('deceased', deceasedBtn.dataset.id, deceasedBtn.dataset.name);
+            } else if (revertBtn) {
+                askConfirm('revert', revertBtn.dataset.id, revertBtn.dataset.name);
             } else if (deleteBtn) {
-                pendingDeleteId = deleteBtn.dataset.id;
-                document.getElementById('confirm-msg').textContent =
-                    'Remover "' + deleteBtn.dataset.name + '" permanentemente? Esta ação não pode ser desfeita.';
-                document.getElementById('confirm-overlay').classList.add('open');
+                askConfirm('delete', deleteBtn.dataset.id, deleteBtn.dataset.name);
             }
         });
 
@@ -596,20 +602,48 @@
             el.className    = `alert alert-${type} show`;
         }
 
-        // ── Delete ───────────────────────────────────────────────
-        document.getElementById('confirm-cancel').addEventListener('click', function() {
+        // ── Confirmação (adotar / falecer / disponibilizar / remover) ──
+        const CONFIRM_CFG = {
+            adopt:    { title: 'Marcar como adotado?',  msg: n => `Confirmar que "${n}" foi adotado? Ele sairá do catálogo público.`,    ok: 'Confirmar adoção', cls: 'btn-success'   },
+            deceased: { title: 'Marcar como falecido?', msg: n => `Registrar o falecimento de "${n}"? Ele sairá do catálogo público.`,   ok: 'Confirmar',        cls: 'btn-secondary' },
+            revert:   { title: 'Disponibilizar cão?',   msg: n => `Tornar "${n}" disponível novamente? Ele voltará ao catálogo público.`, ok: 'Disponibilizar',   cls: 'btn-success'   },
+            delete:   { title: 'Remover cão?',          msg: n => `Remover "${n}" permanentemente? Esta ação não pode ser desfeita.`,     ok: 'Remover',          cls: 'btn-danger'    }
+        };
+
+        function askConfirm(type, id, name) {
+            pendingAction = { type: type, id: id };
+            const cfg = CONFIRM_CFG[type];
+            document.getElementById('confirm-title').textContent = cfg.title;
+            document.getElementById('confirm-msg').textContent   = cfg.msg(name || 'este cão');
+            const okBtn = document.getElementById('confirm-ok');
+            okBtn.textContent = cfg.ok;
+            okBtn.className   = 'btn ' + cfg.cls;
+            document.getElementById('confirm-overlay').classList.add('open');
+        }
+
+        function closeConfirm() {
             document.getElementById('confirm-overlay').classList.remove('open');
-            pendingDeleteId = null;
-        });
+            pendingAction = null;
+        }
+
+        document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
 
         document.getElementById('confirm-ok').addEventListener('click', async function() {
-            if (!pendingDeleteId) return;
+            if (!pendingAction) return;
+            const action = pendingAction;
+            pendingAction = null;
             document.getElementById('confirm-overlay').classList.remove('open');
 
-            const { error } = await sb.from('dogs').delete().eq('id', pendingDeleteId);
-            pendingDeleteId = null;
-
-            if (error) { alert('Erro ao remover: ' + error.message); return; }
+            let error;
+            if (action.type === 'delete') {
+                ({ error } = await sb.from('dogs').delete().eq('id', action.id));
+            } else {
+                const newStatus = action.type === 'adopt'    ? 'adopted'
+                                : action.type === 'deceased' ? 'deceased'
+                                :                              'available';
+                ({ error } = await sb.from('dogs').update({ status: newStatus }).eq('id', action.id));
+            }
+            if (error) { alert('Erro: ' + error.message); return; }
             await loadDogs();
         });
 
@@ -617,7 +651,7 @@
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeModal();
-                    document.getElementById('confirm-overlay').classList.remove('open');
+                    closeConfirm();
                 }
             });
         }

@@ -219,6 +219,8 @@ body {
 
 .admin-header img {
     height: 40px;
+    /* logo é branca → preta no modo claro, branca no escuro */
+    filter: brightness(0);
 }
 
 .admin-header h1 {
@@ -345,35 +347,71 @@ tbody tr:hover td {
     font-size: 20px;
 }
 
+/* Foto com anel colorido por status + selo sobreposto (selo só no mobile) */
+.dog-photo {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+.dog-photo .dog-photo-status {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    line-height: normal;
+}
+.dog-photo .dog-photo-status .badge { font-size: 10px; padding: 2px 7px; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.dog-photo.s-available .dog-thumb, .dog-photo.s-available .dog-no-img { box-shadow: 0 0 0 2px var(--success); }
+.dog-photo.s-pending   .dog-thumb, .dog-photo.s-pending   .dog-no-img { box-shadow: 0 0 0 2px var(--warning); }
+.dog-photo.s-adopted   .dog-thumb, .dog-photo.s-adopted   .dog-no-img { box-shadow: 0 0 0 2px var(--red); }
+.dog-photo.s-deceased  .dog-thumb, .dog-photo.s-deceased  .dog-no-img { box-shadow: 0 0 0 2px #9ca3af; }
+
+/* ─── Action buttons (Editar / Remover / Adotado / Falecido) ─── */
 .actions {
     display: flex;
     gap: 8px;
-    align-items: center;
+    align-items: stretch;
 }
+.actions-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+.actions-col .btn {
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    width: 100%;
+    text-align: center;
+}
+.actions-col .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.actions-col .btn span { line-height: 1; }
+.actions-col > .btn-group-vert,
+.actions-col > .btn-revert { flex: 1; }
 
-/* ─── Segmented / mutually exclusive button group ─── */
-.btn-group {
-    display: inline-flex;
-    border: 1.5px solid var(--border);
+.btn-edit             { background: #e8eaed; color: var(--dark); }
+.btn-edit:hover       { background: #dce0e4; }
+.actions-col .btn-danger        { background: var(--red); }
+.actions-col .btn-danger:hover  { background: #db4a45; }
+.btn-revert           { background: var(--success); color: #fff; }
+.btn-revert:hover     { background: #1faa4e; }
+
+/* Grupo segmentado vertical Adotado / Falecido */
+.btn-group-vert {
+    display: flex;
+    flex-direction: column;
     border-radius: 8px;
     overflow: hidden;
 }
-
-.btn-group .btn {
-    border-radius: 0;
-    border: none;
-    border-right: 1.5px solid var(--border);
-    font-size: 12px;
-    padding: 5px 10px;
-    background: transparent;
-}
-
-.btn-group .btn:last-child { border-right: none; }
-
-.btn-group .btn-adopt   { color: #16a34a; }
-.btn-group .btn-adopt:hover   { background: #f0fdf4; }
-.btn-group .btn-deceased-opt  { color: #6b7280; }
-.btn-group .btn-deceased-opt:hover { background: #f3f4f6; }
+.btn-group-vert .btn      { border-radius: 0; flex: 1; }
+.btn-adopt                { background: var(--success); color: #fff; }
+.btn-adopt:hover          { background: #1faa4e; }
+.btn-deceased-opt         { background: #eceef0; color: var(--gray); }
+.btn-deceased-opt:hover   { background: #e2e5e8; }
 
 /* ─── Status badges ─── */
 .badge {
@@ -533,6 +571,7 @@ tbody tr:hover td {
 /* ─── Archive (adopted / deceased) ─── */
 .btn-warning       { background: var(--warning); color: #fff; }
 .btn-success       { background: var(--success); color: #fff; }
+.btn-secondary     { background: #6b7280; color: #fff; }
 .badge-deceased    { background: #f3f4f6; color: #6b7280; }
 .row-inactive td   { opacity: .45; }
 .row-inactive:hover td { opacity: .7; }
@@ -664,27 +703,38 @@ tbody tr:hover td {
     .modal-box          { padding: 24px 20px; }
     .admin-email        { display: none; }
     .admin-header h1    { display: none; }
-    thead th:nth-child(3),
-    tbody td:nth-child(3),
-    thead th:nth-child(4),
-    tbody td:nth-child(4) { display: none; }
+    /* Só Foto, Nome e Ações no mobile (Gênero/Porte, Idade e Status ocultos) */
+    thead th:nth-child(3), tbody td:nth-child(3),
+    thead th:nth-child(4), tbody td:nth-child(4),
+    thead th:nth-child(5), tbody td:nth-child(5) { display: none; }
 
-    /* Stats: 2 colunas, com o card de total ocupando a linha inteira */
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .stats-grid .stat-card:first-child { grid-column: 1 / -1; }
-
-    /* Tabela compacta + ações empilhadas (sem corte horizontal) */
-    .table-wrap { overflow-x: auto; }
-    thead th, tbody td { padding: 12px 10px; }
-    .actions {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        min-width: 104px;
+    /* Stats da página de cães (5 cards): total ocupa a linha inteira;
+       demais 2 colunas, rótulo à esquerda e número à direita. */
+    .stats-grid:has(.stat-card:nth-child(5)) { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stats-grid:has(.stat-card:nth-child(5)) .stat-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
     }
-    .actions > .btn { width: 100%; justify-content: center; }
-    .btn-group { display: flex; width: 100%; }
-    .btn-group .btn { flex: 1; justify-content: center; padding: 8px 6px; }
+    .stats-grid:has(.stat-card:nth-child(5)) .stat-card .stat-value { font-size: 28px; order: 2; }
+    .stats-grid:has(.stat-card:nth-child(5)) .stat-card .stat-label { margin-top: 0; font-size: 14px; order: 1; }
+    .stats-grid:has(.stat-card:nth-child(5)) .stat-card:first-child { grid-column: 1 / -1; padding: 20px 22px; }
+    .stats-grid:has(.stat-card:nth-child(5)) .stat-card:first-child .stat-value { font-size: 40px; }
+    .stats-grid:has(.stat-card:nth-child(5)) .stat-card:first-child .stat-label { font-size: 16px; }
+
+    /* Tabela compacta + status como selo sobre a foto */
+    .table-wrap { overflow-x: auto; }
+    thead th, tbody td { padding: 12px 8px; }
+    tbody td:first-child { padding: 12px 8px 16px; }
+    .dog-photo .dog-photo-status { display: block; }
+
+    /* Ações em grade 2×2, colunas compactas (largura limitada p/ não inchar) */
+    .actions { gap: 6px; justify-content: flex-end; }
+    .actions-col { flex: 1 1 0; gap: 6px; min-width: 0; max-width: 100px; }
+    .actions-col .btn { padding: 7px 4px; font-size: 11px; gap: 3px; white-space: nowrap; }
+    .actions-col .btn svg { width: 14px; height: 14px; }
 }
 
 /* ─── Theme toggle (claro/escuro) ─── */
@@ -750,6 +800,9 @@ tbody tr:hover td {
 [data-theme="dark"] .form-group textarea::placeholder { color: #6b7079; }
 [data-theme="dark"] .admin-nav a:hover,
 [data-theme="dark"] .theme-toggle:hover { background: #262830; }
-[data-theme="dark"] .btn-group .btn-adopt:hover        { background: rgba(34,197,94,.18); }
-[data-theme="dark"] .btn-group .btn-deceased-opt:hover { background: rgba(255,255,255,.08); }
+[data-theme="dark"] .admin-header img        { filter: none; }
+[data-theme="dark"] .btn-edit                { background: #363842; color: var(--dark); }
+[data-theme="dark"] .btn-edit:hover          { background: #40434d; }
+[data-theme="dark"] .btn-deceased-opt        { background: #2a2c34; color: #9aa0aa; }
+[data-theme="dark"] .btn-deceased-opt:hover  { background: #34363f; }
 [data-theme="dark"] .badge-deceased { background: #2a2c34; color: #9aa0aa; }
