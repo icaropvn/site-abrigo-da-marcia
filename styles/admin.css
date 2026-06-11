@@ -733,7 +733,7 @@ tbody tr:hover td {
     /* Ações em grade 2×2, colunas compactas (largura limitada p/ não inchar) */
     .actions { gap: 6px; justify-content: flex-end; }
     .actions-col { flex: 1 1 0; gap: 6px; min-width: 0; max-width: 100px; }
-    .actions-col .btn { padding: 7px 4px; font-size: 11px; gap: 3px; white-space: nowrap; }
+    .actions-col .btn { padding: 12px 4px; font-size: 11px; gap: 3px; white-space: nowrap; }
     .actions-col .btn svg { width: 14px; height: 14px; }
 }
 
