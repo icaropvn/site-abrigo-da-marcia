@@ -790,6 +790,22 @@ main .catalog-card {
     text-align: justify;
 }
 
+/* Link "Quero adotar" do modal — replica o visual do link do modal de Histórias
+   (o modal fica fora de <main>, então a regra main .catalog-card-button não o alcança) */
+#modal-dog-button {
+    align-self: flex-start;
+    color: var(--vermelhoPrincipal);
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.1s ease-out;
+}
+
+#modal-dog-button:hover { color: var(--pretoPrincipal); }
+
+[data-theme="dark"] #modal-dog-button:hover { color: #fff; }
+
 /* ========= MEDIA QUERIES DE TELA ========= */
 
 

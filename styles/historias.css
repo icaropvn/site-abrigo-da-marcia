@@ -82,6 +82,7 @@ main #stories-list {
 
 #stories-list .story-card-desc {
     margin: 15px 0 20px 0;
+    font-size: 15px;
     line-height: 1.5;
     text-align: left;
     display: -webkit-box;
@@ -263,6 +264,7 @@ main #stories-list {
 
 /* ── Dark mode ── */
 [data-theme="dark"] .story-modal-content { background-color: #1e1e1e; }
+[data-theme="dark"] .story-modal-back:hover { color: #fff; }
 [data-theme="dark"] #story-modal-text { color: #e8e8e8; }
 [data-theme="dark"] .story-modal-media .story-slide img { background-color: #1a1a1a; }
 

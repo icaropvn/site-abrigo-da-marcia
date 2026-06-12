@@ -379,6 +379,7 @@ tbody tr:hover td {
     flex-direction: column;
     gap: 8px;
     min-width: 0;
+    flex: 0 0 160px;
 }
 .actions-col .btn {
     justify-content: center;
