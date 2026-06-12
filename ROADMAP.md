@@ -2205,7 +2205,7 @@ Coletar o mínimo, informar a finalidade e **excluir de verdade** os dados de ev
 | 5 | SEO meta tags + sitemap.xml + robots.txt | ✅ Concluído |
 | 5 | Analytics | Pronto para implementar |
 | 6 | Schema eventos/reservas + RLS + RPC (`supabase/eventos-schema.sql`) | 🚧 Aguardando execução no Supabase |
-| 6 | Página pública de eventos (rifa + PIX QR Code) | 🔜 Planejado |
+| 6 | Página pública de eventos (rifa + PIX QR Code) | 🚧 Implementado — pendente teste com schema executado |
 | 6 | Admin — eventos, reservas, totais, CSV | 🔜 Planejado |
 | 6 | Tela de sorteio | 🔜 Planejado |
 | 6 | Venda de produtos (variações configuráveis) | 🔜 Planejado (após rifa) |

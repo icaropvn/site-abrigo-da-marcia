@@ -1,0 +1,556 @@
+/* ========= EVENTOS DO ABRIGO — página dedicada ========= */
+/* Carrega junto de catalogo.css (header, footer, menu, theme-toggle).
+   Evento ativo (cabeçalho + grade da rifa + modal de reserva com PIX)
+   e histórico de eventos anteriores. */
+
+.events-empty {
+    text-align: center;
+    color: var(--cinzaFooter, #868686);
+    font-size: 22px;
+    width: 100%;
+    margin-top: 40px;
+}
+
+/* ── Cabeçalho do evento ativo ── */
+main .event-header {
+    margin-top: 50px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--brancoPrincipal);
+    box-shadow: 0 0 20px 2px #0000002c;
+}
+
+main .event-cover {
+    width: 100%;
+    max-height: 340px;
+    object-fit: cover;
+    display: block;
+}
+
+main .event-info {
+    padding: 30px 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+main .event-info h2 {
+    font-size: 42px;
+    line-height: 1.1;
+    color: var(--vermelhoPrincipal);
+    margin: 0;
+}
+
+main .event-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+main .event-tags span {
+    background-color: var(--vermelhoBackgroundTags);
+    color: var(--vermelhoPrincipal);
+    padding: 5px 14px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+main .event-description {
+    font-size: 18px;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-line;
+}
+
+main .event-prize {
+    font-size: 18px;
+    text-align: left;
+}
+
+/* Barra de progresso da meta */
+main .event-goal {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+main .event-goal-bar {
+    width: 100%;
+    height: 14px;
+    border-radius: 7px;
+    background-color: #e3e3e3;
+    overflow: hidden;
+}
+
+main .event-goal-fill {
+    height: 100%;
+    border-radius: 7px;
+    background-color: var(--amareloDestaque);
+    transition: width 0.6s ease-out;
+}
+
+main .event-goal-text {
+    font-size: 15px;
+    color: var(--cinzaFooter);
+}
+
+/* Galeria de divulgação */
+main .event-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 35px 30px 35px;
+}
+
+main .event-gallery img {
+    width: 140px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ── Grade da rifa ── */
+main .raffle-section {
+    margin-top: 50px;
+}
+
+main .raffle-section h3 {
+    font-size: 32px;
+    color: var(--pretoPrincipal);
+    margin-bottom: 14px;
+}
+
+main .raffle-winner {
+    background-color: var(--amareloDestaque);
+    color: #3d2a00;
+    font-size: 22px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 30px;
+}
+
+main .raffle-legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    font-size: 15px;
+}
+
+main .raffle-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+main .raffle-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+main .raffle-dot-free  { background-color: var(--brancoPrincipal); border: 2px solid var(--vermelhoPrincipal); }
+main .raffle-dot-taken { background-color: var(--vermelhoPrincipal); }
+
+main .raffle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 8px;
+}
+
+main .raffle-cell {
+    min-height: 52px;
+    border: 2px solid var(--vermelhoPrincipal);
+    border-radius: 8px;
+    background-color: var(--brancoPrincipal);
+    color: var(--pretoPrincipal);
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 4px 2px;
+    transition: background-color 0.12s ease-out, transform 0.12s ease-out;
+}
+
+main .raffle-cell:not(:disabled):hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+main .raffle-cell:focus-visible {
+    outline: 3px solid var(--pretoPrincipal);
+    outline-offset: 2px;
+}
+
+main .raffle-cell-number {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+main .raffle-cell-name {
+    font-size: 10px;
+    line-height: 1.1;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+main .raffle-cell.is-taken {
+    background-color: var(--vermelhoPrincipal);
+    border-color: var(--vermelhoPrincipal);
+    color: #fff;
+    cursor: default;
+}
+
+main .raffle-cell:disabled:not(.is-taken) {
+    opacity: 0.45;
+    cursor: default;
+}
+
+main .raffle-cell.is-winner {
+    border-color: var(--amareloDestaque);
+    box-shadow: 0 0 0 3px var(--amareloDestaque);
+}
+
+main .raffle-closed {
+    margin-top: 24px;
+    color: var(--cinzaFooter);
+    font-size: 17px;
+}
+
+main .event-sale-note {
+    margin-top: 40px;
+    font-size: 18px;
+    color: var(--cinzaFooter);
+}
+
+/* ── Histórico de eventos anteriores ── */
+main #past-events {
+    margin-top: 80px;
+}
+
+main #past-events h2 {
+    font-size: 36px;
+    color: var(--pretoPrincipal);
+    margin-bottom: 30px;
+}
+
+main #past-events-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+.past-event-card {
+    width: 300px;
+    max-width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--brancoPrincipal);
+    box-shadow: 0 0 20px 2px #0000002c;
+    display: flex;
+    flex-direction: column;
+}
+
+.past-event-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.past-event-body {
+    padding: 18px 20px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.past-event-name {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--vermelhoPrincipal);
+    line-height: 1.15;
+}
+
+.past-event-period {
+    font-size: 14px;
+    color: var(--cinzaFooter);
+}
+
+.past-event-result {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+/* ── Modal de reserva ── */
+.reserve-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background-color: rgba(0, 0, 0, 0.65);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.reserve-modal-content {
+    background-color: var(--brancoPrincipal);
+    border-radius: 16px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 34px 30px 30px 30px;
+    text-align: left;
+}
+
+.reserve-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease-out;
+}
+
+.reserve-modal-close:hover { background: rgba(0, 0, 0, 0.7); }
+
+.reserve-modal-content h2 {
+    font-size: 30px;
+    color: var(--vermelhoPrincipal);
+    margin: 0 0 6px 0;
+    line-height: 1.1;
+}
+
+#reserve-subtitle {
+    font-size: 16px;
+    color: var(--cinzaFooter);
+    text-align: left;
+    margin-bottom: 18px;
+}
+
+#reserve-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+#reserve-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+#reserve-form input {
+    padding: 11px 12px;
+    border: 1px solid var(--vermelhoPrincipal);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 16px;
+    background-color: #fff;
+    color: var(--pretoPrincipal);
+}
+
+#reserve-form input:focus-visible {
+    outline: 3px solid var(--vermelhoPrincipal);
+    outline-offset: 1px;
+}
+
+/* Honeypot: fora da tela para humanos, visível para bots */
+.hp-field {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+}
+
+.reserve-lgpd {
+    font-size: 13px;
+    color: var(--cinzaFooter);
+    text-align: left;
+    line-height: 1.45;
+}
+
+.reserve-error {
+    background-color: #fdecea;
+    color: #b3261e;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+    text-align: left;
+}
+
+#reserve-submit,
+#reserve-done {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 0;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out;
+    width: 100%;
+}
+
+#reserve-submit:hover,
+#reserve-done:hover { background-color: var(--pretoPrincipal); }
+
+#reserve-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+#reserve-success-summary {
+    font-size: 17px;
+    text-align: left;
+    margin-bottom: 18px;
+}
+
+#pix-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    background-color: #fff;
+    border: 2px dashed var(--vermelhoPrincipal);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 18px;
+}
+
+#pix-box-title {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+#pix-qrcode img,
+#pix-qrcode canvas {
+    border-radius: 6px;
+}
+
+#pix-copy {
+    background: none;
+    border: 2px solid var(--vermelhoPrincipal);
+    color: var(--vermelhoPrincipal);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.12s ease-out;
+}
+
+#pix-copy:hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+#pix-instructions {
+    font-size: 14px;
+    color: var(--cinzaFooter);
+    text-align: center;
+    white-space: pre-line;
+}
+
+.reserve-after-pay {
+    font-size: 14px;
+    color: var(--cinzaFooter);
+    text-align: left;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+/* ── Dark mode ── */
+[data-theme="dark"] main .event-header,
+[data-theme="dark"] .past-event-card,
+[data-theme="dark"] .reserve-modal-content {
+    background-color: #1e1e1e;
+    box-shadow: 0 0 20px 2px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] main .event-description,
+[data-theme="dark"] main .event-prize,
+[data-theme="dark"] .past-event-result,
+[data-theme="dark"] #reserve-success-summary {
+    color: #e8e8e8;
+}
+
+[data-theme="dark"] main .event-goal-bar { background-color: #333; }
+
+[data-theme="dark"] main .raffle-cell {
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+}
+
+[data-theme="dark"] main .raffle-cell.is-taken {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+[data-theme="dark"] main .raffle-dot-free { background-color: #1e1e1e; }
+
+[data-theme="dark"] #reserve-form input {
+    background-color: #2a2a2a;
+    color: #f0f0f0;
+}
+
+[data-theme="dark"] #pix-box { background-color: #2a2a2a; }
+
+[data-theme="dark"] .reserve-error {
+    background-color: #3a1a1a;
+    color: #ffb0ad;
+}
+
+/* ── Mobile ── */
+@media (width < 800px) {
+    main .event-header { margin-top: 30px; }
+    main .event-info { padding: 22px 18px; }
+    main .event-info h2 { font-size: 30px; }
+    main .event-gallery { padding: 0 18px 22px 18px; }
+    main .event-gallery img { width: 105px; height: 76px; }
+
+    main .raffle-section h3 { font-size: 26px; }
+    main .raffle-grid {
+        grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+        gap: 6px;
+    }
+    main .raffle-cell { min-height: 48px; }
+
+    main #past-events { margin-top: 56px; }
+    main #past-events h2 { font-size: 28px; }
+    .past-event-card { width: min(300px, 88vw); }
+
+    .reserve-modal-content { padding: 28px 20px 24px 20px; }
+}
