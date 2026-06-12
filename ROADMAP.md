@@ -2194,9 +2194,9 @@ Coletar o mínimo, informar a finalidade e **excluir de verdade** os dados de ev
 | 3 | Filtros | ✅ Concluído |
 | 3 | Modal de detalhes | ✅ Concluído |
 | 3 | Voluntários | ✅ Concluído |
-| 4 | Backend Express | ✅ Concluído (legacy) |
-| 4 | API de cães | ✅ Concluído (legacy) |
-| 4 | Autenticação | ✅ Concluído (legacy) |
+| 4 | Backend Express | ✅ Concluído (legacy — removido do repo em 2026-06-12, ver histórico do git) |
+| 4 | API de cães | ✅ Concluído (legacy — removido do repo em 2026-06-12) |
+| 4 | Autenticação | ✅ Concluído (legacy — removido do repo em 2026-06-12) |
 | Supabase | Migração de plataforma (Firebase → Supabase) | ✅ Concluído (2026-06-09) |
 | Supabase | schema.sql + RLS + Storage bucket dog-photos | ✅ Concluído |
 | Supabase | render-dogs.js integrado (Supabase → backend → JSON) | ✅ Concluído |

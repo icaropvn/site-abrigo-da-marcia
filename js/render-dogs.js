@@ -131,21 +131,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         } catch (_) {}
     }
 
-    var apiBase = (typeof window !== 'undefined' && window.ABRIGO_API_URL) || 'http://localhost:5000';
-    try {
-        var controller = new AbortController();
-        var timeoutId  = setTimeout(function() { controller.abort(); }, 3000);
-        var apiResponse = await fetch(apiBase + '/api/public/dogs-data', { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (apiResponse.ok) {
-            var apiData = await apiResponse.json();
-            if (apiData.dogs && apiData.dogs.length > 0) {
-                renderDogs(apiData.dogs.map(normalizeDog));
-                return;
-            }
-        }
-    } catch (_) {}
-
+    // Fallback local: dados estáticos quando o Supabase está indisponível.
+    // (O fallback intermediário via backend Express legado foi removido em
+    // 2026-06-12 junto com a pasta backend/ — disponível no histórico do git.)
     try {
         var localResponse = await fetch('../data/dogs.json');
         var localData     = await localResponse.json();
