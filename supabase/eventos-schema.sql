@@ -44,6 +44,8 @@ create table if not exists events (
   payment_instructions text,
   raffle_total_numbers integer     check (raffle_total_numbers is null or raffle_total_numbers between 1 and 10000),
   raffle_number_price  numeric(10,2) check (raffle_number_price is null or raffle_number_price > 0),
+  raffle_max_per_reservation integer not null default 5
+                       check (raffle_max_per_reservation between 1 and 50),  -- nºs por reserva
   raffle_prize         text,
   raffle_winner_number integer     check (raffle_winner_number is null or raffle_winner_number >= 1),
   -- preenchido por purge_event_data() ANTES de deletar as reservas,
@@ -75,6 +77,13 @@ drop trigger if exists events_updated_at on events;
 create trigger events_updated_at
   before update on events
   for each row execute function update_updated_at();
+
+-- Migração: limite de números por reserva na rifa (instalações anteriores
+-- a 2026-06-13). Seguro rodar mais de uma vez.
+alter table events add column if not exists raffle_max_per_reservation integer not null default 5;
+alter table events drop constraint if exists events_raffle_max_check;
+alter table events add constraint events_raffle_max_check
+  check (raffle_max_per_reservation between 1 and 50);
 
 -- ──────────────────────────────────────────────────────────
 -- 2. TABELA: event_products (produtos de eventos de venda)
@@ -244,14 +253,17 @@ create policy "Admin gerencia itens de reserva"
 -- Supabase avisa sobre security definer views; aqui é proposital.
 -- ──────────────────────────────────────────────────────────
 
--- Grade da rifa: número + primeiro nome, nada mais.
--- Número ausente na view = número livre.
-create or replace view raffle_board
+-- Grade da rifa: apenas QUAIS números estão tomados. NUNCA expõe dados
+-- pessoais — páginas públicas não mostram nomes (nem o do ganhador). O
+-- nome do ganhador aparece só na tela de sorteio do admin, durante a
+-- transmissão ao vivo. Número ausente na view = número livre.
+-- (drop + create porque a versão anterior tinha a coluna first_name)
+drop view if exists raffle_board;
+create view raffle_board
 with (security_invoker = off) as
   select
     ri.event_id,
-    ri.raffle_number,
-    split_part(trim(r.customer_name), ' ', 1) as first_name
+    ri.raffle_number
   from reservation_items ri
   join reservations r on r.id = ri.reservation_id
   join events e       on e.id = ri.event_id
@@ -288,7 +300,7 @@ grant select on event_totals to anon, authenticated;
 -- Códigos de erro (mapeados para mensagens amigáveis no JS):
 --   RESERVA_INVALIDA, NOME_INVALIDO, CONTATO_INVALIDO,
 --   ITENS_INVALIDOS, EVENTO_INDISPONIVEL, LIMITE_RESERVAS_HORA,
---   LIMITE_RESERVAS_EVENTO, RIFA_UM_NUMERO, NUMERO_INVALIDO,
+--   LIMITE_RESERVAS_EVENTO, RIFA_LIMITE_NUMEROS, NUMERO_INVALIDO,
 --   NUMERO_INDISPONIVEL, ITEM_INVALIDO, PRODUTO_INVALIDO,
 --   QUANTIDADE_INVALIDA, VARIACAO_INVALIDA
 --
@@ -365,9 +377,11 @@ begin
     raise exception 'LIMITE_RESERVAS_EVENTO';
   end if;
 
-  -- Decisão de produto: na rifa, uma reserva = um número
-  if v_event.type = 'rifa' and jsonb_array_length(p_items) <> 1 then
-    raise exception 'RIFA_UM_NUMERO';
+  -- Rifa: o cliente pode reservar vários números numa só reserva,
+  -- respeitando o limite configurado pelo admin no evento.
+  if v_event.type = 'rifa'
+     and jsonb_array_length(p_items) > coalesce(v_event.raffle_max_per_reservation, 5) then
+    raise exception 'RIFA_LIMITE_NUMEROS';
   end if;
 
   insert into reservations (event_id, customer_name, contact)

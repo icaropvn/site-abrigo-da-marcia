@@ -119,7 +119,13 @@ main .raffle-section {
 main .raffle-section h3 {
     font-size: 32px;
     color: var(--pretoPrincipal);
-    margin-bottom: 14px;
+    margin-bottom: 6px;
+}
+
+main .raffle-hint {
+    font-size: 15px;
+    color: var(--cinzaFooter);
+    margin-bottom: 16px;
 }
 
 main .raffle-winner {
@@ -153,8 +159,9 @@ main .raffle-dot {
     display: inline-block;
 }
 
-main .raffle-dot-free  { background-color: var(--brancoPrincipal); border: 2px solid var(--vermelhoPrincipal); }
-main .raffle-dot-taken { background-color: var(--vermelhoPrincipal); }
+main .raffle-dot-free     { background-color: var(--brancoPrincipal); border: 2px solid var(--vermelhoPrincipal); }
+main .raffle-dot-selected { background-color: var(--vermelhoPrincipal); }
+main .raffle-dot-taken    { background-color: #dcdcdc; border: 2px solid #cfcfcf; opacity: 0.7; }
 
 main .raffle-grid {
     display: grid;
@@ -162,12 +169,13 @@ main .raffle-grid {
     gap: 8px;
 }
 
+/* Disponível: fundo claro, texto vermelho */
 main .raffle-cell {
     min-height: 52px;
     border: 2px solid var(--vermelhoPrincipal);
     border-radius: 8px;
     background-color: var(--brancoPrincipal);
-    color: var(--pretoPrincipal);
+    color: var(--vermelhoPrincipal);
     font-family: inherit;
     cursor: pointer;
     display: flex;
@@ -205,11 +213,45 @@ main .raffle-cell-name {
     white-space: nowrap;
 }
 
-main .raffle-cell.is-taken {
+/* Selecionado pelo usuário (ainda não reservado): fundo vermelho */
+main .raffle-cell.is-selected {
     background-color: var(--vermelhoPrincipal);
     border-color: var(--vermelhoPrincipal);
     color: #fff;
+    font-weight: 700;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(241, 90, 85, 0.45);
+}
+
+main .raffle-cell.is-selected:hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+/* Esmaecido quando o limite por reserva foi atingido */
+main .raffle-cell.is-limited {
+    opacity: 0.4;
     cursor: default;
+}
+main .raffle-cell.is-limited:hover {
+    background-color: var(--brancoPrincipal);
+    color: var(--vermelhoPrincipal);
+    transform: none;
+}
+
+/* Reservado: esmaecido, com a palavra "Reservado" (sem expor quem reservou) */
+main .raffle-cell.is-taken {
+    background-color: #ededed;
+    border-color: #dcdcdc;
+    color: var(--cinzaFooter);
+    opacity: 0.65;
+    cursor: default;
+}
+
+main .raffle-cell.is-taken .raffle-cell-name {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 main .raffle-cell:disabled:not(.is-taken) {
@@ -226,6 +268,104 @@ main .raffle-closed {
     margin-top: 24px;
     color: var(--cinzaFooter);
     font-size: 17px;
+}
+
+/* Espaço extra no rodapé enquanto a barra de seleção está visível,
+   para ela não cobrir as últimas linhas da grade (sobretudo no mobile) */
+body.has-raffle-bar { padding-bottom: 120px; }
+
+/* ── Barra de ação da seleção (fixa no rodapé) ── */
+.raffle-actionbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+    animation: raffle-bar-up 0.2s ease-out;
+}
+
+@keyframes raffle-bar-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+.raffle-actionbar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.raffle-actionbar-info strong { font-size: 16px; }
+
+.raffle-actionbar-nums {
+    font-size: 14px;
+    opacity: 0.9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60vw;
+}
+
+.raffle-actionbar-total { font-size: 15px; font-weight: 700; }
+
+.raffle-actionbar-limit { font-size: 12.5px; opacity: 0.85; }
+
+.raffle-actionbar-buttons {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.raffle-clear,
+.raffle-reserve {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.raffle-clear {
+    background-color: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+.raffle-clear:hover { background-color: rgba(255, 255, 255, 0.3); }
+
+.raffle-reserve {
+    background-color: #fff;
+    color: var(--vermelhoPrincipal);
+}
+.raffle-reserve:hover { background-color: var(--amareloDestaque); color: #3d2a00; }
+
+/* Desktop: barra flutuante centralizada em vez de full-width */
+@media (width >= 800px) {
+    .raffle-actionbar {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        bottom: 24px;
+        max-width: 720px;
+        width: calc(100% - 48px);
+        border-radius: 14px;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    }
+    @keyframes raffle-bar-up {
+        from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+        to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
 }
 
 main .event-sale-note {
@@ -511,15 +651,27 @@ main #past-events-list {
 
 [data-theme="dark"] main .raffle-cell {
     background-color: #1e1e1e;
-    color: #f0f0f0;
+    color: var(--vermelhoPrincipal);
 }
 
-[data-theme="dark"] main .raffle-cell.is-taken {
+[data-theme="dark"] main .raffle-cell.is-selected {
     background-color: var(--vermelhoPrincipal);
     color: #fff;
 }
 
-[data-theme="dark"] main .raffle-dot-free { background-color: #1e1e1e; }
+[data-theme="dark"] main .raffle-cell.is-limited:hover {
+    background-color: #1e1e1e;
+    color: var(--vermelhoPrincipal);
+}
+
+[data-theme="dark"] main .raffle-cell.is-taken {
+    background-color: #262626;
+    border-color: #3a3a3a;
+    color: #8a8a8a;
+}
+
+[data-theme="dark"] main .raffle-dot-free  { background-color: #1e1e1e; }
+[data-theme="dark"] main .raffle-dot-taken { background-color: #3a3a3a; border-color: #4a4a4a; }
 
 [data-theme="dark"] #reserve-form input {
     background-color: #2a2a2a;
@@ -538,10 +690,14 @@ main #past-events-list {
     main .event-header { margin-top: 30px; }
     main .event-info { padding: 22px 18px; }
     main .event-info h2 { font-size: 30px; }
+    main .event-tags span { font-size: 14px; padding: 4px 12px; }
+    main .event-description,
+    main .event-prize { font-size: 16px; }
     main .event-gallery { padding: 0 18px 22px 18px; }
     main .event-gallery img { width: 105px; height: 76px; }
 
     main .raffle-section h3 { font-size: 26px; }
+    main .raffle-winner { font-size: 18px; padding: 14px 16px; }
     main .raffle-grid {
         grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
         gap: 6px;
@@ -552,5 +708,30 @@ main #past-events-list {
     main #past-events h2 { font-size: 28px; }
     .past-event-card { width: min(300px, 88vw); }
 
-    .reserve-modal-content { padding: 28px 20px 24px 20px; }
+    /* Modal de reserva: aproveita melhor a tela pequena */
+    .reserve-modal { padding: 12px; }
+    .reserve-modal-content { padding: 28px 20px 24px 20px; max-height: 94vh; }
+    .reserve-modal-content h2 { font-size: 26px; }
+
+    /* Textos do checkout (reserva + PIX) um pouco maiores no mobile,
+       para leitura mais confortável */
+    #reserve-subtitle        { font-size: 17px; }
+    #reserve-form label      { font-size: 16px; }
+    .reserve-lgpd            { font-size: 14px; }
+    #reserve-success-summary { font-size: 18px; }
+    #pix-box-title           { font-size: 17px; }
+    #pix-instructions        { font-size: 15px; }
+    .reserve-after-pay       { font-size: 15px; }
+    .reserve-error           { font-size: 16px; }
+
+    /* Alvos de toque generosos no fluxo de pagamento */
+    #pix-copy { width: 100%; padding: 13px 18px; font-size: 17px; }
+
+    /* Barra de seleção: info em cima, botões dividindo a linha de baixo */
+    .raffle-actionbar { padding: 12px 16px; gap: 10px; }
+    .raffle-actionbar-info { flex: 1 1 100%; }
+    .raffle-actionbar-nums { max-width: 100%; }
+    .raffle-actionbar-buttons { flex: 1 1 100%; }
+    .raffle-clear { flex: 0 0 auto; }
+    .raffle-reserve { flex: 1; }
 }

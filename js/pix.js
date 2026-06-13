@@ -65,5 +65,49 @@
         return payload + crc16(payload);
     }
 
-    window.PixBRCode = { buildPayload: buildPayload };
+    /**
+     * Reescreve (ou insere) o campo 54 — valor da transação — em um
+     * payload pronto (ex: copia-e-cola do PagSeguro) e recalcula o CRC.
+     * Assim o app do banco já abre com o valor da reserva preenchido.
+     * Payload malformado é devolvido intacto (melhor sem valor que quebrado).
+     * @param {string} payload Copia-e-cola original
+     * @param {number} amount  Valor em reais
+     * @returns {string} payload com o valor, ou o original em caso de erro
+     */
+    function setAmount(payload, amount) {
+        payload = String(payload || '').trim();
+        if (!payload || !(amount > 0)) return payload;
+
+        // Decompõe o TLV de primeiro nível (ID 2 dígitos + tam. 2 dígitos + valor)
+        var fields = [];
+        var i = 0;
+        while (i + 4 <= payload.length) {
+            var id  = payload.slice(i, i + 2);
+            var len = parseInt(payload.slice(i + 2, i + 4), 10);
+            if (!/^\d\d$/.test(id) || isNaN(len) || i + 4 + len > payload.length) return payload;
+            fields.push({ id: id, value: payload.slice(i + 4, i + 4 + len) });
+            i += 4 + len;
+        }
+        if (i !== payload.length) return payload;
+
+        var value = Number(amount).toFixed(2);
+        var has54 = fields.some(function(f) { return f.id === '54'; });
+        var out = '';
+        var inserted = false;
+        for (var k = 0; k < fields.length; k++) {
+            var f = fields[k];
+            if (f.id === '63') continue;                       // CRC antigo sai
+            if (f.id === '54') { f.value = value; inserted = true; }
+            if (!has54 && !inserted && Number(f.id) > 54) {    // insere na posição padrão
+                out += emv('54', value);
+                inserted = true;
+            }
+            out += emv(f.id, f.value);
+        }
+        if (!inserted) out += emv('54', value);
+        out += '6304';
+        return out + crc16(out);
+    }
+
+    window.PixBRCode = { buildPayload: buildPayload, setAmount: setAmount };
 })();

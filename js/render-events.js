@@ -47,7 +47,8 @@
         'EVENTO_INDISPONIVEL':    'Este evento não está mais recebendo reservas.',
         'NOME_INVALIDO':          'Informe seu nome completo (mínimo 2 letras).',
         'CONTATO_INVALIDO':       'Informe um telefone ou e-mail válido.',
-        'NUMERO_INVALIDO':        'Número inválido para esta rifa. Recarregue a página e tente novamente.'
+        'NUMERO_INVALIDO':        'Número inválido para esta rifa. Recarregue a página e tente novamente.',
+        'RIFA_LIMITE_NUMEROS':    'Você selecionou números demais para uma única reserva. Reduza a quantidade.'
     };
 
     function friendlyError(err) {
@@ -173,16 +174,34 @@
             info.appendChild(prize);
         }
 
-        // Barra de progresso da meta (meta pode ser ultrapassada)
-        if (ev.goal_amount && totals) {
-            var raised  = Number(totals.amount_reserved || 0);
-            var percent = Math.min(100, Math.round((raised / Number(ev.goal_amount)) * 100));
+        // Barra de progresso — rifa: números vendidos (valores arrecadados
+        // não são expostos ao público); venda: arrecadação da meta
+        if (ev.type === 'rifa' && totals && ev.raffle_total_numbers) {
+            var sold    = Number(totals.items_sold || 0);
+            var percent = Math.min(100, Math.round((sold / ev.raffle_total_numbers) * 100));
+            var text;
+            if (sold === 0) {
+                text = 'Todos os ' + ev.raffle_total_numbers + ' números estão disponíveis!';
+            } else if (sold === 1) {
+                text = 'Já foi vendido 1 dos ' + ev.raffle_total_numbers + ' números!';
+            } else {
+                text = 'Já foram vendidos ' + sold + ' dos ' + ev.raffle_total_numbers + ' números!';
+            }
             var goal = document.createElement('div');
             goal.className = 'event-goal';
             goal.innerHTML =
                 '<div class="event-goal-bar"><div class="event-goal-fill" style="width: ' + percent + '%"></div></div>' +
-                '<span class="event-goal-text">' + formatMoney(raised) + ' arrecadados da meta de ' + formatMoney(ev.goal_amount) + '</span>';
+                '<span class="event-goal-text">' + text + '</span>';
             info.appendChild(goal);
+        } else if (ev.goal_amount && totals) {
+            var raised   = Number(totals.amount_reserved || 0);
+            var percentG = Math.min(100, Math.round((raised / Number(ev.goal_amount)) * 100));
+            var goalEl = document.createElement('div');
+            goalEl.className = 'event-goal';
+            goalEl.innerHTML =
+                '<div class="event-goal-bar"><div class="event-goal-fill" style="width: ' + percentG + '%"></div></div>' +
+                '<span class="event-goal-text">' + formatMoney(raised) + ' arrecadados da meta de ' + formatMoney(ev.goal_amount) + '</span>';
+            info.appendChild(goalEl);
         }
 
         header.appendChild(info);
@@ -208,24 +227,34 @@
         var section = document.createElement('section');
         section.className = 'raffle-section';
 
-        // Banner do número sorteado
+        // Banner do número sorteado — só o número (nenhum dado pessoal
+        // na página pública; o nome do ganhador é anunciado na transmissão)
         if (ev.raffle_winner_number) {
             var winner = document.createElement('div');
             winner.className = 'raffle-winner';
-            var winnerEntry = takenByNumber[ev.raffle_winner_number];
-            winner.textContent = 'Número sorteado: ' + ev.raffle_winner_number +
-                (winnerEntry ? ' — parabéns, ' + winnerEntry.first_name + '!' : '');
+            winner.textContent = 'Número sorteado: ' + ev.raffle_winner_number + ' — parabéns ao ganhador!';
             section.appendChild(winner);
         }
 
         var title = document.createElement('h3');
-        title.textContent = 'Escolha seu número';
+        title.textContent = 'Escolha seus números';
         section.appendChild(title);
+
+        if (clickable) {
+            var hint = document.createElement('p');
+            hint.className = 'raffle-hint';
+            var maxPer = ev.raffle_max_per_reservation || 5;
+            hint.textContent = maxPer > 1
+                ? 'Toque para selecionar até ' + maxPer + ' números e depois toque em "Reservar".'
+                : 'Toque em um número para reservar.';
+            section.appendChild(hint);
+        }
 
         var legend = document.createElement('div');
         legend.className = 'raffle-legend';
         legend.innerHTML =
             '<span><i class="raffle-dot raffle-dot-free"></i> Disponível</span>' +
+            '<span><i class="raffle-dot raffle-dot-selected"></i> Selecionado</span>' +
             '<span><i class="raffle-dot raffle-dot-taken"></i> Reservado</span>';
         section.appendChild(legend);
 
@@ -244,14 +273,15 @@
             if (taken) {
                 cell.classList.add('is-taken');
                 cell.disabled = true;
+                // não revela quem reservou — apenas marca como tomado
                 cell.innerHTML = '<span class="raffle-cell-number">' + n + '</span>' +
-                                 '<span class="raffle-cell-name"></span>';
-                cell.querySelector('.raffle-cell-name').textContent = taken.first_name;
-                cell.title = 'Número ' + n + ' reservado por ' + taken.first_name;
+                                 '<span class="raffle-cell-name">Reservado</span>';
+                cell.title = 'Número ' + n + ' já reservado';
             } else {
                 cell.disabled = !clickable;
                 cell.innerHTML = '<span class="raffle-cell-number">' + n + '</span>';
-                cell.setAttribute('aria-label', 'Reservar número ' + n);
+                cell.setAttribute('aria-label', 'Selecionar número ' + n);
+                cell.setAttribute('aria-pressed', 'false');
             }
             if (ev.raffle_winner_number === n) cell.classList.add('is-winner');
             fragment.appendChild(cell);
@@ -316,15 +346,23 @@
     }
 
     // ── Modal de reserva (rifa) ─────────────────────────────────
-    var modalState = { event: null, number: null };
+    var modalState = { event: null, numbers: [] };
 
-    function openReserveModal(ev, number) {
-        modalState.event  = ev;
-        modalState.number = number;
+    function describeNumbers(numbers) {
+        if (numbers.length === 1) return 'o número ' + numbers[0];
+        return 'os números ' + numbers.join(', ');
+    }
 
-        document.getElementById('reserve-title').textContent = 'Reservar o número ' + number;
+    function openReserveModal(ev, numbers) {
+        modalState.event   = ev;
+        modalState.numbers = numbers.slice();
+
+        var total = numbers.length * Number(ev.raffle_number_price || 0);
+        document.getElementById('reserve-title').textContent =
+            numbers.length === 1 ? 'Reservar o número ' + numbers[0]
+                                  : 'Reservar ' + numbers.length + ' números';
         document.getElementById('reserve-subtitle').textContent =
-            ev.name + ' — ' + formatMoney(ev.raffle_number_price) + ' por número.';
+            ev.name + ' — ' + describeNumbers(numbers) + '. Total: ' + formatMoney(total) + '.';
 
         document.getElementById('reserve-form-step').style.display = '';
         document.getElementById('reserve-success-step').style.display = 'none';
@@ -354,15 +392,22 @@
     }
 
     // Confirmação + PIX (QR Code e copia-e-cola)
-    function showSuccess(ev, number, total) {
+    function showSuccess(ev, numbers, total) {
         document.getElementById('reserve-form-step').style.display = 'none';
         document.getElementById('reserve-success-step').style.display = '';
+        var label = numbers.length === 1
+            ? 'Número ' + numbers[0] + ' reservado'
+            : 'Números ' + numbers.join(', ') + ' reservados';
         document.getElementById('reserve-success-summary').textContent =
-            'Número ' + number + ' reservado em "' + ev.name + '". Valor: ' + formatMoney(total) + '.';
+            label + ' em "' + ev.name + '". Valor: ' + formatMoney(total) + '.';
 
         // pix_payload pronto (ex: PagSeguro) tem prioridade;
         // senão o site monta o BR Code com chave + nome + cidade
         var payload = ev.pix_payload && ev.pix_payload.trim() ? ev.pix_payload.trim() : null;
+        if (payload && window.PixBRCode && PixBRCode.setAmount) {
+            // injeta o valor da reserva para o app do banco pré-preencher
+            payload = PixBRCode.setAmount(payload, Number(total));
+        }
         if (!payload && window.PixBRCode) {
             payload = PixBRCode.buildPayload({
                 key:    ev.pix_key,
@@ -400,9 +445,69 @@
         instructions.style.display = ev.payment_instructions ? '' : 'none';
     }
 
-    function setupReserveModal(reloadGrid) {
+    // ── Contato: detecta e-mail × telefone e formata em tempo real ──
+    // Tem letra ou @ → e-mail; só dígitos/sinais → telefone.
+    function isEmail(v)      { return /[a-zA-Z@]/.test(v); }
+    function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+    // Máscara de telefone brasileiro: aceita +55 opcional, DDD e corpo
+    // 8 (fixo, 4-4) ou 9 dígitos (celular, 5-4). Sem separador "preso":
+    // os parênteses/traço só entram quando há dígito depois.
+    function maskPhoneBR(value) {
+        var hasCountry = /^\s*\+/.test(value);
+        var d = value.replace(/\D/g, '');
+        var cc = '';
+        if (hasCountry) { cc = d.slice(0, 2); d = d.slice(2); }
+        d = d.slice(0, 11);                       // DDD (2) + até 9 dígitos
+        var out = hasCountry ? '+' + cc : '';
+        if (!d) return out;
+        if (d.length <= 2) {
+            out += (hasCountry ? ' ' : '') + '(' + d;
+        } else {
+            var ddd  = d.slice(0, 2);
+            var body = d.slice(2);
+            out += (hasCountry ? ' ' : '') + '(' + ddd + ') ';
+            out += body.length <= 4
+                ? body
+                : body.slice(0, body.length - 4) + '-' + body.slice(body.length - 4);
+        }
+        return out;
+    }
+
+    function phoneDigitCount(v) {
+        var d = v.replace(/\D/g, '');
+        if (/^\s*\+/.test(v)) d = d.slice(2);     // desconta o código do país
+        return d.length;
+    }
+
+    function setupContactField() {
+        var input = document.getElementById('reserve-contact');
+        if (!input) return;
+
+        // Formata em tempo real, mas sem mensagens de "válido": a verificação
+        // do e-mail só é mostrada ao enviar (deixa a digitação mais limpa).
+        input.addEventListener('input', function() {
+            if (!this.value.trim()) { this.removeAttribute('inputmode'); return; }
+
+            if (isEmail(this.value)) {
+                // virou e-mail: remove resíduos da máscara de telefone
+                // (parênteses e espaços) caso tenha começado com dígitos,
+                // ex.: "(12) 3eusou…" → "123eusou…"
+                var cleaned = this.value.replace(/[()\s]/g, '');
+                if (cleaned !== this.value) this.value = cleaned;
+                this.setAttribute('inputmode', 'email');
+            } else {
+                // telefone: aplica a máscara brasileira enquanto digita
+                this.setAttribute('inputmode', 'tel');
+                this.value = maskPhoneBR(this.value);
+            }
+        });
+    }
+
+    function setupReserveModal(reloadGrid, clearSelection) {
         var modal = document.getElementById('reserve-modal');
         if (!modal) return;
+        setupContactField();
 
         document.getElementById('reserve-modal-close').addEventListener('click', closeReserveModal);
         document.getElementById('reserve-done').addEventListener('click', closeReserveModal);
@@ -417,8 +522,12 @@
             var contact = document.getElementById('reserve-contact').value.trim();
             var website = document.getElementById('reserve-website').value;
 
-            if (name.length < 2)    { showReserveError(ERROR_MESSAGES.NOME_INVALIDO);    return; }
-            if (contact.length < 8) { showReserveError(ERROR_MESSAGES.CONTATO_INVALIDO); return; }
+            if (name.length < 2) { showReserveError(ERROR_MESSAGES.NOME_INVALIDO); return; }
+            if (isEmail(contact)) {
+                if (!isValidEmail(contact)) { showReserveError('Confira o e-mail informado (ex.: nome@email.com).'); return; }
+            } else if (phoneDigitCount(contact) < 10) {
+                showReserveError('Informe um telefone com DDD (ex.: (11) 98765-4321).'); return;
+            }
 
             var submitBtn = document.getElementById('reserve-submit');
             submitBtn.disabled = true;
@@ -426,16 +535,18 @@
             document.getElementById('reserve-error').style.display = 'none';
 
             try {
+                var items = modalState.numbers.map(function(n) { return { raffle_number: n }; });
                 var result = await fetchJson('rpc/create_reservation', {
                     body: {
                         p_event_id: modalState.event.id,
                         p_name:     name,
                         p_contact:  contact,
-                        p_items:    [{ raffle_number: modalState.number }],
+                        p_items:    items,
                         p_website:  website
                     }
                 });
-                showSuccess(modalState.event, modalState.number, result.total);
+                showSuccess(modalState.event, modalState.numbers, result.total);
+                if (clearSelection) clearSelection();
                 if (reloadGrid) reloadGrid();
             } catch (err) {
                 showReserveError(friendlyError(err));
@@ -463,6 +574,64 @@
             var gridContainer = document.createElement('div');
             area.appendChild(gridContainer);
 
+            // Barra de ação fixa (mobile-first): aparece ao selecionar números
+            var actionBar = document.createElement('div');
+            actionBar.className = 'raffle-actionbar';
+            actionBar.style.display = 'none';
+            area.appendChild(actionBar);
+
+            var maxPer    = ev.raffle_max_per_reservation || 5;
+            var openForRes = isOpenForReservations(ev);
+            var selected  = [];   // números escolhidos, na ordem de clique
+
+            // Reflete a seleção e o limite nas células já renderizadas
+            function updateCells() {
+                var atMax = selected.length >= maxPer;
+                var cells = gridContainer.querySelectorAll('.raffle-cell');
+                cells.forEach(function(cell) {
+                    if (cell.classList.contains('is-taken') || cell.disabled) return;
+                    var num   = parseInt(cell.dataset.number, 10);
+                    var isSel = selected.indexOf(num) !== -1;
+                    cell.classList.toggle('is-selected', isSel);
+                    cell.classList.toggle('is-limited', atMax && !isSel);
+                    cell.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+                });
+            }
+
+            function renderActionBar() {
+                document.body.classList.toggle('has-raffle-bar', selected.length > 0);
+                if (!selected.length) { actionBar.style.display = 'none'; actionBar.innerHTML = ''; return; }
+                var nums  = selected.slice().sort(function(a, b) { return a - b; });
+                var count = nums.length;
+                var total = count * Number(ev.raffle_number_price || 0);
+                actionBar.style.display = '';
+                actionBar.innerHTML =
+                    '<div class="raffle-actionbar-info">' +
+                        '<strong>' + count + (count > 1 ? ' números selecionados' : ' número selecionado') + '</strong>' +
+                        '<span class="raffle-actionbar-nums">' + nums.join(', ') + '</span>' +
+                        '<span class="raffle-actionbar-total">' + formatMoney(total) + '</span>' +
+                        (count >= maxPer ? '<span class="raffle-actionbar-limit">Limite de ' + maxPer + ' por reserva atingido</span>' : '') +
+                    '</div>' +
+                    '<div class="raffle-actionbar-buttons">' +
+                        '<button type="button" class="raffle-clear" id="raffle-clear">Limpar</button>' +
+                        '<button type="button" class="raffle-reserve" id="raffle-reserve">Reservar</button>' +
+                    '</div>';
+            }
+
+            function refreshSelection() { updateCells(); renderActionBar(); }
+
+            function toggleSelect(num) {
+                var idx = selected.indexOf(num);
+                if (idx !== -1) {
+                    selected.splice(idx, 1);
+                } else if (selected.length < maxPer) {
+                    selected.push(num);
+                } else {
+                    return; // no limite: ignora novas seleções (células ficam esmaecidas)
+                }
+                refreshSelection();
+            }
+
             async function loadGrid() {
                 var taken = {};
                 try {
@@ -470,16 +639,29 @@
                     board.forEach(function(entry) { taken[entry.raffle_number] = entry; });
                 } catch (e) { /* grade sem nomes é melhor que nada */ }
                 gridContainer.innerHTML = '';
-                gridContainer.appendChild(buildRaffleGrid(ev, taken, isOpenForReservations(ev)));
+                gridContainer.appendChild(buildRaffleGrid(ev, taken, openForRes));
+                // remove da seleção números que outra pessoa tomou nesse meio tempo
+                selected = selected.filter(function(n) { return !taken[n]; });
+                refreshSelection();
             }
+
+            function clearSelection() { selected = []; refreshSelection(); }
 
             gridContainer.addEventListener('click', function(e) {
                 var cell = e.target.closest('.raffle-cell');
-                if (!cell || cell.disabled) return;
-                openReserveModal(ev, parseInt(cell.dataset.number, 10));
+                if (!cell || cell.disabled || cell.classList.contains('is-taken') || !openForRes) return;
+                toggleSelect(parseInt(cell.dataset.number, 10));
             });
 
-            setupReserveModal(loadGrid);
+            actionBar.addEventListener('click', function(e) {
+                if (e.target.closest('#raffle-reserve')) {
+                    if (selected.length) openReserveModal(ev, selected.slice().sort(function(a, b) { return a - b; }));
+                } else if (e.target.closest('#raffle-clear')) {
+                    clearSelection();
+                }
+            });
+
+            setupReserveModal(loadGrid, clearSelection);
             await loadGrid();
         } else {
             // Venda de produtos: reservas online chegam na fase 6.5
