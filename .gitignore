@@ -3,3 +3,6 @@
 
 # Logs
 *.log
+
+# Guia local do Claude (não versionar)
+CLAUDE.md
