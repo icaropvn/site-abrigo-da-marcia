@@ -213,7 +213,8 @@ main #stories-list {
 .story-modal-media .story-slide { flex: 0 0 100%; height: 100%; }
 .story-modal-media .story-slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .story-modal-media .story-carousel.is-empty { display: flex; align-items: center; justify-content: center; }
-.story-modal-media .story-carousel-placeholder { font-size: 72px; opacity: 0.5; }
+/* color fixa: o fundo do modal é #101010 nos dois temas */
+.story-modal-media .story-carousel-placeholder { font-size: 72px; opacity: 0.5; color: #f0f0f0; }
 
 .story-modal-media .story-nav {
     position: absolute;

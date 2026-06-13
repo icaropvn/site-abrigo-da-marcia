@@ -353,7 +353,8 @@ main .catalog-card:hover .carousel-nav {
 #modal-dog-media .carousel-track { display: flex; height: 100%; transition: transform .4s cubic-bezier(.63,0,.09,1); }
 #modal-dog-media .carousel-slide { flex: 0 0 100%; height: 100%; }
 #modal-dog-media .carousel-slide img { width:100%; height:100%; object-fit: contain; display:block; }
-#modal-dog-media .carousel-placeholder { display:flex; align-items:center; justify-content:center; height:100%; font-size:72px; opacity:.4; }
+/* color fixa: o fundo do modal é #101010 nos dois temas */
+#modal-dog-media .carousel-placeholder { display:flex; align-items:center; justify-content:center; height:100%; font-size:72px; opacity:.4; color:#f0f0f0; }
 #modal-dog-media .modal-dog-carousel.is-empty { background:#101010; }
 
 #modal-dog-media .carousel-nav {
