@@ -432,21 +432,6 @@ main #donation-section #donation-buttons-container button:hover {
     color: var(--brancoPrincipal);
 }
 
-main #donation-section #donation-buttons-container #donation-button-generic {
-    background-color: transparent;
-    outline-color: var(--brancoPrincipal);
-    outline-width: 2px;
-    outline-style: solid;
-    color: var(--brancoPrincipal);
-    transition: outline-width 0.1s ease-in-out;
-}
-
-main #donation-section #donation-buttons-container #donation-button-generic:hover {
-    background-color: var(--pretoPrincipal);
-    color: var(--brancoPrincipal);
-    outline-width: 0;
-}
-
 main #donation-section #donation-buttons-container .donation-button-most-chosen {
     position: relative;
 }
