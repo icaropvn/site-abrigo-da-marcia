@@ -337,11 +337,13 @@ desenvolvimento). Fazer com calma, um arquivo por vez, validando com `node --che
    admin: helpers (`esc`, `slugify`, `formatMoney`, `formatDate`), as constantes
    de ícone SVG, a criação do client Supabase e o **guard de auth + checagem
    AAL2** (hoje repetido em index/historias/eventos/sorteio/seguranca).
-3. **Desduplicar o SVG do cão** (placeholder "sem foto"), atualmente repetido em
-   4 arquivos (`admin/index.html`, `admin/historias.html`, `js/render-stories.js`,
-   `js/carousel.js`).
-4. Revisar `styles/index.css` (1.6k linhas) e `styles/catalogo.css` em busca de
-   regras mortas/duplicadas.
+3. ✅ **Desduplicar o SVG do cão** (placeholder "sem foto") — feito em 2026-06-13.
+   Agora em `js/icons.js` (`ICON_DOG_SVG`), incluído nas páginas que o consomem;
+   carousel.js, render-stories.js e os dois admins só referenciam a constante.
+4. ✅ **Revisar `styles/index.css`/`styles/catalogo.css`** — feito em 2026-06-13.
+   Único morto encontrado: `#donation-button-generic` (removido). As "duplicatas"
+   de seletores são overrides responsivos legítimos (base + breakpoints `@media`).
 
-> Nota: a extração de JS tem risco de regressão; deixar para **depois** da Fase 6
-> estar publicada e validada em produção.
+> Nota: a extração de JS (itens 1 e 2) tem risco de regressão; deixar para
+> **depois** da Fase 6 estar publicada e validada em produção. Itens 3 e 4
+> (baixo risco) já concluídos.
