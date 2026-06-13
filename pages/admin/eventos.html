@@ -562,9 +562,11 @@
             document.getElementById('ev-raffle-price').value = ev && ev.raffle_number_price != null ? ev.raffle_number_price : '';
             document.getElementById('ev-raffle-prize').value = ev && ev.raffle_prize ? ev.raffle_prize : '';
             document.getElementById('ev-raffle-max').value   = ev && ev.raffle_max_per_reservation != null ? ev.raffle_max_per_reservation : 5;
-            document.getElementById('ev-pix-key').value      = ev && ev.pix_key ? ev.pix_key : '';
-            document.getElementById('ev-pix-name').value     = ev && ev.pix_merchant_name ? ev.pix_merchant_name : '';
-            document.getElementById('ev-pix-city').value     = ev && ev.pix_merchant_city ? ev.pix_merchant_city : '';
+            // PIX: pré-preenche com os dados padrão do abrigo (PIX_DEFAULTS, em
+            // admin-common.js) quando o evento não tem valor próprio — admin pode editar.
+            document.getElementById('ev-pix-key').value      = (ev && ev.pix_key) || PIX_DEFAULTS.key;
+            document.getElementById('ev-pix-name').value     = (ev && ev.pix_merchant_name) || PIX_DEFAULTS.name;
+            document.getElementById('ev-pix-city').value     = (ev && ev.pix_merchant_city) || PIX_DEFAULTS.city;
             document.getElementById('ev-pix-payload').value  = ev && ev.pix_payload ? ev.pix_payload : '';
             document.getElementById('ev-pay-instructions').value = ev && ev.payment_instructions ? ev.payment_instructions : '';
 

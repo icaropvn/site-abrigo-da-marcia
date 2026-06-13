@@ -11,6 +11,17 @@
 // permanece logado entre recarregamentos e reaberturas.
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ── Dados padrão do PIX (constantes do abrigo) ──────────────────
+// Pré-preenchem os campos de PIX ao criar/editar um evento (o admin pode
+// sobrescrever por evento). Valores públicos — vão no QR/copia-e-cola.
+// O pix.js sanitiza nome/cidade (remove acento, maiúsculas, corta no limite)
+// na hora de montar o BR Code, então aqui ficam legíveis.
+var PIX_DEFAULTS = {
+    key:  'abrigodamarcia@gmail.com',
+    name: 'Marcia Camara Barbosa',
+    city: 'Ribeirão Preto'
+};
+
 // ── Helpers de formatação ───────────────────────────────────────
 // Escapa texto para interpolação segura em HTML.
 function esc(s) {
