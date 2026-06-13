@@ -145,7 +145,8 @@
             const pending = ((list.data && list.data.all) || []).filter(function(f) { return f.status === 'unverified'; });
             for (const f of pending) { await sb.auth.mfa.unenroll({ factorId: f.id }); }
 
-            const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Autenticador do admin' });
+            // issuer define o rótulo mostrado no app autenticador (senão usa o Site URL do Supabase, que por padrão é localhost:3000)
+            const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Autenticador do admin', issuer: 'Abrigo da Márcia' });
             if (error) { alertMsg('Não foi possível iniciar o cadastro: ' + error.message); return; }
 
             enrollFactorId = data.id;
