@@ -51,36 +51,22 @@ create policy "Público lê cães disponíveis"
   to anon
   using (status = 'available');
 
--- Admin autenticado: leitura total
+-- Admin: qualquer usuário AUTENTICADO gerencia os cães (só o admin consegue
+-- logar — cadastro público desabilitado). Mesmo modelo de stories/events e do
+-- bucket dog-photos abaixo; evita o foot-gun de fixar o ADMIN-UUID. Este é o
+-- BASELINE (pré-2FA); o supabase/2fa-aal2.sql endurece para exigir AAL2 depois.
+-- Remove as políticas antigas baseadas em ADMIN-UUID:
 drop policy if exists "Admin lê todos" on dogs;
-create policy "Admin lê todos"
-  on dogs for select
-  to authenticated
-  using (true);
-
--- Admin autenticado: inserção
--- IMPORTANTE: substitua 'ADMIN-UUID' pelo UID do seu usuário admin.
--- Encontre em: Authentication → Users → copie o User UID.
-drop policy if exists "Admin insere" on dogs;
-create policy "Admin insere"
-  on dogs for insert
-  to authenticated
-  with check (auth.uid() = 'ADMIN-UUID'::uuid);
-
--- Admin autenticado: atualização
+drop policy if exists "Admin insere"   on dogs;
 drop policy if exists "Admin atualiza" on dogs;
-create policy "Admin atualiza"
-  on dogs for update
-  to authenticated
-  using (auth.uid() = 'ADMIN-UUID'::uuid)
-  with check (auth.uid() = 'ADMIN-UUID'::uuid);
+drop policy if exists "Admin deleta"   on dogs;
 
--- Admin autenticado: exclusão
-drop policy if exists "Admin deleta" on dogs;
-create policy "Admin deleta"
-  on dogs for delete
+drop policy if exists "Admin gerencia cães" on dogs;
+create policy "Admin gerencia cães"
+  on dogs for all
   to authenticated
-  using (auth.uid() = 'ADMIN-UUID'::uuid);
+  using (true)
+  with check (true);
 
 -- ──────────────────────────────────────────────────────────
 -- 3. STORAGE: bucket dog-photos
