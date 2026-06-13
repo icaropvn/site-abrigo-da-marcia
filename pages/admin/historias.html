@@ -15,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
     <script src="../../js/icons.js"></script>
+    <script src="../../js/admin-common.js"></script>
 </head>
 <body>
 
@@ -134,13 +135,12 @@
 
     <script>
     (function() {
-        const { createClient } = supabase;
-        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // `sb` (client Supabase) vem de js/admin-common.js.
 
         // Ícones SVG inline (currentColor acompanha o tema claro/escuro).
-        // ICON_DOG vem de js/icons.js (width=1em → tamanho herda o font-size da .dog-no-img).
+        // ICON_DOG/ICON_STAR vêm de js/icons.js (width=1em → tamanho herda o font-size).
         const ICON_DOG = ICON_DOG_SVG;
-        const ICON_STAR = '<svg class="icon icon-star" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.58737 8.23597L11.1849 3.00376C11.5183 2.33208 12.4817 2.33208 12.8151 3.00376L15.4126 8.23597L21.2215 9.08017C21.9668 9.18848 22.2638 10.0994 21.7243 10.6219L17.5217 14.6918L18.5135 20.4414C18.6409 21.1798 17.8614 21.7428 17.1945 21.3941L12 18.678L6.80547 21.3941C6.1386 21.7428 5.35909 21.1798 5.48645 20.4414L6.47825 14.6918L2.27575 10.6219C1.73617 10.0994 2.03322 9.18848 2.77852 9.08017L8.58737 8.23597Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+        const ICON_STAR = ICON_STAR_SVG;
 
         const MAX_PHOTOS = 5;
         let allStories = [];
@@ -149,37 +149,12 @@
         // Itens de foto: { url: string|null, file: File|null, preview: string }
         let photoItems = [];
 
-        function esc(s) {
-            return String(s == null ? '' : s)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function slugify(s) {
-            return String(s || 'historia')
-                .toLowerCase()
-                .normalize('NFD').replace(/[̀-ͯ]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/[^a-z0-9-]/g, '') || 'historia';
-        }
+        // esc() e slugify() vêm de js/admin-common.js.
 
         // ── Auth guard ──────────────────────────────────────────
         async function init() {
-            const { data } = await sb.auth.getSession();
-            if (!data.session) {
-                window.location.href = 'login.html';
-                return;
-            }
-            // Exige o 2º fator (AAL2) quando há 2FA cadastrado
-            const aal = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
-            if (aal.data && aal.data.nextLevel === 'aal2' && aal.data.currentLevel !== 'aal2') {
-                window.location.href = 'login.html';
-                return;
-            }
-            document.getElementById('admin-email').textContent = data.session.user.email;
+            // requireAdminSession (admin-common.js): valida sessão + AAL2 e preenche #admin-email
+            if (!await requireAdminSession()) return;
             await loadStories();
             bindEvents();
         }
@@ -374,7 +349,7 @@
 
             try {
                 const dogName = document.getElementById('f-dog-name').value.trim();
-                const slug    = slugify(dogName);
+                const slug    = slugify(dogName, 'historia');
                 const photos  = [];
 
                 for (const item of photoItems) {

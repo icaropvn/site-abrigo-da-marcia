@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../../styles/admin.css?v=6">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
+    <script src="../../js/admin-common.js"></script>
 </head>
 <body>
 
@@ -101,8 +102,7 @@
 
     <script>
     (function() {
-        const { createClient } = supabase;
-        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // `sb` (client Supabase) vem de js/admin-common.js.
 
         let enrollFactorId = null;   // fator em processo de cadastro
 
@@ -118,9 +118,9 @@
         }
 
         async function init() {
-            const { data } = await sb.auth.getSession();
-            if (!data.session) { window.location.href = 'login.html'; return; }
-            document.getElementById('admin-email').textContent = data.session.user.email;
+            // requireAdminSession (admin-common.js): valida sessão e preenche #admin-email.
+            // aal2:false — esta é a própria página de cadastro do 2FA (não exige o 2º fator).
+            if (!await requireAdminSession({ aal2: false })) return;
             await refreshState();
         }
 

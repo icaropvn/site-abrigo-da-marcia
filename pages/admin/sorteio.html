@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../../styles/sorteio.css?v=1">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
+    <script src="../../js/admin-common.js"></script>
 </head>
 <body>
 
@@ -43,8 +44,7 @@
 
     <script>
     (function() {
-        const { createClient } = supabase;
-        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // `sb` (client Supabase) vem de js/admin-common.js.
 
         let raffles      = [];     // rifas elegíveis (ativo/encerrado)
         let currentEvent = null;
@@ -75,11 +75,7 @@
             '<path d="M12 7H7.5C6.83696 7 6.20107 6.73661 5.73223 6.26777C5.26339 5.79893 5 5.16304 5 4.5C5 3.83696 5.26339 3.20107 5.73223 2.73223C6.20107 2.26339 6.83696 2 7.5 2C11 2 12 7 12 7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>' +
             '<path d="M12 7H16.5C17.163 7 17.7989 6.73661 18.2678 6.26777C18.7366 5.79893 19 5.16304 19 4.5C19 3.83696 18.7366 3.20107 18.2678 2.73223C17.7989 2.26339 17.163 2 16.5 2C13 2 12 7 12 7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 
-        function esc(s) {
-            return String(s == null ? '' : s)
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        }
+        // esc() vem de js/admin-common.js.
         function firstName(full) {
             return String(full || '').trim().split(/\s+/)[0] || '';
         }
@@ -92,13 +88,8 @@
 
         // ── Auth guard ──────────────────────────────────────────
         async function init() {
-            const { data } = await sb.auth.getSession();
-            if (!data.session) { window.location.href = 'login.html'; return; }
-            // Exige o 2º fator (AAL2) quando há 2FA cadastrado
-            const aal = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
-            if (aal.data && aal.data.nextLevel === 'aal2' && aal.data.currentLevel !== 'aal2') {
-                window.location.href = 'login.html'; return;
-            }
+            // requireAdminSession (admin-common.js): valida sessão + AAL2
+            if (!await requireAdminSession()) return;
             await loadRaffles();
             bindEvents();
         }

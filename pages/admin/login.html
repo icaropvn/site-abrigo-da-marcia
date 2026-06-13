@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../../styles/admin.css?v=6">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
+    <script src="../../js/admin-common.js"></script>
 </head>
 <body class="auth-page">
 
@@ -59,10 +60,7 @@
     </div>
 
     <script>
-        const { createClient } = supabase;
-        // persistSession (localStorage) + autoRefreshToken já são padrão:
-        // o admin permanece logado entre recarregamentos e reaberturas.
-        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // `sb` (client Supabase) vem de js/admin-common.js.
 
         const alertEl   = document.getElementById('alert');
         const submitBtn = document.getElementById('submit-btn');
