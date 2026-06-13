@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin · Segurança — Abrigo da Márcia</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="../../styles/admin.css?v=6">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/supabase-config.js"></script>
+</head>
+<body>
+
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
+            <h1>Painel Admin</h1>
+            <nav class="admin-nav">
+                <a href="index.html">Cães</a>
+                <a href="historias.html">Histórias</a>
+                <a href="eventos.html">Eventos</a>
+                <a href="seguranca.html" class="active">Segurança</a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="theme-toggle" aria-label="Alternar tema"></button>
+            <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="section-header">
+            <h2>Verificação em duas etapas (2FA)</h2>
+        </div>
+
+        <div class="table-wrap" style="padding:24px; max-width:560px">
+            <div id="mfa-alert" class="alert"></div>
+
+            <!-- Estado: carregando -->
+            <p id="mfa-loading" class="muted-hint">Carregando…</p>
+
+            <!-- Estado: 2FA ativo -->
+            <div id="mfa-active" style="display:none">
+                <p style="margin-bottom:14px">
+                    <span class="badge badge-ativo">2FA ativo</span>
+                </p>
+                <p class="muted-hint" style="margin-bottom:18px">
+                    Seu login exige o código do aplicativo autenticador. Mantenha o app instalado;
+                    sem ele você não conseguirá entrar.
+                </p>
+                <button class="btn btn-danger" id="disable-btn">Desativar 2FA</button>
+            </div>
+
+            <!-- Estado: 2FA inativo (iniciar cadastro) -->
+            <div id="mfa-inactive" style="display:none">
+                <p class="muted-hint" style="margin-bottom:18px">
+                    Proteja o painel com um segundo fator. Você vai precisar de um aplicativo
+                    autenticador (Google Authenticator, Authy, 1Password, etc.).
+                </p>
+                <button class="btn btn-primary" id="enable-btn">Ativar 2FA</button>
+            </div>
+
+            <!-- Estado: cadastro em andamento (QR + código) -->
+            <div id="mfa-enroll" style="display:none">
+                <p style="margin-bottom:12px">1. Escaneie o QR Code no seu aplicativo autenticador:</p>
+                <div id="qr-box" style="background:#fff; padding:16px; border-radius:10px; width:fit-content; margin-bottom:12px"></div>
+                <p class="muted-hint" style="margin-bottom:18px">
+                    Não consegue escanear? Digite este código no app:<br>
+                    <code id="mfa-secret" style="font-size:15px; letter-spacing:.04em; word-break:break-all"></code>
+                </p>
+                <p style="margin-bottom:8px">2. Digite o código de 6 dígitos gerado pelo app:</p>
+                <form id="verify-form" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+                    <input id="verify-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+                           placeholder="000000" required
+                           style="padding:10px 12px; border:1px solid var(--border); border-radius:8px; font:inherit; font-size:18px; letter-spacing:.3em; text-align:center; width:140px; background:#fff; color:var(--dark)">
+                    <button type="submit" class="btn btn-primary" id="verify-btn">Confirmar</button>
+                    <button type="button" class="btn btn-ghost" id="enroll-cancel">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmação de desativação -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3>Desativar 2FA?</h3>
+            <p>Seu login voltará a exigir só e-mail e senha. Você pode reativar a qualquer momento.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-ok">Desativar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let enrollFactorId = null;   // fator em processo de cadastro
+
+        function show(id) {
+            ['mfa-loading', 'mfa-active', 'mfa-inactive', 'mfa-enroll'].forEach(function(s) {
+                document.getElementById(s).style.display = (s === id) ? '' : 'none';
+            });
+        }
+        function alertMsg(msg, type) {
+            const el = document.getElementById('mfa-alert');
+            el.textContent = msg;
+            el.className = 'alert alert-' + (type || 'error') + (msg ? ' show' : '');
+        }
+
+        async function init() {
+            const { data } = await sb.auth.getSession();
+            if (!data.session) { window.location.href = 'login.html'; return; }
+            document.getElementById('admin-email').textContent = data.session.user.email;
+            await refreshState();
+        }
+
+        // Mostra o estado atual: ativo (há fator verificado) ou inativo
+        async function refreshState() {
+            const { data, error } = await sb.auth.mfa.listFactors();
+            if (error) { show('mfa-inactive'); return; }
+            const verified = (data.totp || []).filter(function(f) { return f.status === 'verified'; });
+            show(verified.length ? 'mfa-active' : 'mfa-inactive');
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', async function() {
+            await sb.auth.signOut();
+            window.location.href = 'login.html';
+        });
+
+        // ── Ativar: cria o fator e mostra o QR ──────────────────
+        document.getElementById('enable-btn').addEventListener('click', async function() {
+            alertMsg('');
+            // limpa fatores não verificados pendentes (tentativas anteriores)
+            const list = await sb.auth.mfa.listFactors();
+            const pending = ((list.data && list.data.all) || []).filter(function(f) { return f.status === 'unverified'; });
+            for (const f of pending) { await sb.auth.mfa.unenroll({ factorId: f.id }); }
+
+            const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Autenticador do admin' });
+            if (error) { alertMsg('Não foi possível iniciar o cadastro: ' + error.message); return; }
+
+            enrollFactorId = data.id;
+            const qrBox = document.getElementById('qr-box');
+            qrBox.innerHTML = '';
+            const qr = data.totp.qr_code;
+            if (qr && qr.indexOf('<svg') !== -1) {
+                qrBox.innerHTML = qr;                       // SVG inline
+            } else {
+                const img = new Image();
+                img.alt = 'QR Code do 2FA';
+                img.src = qr;                               // data URL
+                img.style.display = 'block';
+                qrBox.appendChild(img);
+            }
+            document.getElementById('mfa-secret').textContent = data.totp.secret;
+            document.getElementById('verify-code').value = '';
+            show('mfa-enroll');
+            document.getElementById('verify-code').focus();
+        });
+
+        // ── Confirmar cadastro: verifica o código ───────────────
+        document.getElementById('verify-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('verify-btn');
+            btn.disabled = true; btn.textContent = 'Confirmando…';
+            alertMsg('');
+
+            const code = document.getElementById('verify-code').value.trim();
+            const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: enrollFactorId, code: code });
+
+            btn.disabled = false; btn.textContent = 'Confirmar';
+            if (error) { alertMsg('Código inválido. Confira o app e tente novamente.'); return; }
+
+            enrollFactorId = null;
+            alertMsg('2FA ativado com sucesso!', 'success');
+            await refreshState();
+        });
+
+        document.getElementById('enroll-cancel').addEventListener('click', async function() {
+            if (enrollFactorId) { await sb.auth.mfa.unenroll({ factorId: enrollFactorId }); enrollFactorId = null; }
+            alertMsg('');
+            await refreshState();
+        });
+
+        // ── Desativar 2FA ───────────────────────────────────────
+        document.getElementById('disable-btn').addEventListener('click', function() {
+            document.getElementById('confirm-overlay').classList.add('open');
+        });
+        document.getElementById('confirm-cancel').addEventListener('click', function() {
+            document.getElementById('confirm-overlay').classList.remove('open');
+        });
+        document.getElementById('confirm-ok').addEventListener('click', async function() {
+            document.getElementById('confirm-overlay').classList.remove('open');
+            const { data } = await sb.auth.mfa.listFactors();
+            for (const f of (data.totp || [])) { await sb.auth.mfa.unenroll({ factorId: f.id }); }
+            alertMsg('2FA desativado.', 'success');
+            await refreshState();
+        });
+
+        init();
+    })();
+    </script>
+    <script src="../../js/theme-toggle.js"></script>
+</body>
+</html>
