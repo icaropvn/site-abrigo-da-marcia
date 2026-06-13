@@ -333,10 +333,12 @@ desenvolvimento). Fazer com calma, um arquivo por vez, validando com `node --che
    `js/` (ex.: `js/admin-eventos.js`, `js/admin-dogs.js`, `js/admin-stories.js`,
    `js/admin-sorteio.js`, `js/admin-seguranca.js`). Hoje, por exemplo,
    `pages/admin/eventos.html` tem ~1.200 linhas misturando HTML + JS.
-2. **Criar `js/admin-common.js`** com o que está duplicado em todas as páginas
-   admin: helpers (`esc`, `slugify`, `formatMoney`, `formatDate`), as constantes
-   de ícone SVG, a criação do client Supabase e o **guard de auth + checagem
-   AAL2** (hoje repetido em index/historias/eventos/sorteio/seguranca).
+2. ✅ **Criar `js/admin-common.js`** — feito em 2026-06-13. Centraliza o que estava
+   duplicado nas páginas admin: o client Supabase (`sb`), os helpers (`esc`,
+   `slugify(s, fallback)`, `formatMoney`, `formatDate`) e o guard de auth + AAL2,
+   agora `requireAdminSession(opts)` (`{ aal2: false }` na página de Segurança).
+   Exposto como globais de mesmo nome → call sites inalterados. O `ICON_STAR` foi
+   para `js/icons.js` (`ICON_STAR_SVG`). Inclui as 6 páginas (login só usa `sb`).
 3. ✅ **Desduplicar o SVG do cão** (placeholder "sem foto") — feito em 2026-06-13.
    Agora em `js/icons.js` (`ICON_DOG_SVG`), incluído nas páginas que o consomem;
    carousel.js, render-stories.js e os dois admins só referenciam a constante.
@@ -344,6 +346,100 @@ desenvolvimento). Fazer com calma, um arquivo por vez, validando com `node --che
    Único morto encontrado: `#donation-button-generic` (removido). As "duplicatas"
    de seletores são overrides responsivos legítimos (base + breakpoints `@media`).
 
-> Nota: a extração de JS (itens 1 e 2) tem risco de regressão; deixar para
-> **depois** da Fase 6 estar publicada e validada em produção. Itens 3 e 4
-> (baixo risco) já concluídos.
+> Nota: itens 2, 3 e 4 concluídos. O **item 1** (extrair o `<script>` embutido das
+> páginas admin) foi **absorvido pela MIGRAÇÃO DE ARQUITETURA** abaixo — em vez de
+> só recortar para `js/admin-*.js`, a extração vira a criação dos *controllers* de
+> página dentro da nova estrutura de módulos. Evita retrabalho sobre os mesmos
+> arquivos. Ver a próxima seção.
+
+---
+
+## 🏗️ MIGRAÇÃO DE ARQUITETURA — Módulos ES + camada de dados (planejada)
+
+Combinado em 2026-06-13. O projeto cresceu de "site estático simples" para uma
+pequena aplicação (público + admin + auth/2FA + rifa + reservas + sorteio). Esta
+seção é o **plano** — nada implementado ainda. Continua **sem build step** e sem
+framework: usa **módulos ES nativos** (rodam direto no navegador; GitHub Pages
+serve normal).
+
+### Por que (dores atuais)
+- HTML gigante com JS embutido (`pages/admin/eventos.html` ~1.100 linhas).
+- Dois padrões de acesso a dados (público = `fetch` na REST; admin = supabase-js),
+  com queries/RPC espalhadas — uma mudança de schema obriga caçar em vários pontos.
+- Tudo em escopo global, dependente da ordem dos `<script>`.
+- Constantes mágicas repetidas (labels de status, `MAX_PHOTOS`, defaults de PIX).
+
+### Objetivos / não-objetivos
+- **Objetivos:** uma fonte única de acesso a dados por domínio; isolamento por
+  módulo (sem global/ordem de script); config centralizada; absorver o item 1 da
+  dívida (extrair JS dos admins) como criação de *controllers*.
+- **Não-objetivos:** introduzir framework, bundler ou TypeScript; reescrever tudo
+  de uma vez. Migração **incremental, página por página**, convivendo com o legado.
+
+### Padrão: camadas leves (MVC-lite)
+- `data/` = **model/repository** — toda query e RPC de um domínio num só módulo.
+- `ui/` + funções de render = **view** — componentes reutilizáveis.
+- `pages/` = **controller** — importa `data` + `ui` + `core` e liga ao DOM.
+
+### Estrutura-alvo
+```
+js/
+  config.js              # creds Supabase, PIX_DEFAULTS, MAX_PHOTOS, STATUS_LABEL, EVENT_STATUS_LABEL
+  core/
+    supabase.js          # cria/exporta o client (import ESM do supabase-js)
+    rest.js              # helper de fetch na REST (leitura pública anon)
+    dom.js               # esc, slugify, formatMoney, formatDate, helpers de DOM
+    icons.js             # ICON_* (move js/icons.js)
+    auth.js              # requireAdminSession, fluxo de login/2FA
+  data/                  # camada de dados (Repository), 1 por domínio
+    events.js            #   getActiveEvent, listEvents, saveEvent, createReservation...
+    dogs.js
+    stories.js
+    reservations.js
+  ui/                    # componentes reutilizáveis
+    modal.js
+    photo-uploader.js    # o padrão {url,file,preview} repetido em dogs/stories/events
+    toast.js
+  pages/                 # 1 controller por página
+    admin-eventos.js, admin-historias.js, admin-dogs.js, admin-sorteio.js,
+    admin-seguranca.js, login.js, catalogo.js, eventos.js, historias.js, home.js
+```
+
+### Convenções
+- Módulos ES nativos (`import`/`export`); `<script type="module" src="…">` na página.
+- supabase-js via ESM: `import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'`
+  (ou vendorizar em `js/vendor/` p/ não depender de CDN — **decidir na Fase A**).
+- Comentários em PT-BR. Validar cada módulo com `node --check` (agora são `.js`
+  puros, sem precisar extrair IIFE) + teste manual no navegador.
+- O `<script>` inline de tema no `<head>` **permanece inline** (precisa rodar antes
+  do paint p/ evitar flash); módulos são *deferred* e rodariam tarde demais.
+
+### Fases (ordem de execução)
+- **Fase A — Fundação.** Criar `config.js` + `core/*` (basicamente migrar o conteúdo
+  de `admin-common.js`, `icons.js` e `supabase-config.js` para módulos que
+  *exportam*). Nada de página muda ainda. Decidir CDN vs vendor do supabase-js.
+- **Fase B — Piloto.** Migrar **`admin/historias.html`** (porte médio, baixo risco)
+  para `type="module"`: criar `data/stories.js` + `pages/admin-historias.js`, trocar
+  os `<script>`. Validar a fundo (login+2FA, CRUD, upload de fotos, tema). Serve de
+  modelo para as demais.
+- **Fase C — Rollout admin.** `eventos` (+ `data/events.js`, `data/reservations.js`),
+  `sorteio`, `index` (+ `data/dogs.js`), `seguranca`, `login`. Extrair `ui/` à
+  medida que a repetição aparecer (modal, photo-uploader).
+- **Fase D — Páginas públicas.** `catalogo`, `eventos`, `historias`, home. Reusar os
+  repositórios de `data/` (leitura anon via `core/rest.js` ou client supabase-js
+  anon — **decidir o peso** na fase).
+- **Fase E — Limpeza.** Remover `admin-common.js`/`supabase-config.js`/`icons.js`
+  antigos quando ninguém mais os usar; atualizar a seção "Convenções" do CLAUDE.md.
+
+### Riscos e mitigação
+- **`file://` não carrega módulos** (CORS). Dev local passa a exigir um server
+  estático: `python3 -m http.server` na raiz. GitHub Pages não muda.
+- **Dependência de CDN** (esm.sh) — equivalente ao jsdelivr de hoje; vendorizar
+  elimina o risco (avaliar na Fase A).
+- **Compatibilidade**: módulos ES têm ~96% de suporte; adequado a este público.
+- **Regressão**: mitigada migrando 1 página por vez, com o legado intacto até a
+  página nova passar nos critérios abaixo.
+
+### Critério de "pronto" por página migrada
+Console sem erros; guard de auth (+AAL2) funciona; CRUD/ações funcionam; tema
+persiste sem flash; `node --check` passa nos módulos novos.
