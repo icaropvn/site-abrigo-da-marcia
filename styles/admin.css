@@ -345,7 +345,12 @@ tbody tr:hover td {
     align-items: center;
     justify-content: center;
     font-size: 20px;
+    color: var(--gray);
 }
+
+/* ─── Ícones SVG inline (substituem emojis; currentColor segue o tema) ─── */
+svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
+.icon-star { color: var(--warning); }
 
 /* Foto com anel colorido por status + selo sobreposto (selo só no mobile) */
 .dog-photo {
@@ -697,8 +702,43 @@ tbody tr:hover td {
 .photos-counter { font-size: 13px; color: var(--gray); }
 
 /* ─── Responsive ─── */
+
+/* Header: quando falta espaço, a navegação vai para a própria linha (largura
+   total) em vez de gerar rolagem horizontal. Os botões da direita (tema/sair)
+   ficam fixados no topo direito. */
+@media (max-width: 900px) {
+    .admin-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 10px 16px;
+        row-gap: 10px;
+    }
+    .admin-email { display: none; }
+    .admin-header-left {
+        flex-wrap: wrap;
+        flex-basis: 100%;
+        gap: 8px 12px;
+    }
+    /* sticky já serve de bloco de contexto para o absolute */
+    .admin-header-right {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        gap: 8px;
+    }
+    .admin-nav {
+        flex-basis: 100%;
+        margin-left: 0;
+        gap: 6px;
+    }
+    .admin-nav a {
+        flex: 1 1 0;
+        text-align: center;
+        padding: 8px 6px;
+    }
+}
+
 @media (max-width: 640px) {
-    .admin-header       { padding: 0 16px; }
     .admin-main         { padding: 20px 16px; }
     .form-row           { grid-template-columns: 1fr; }
     .modal-box          { padding: 24px 20px; }
@@ -744,6 +784,36 @@ tbody tr:hover td {
     /* Histórias: Editar/Remover empilhados, alvo de toque alto */
     .t-stories .actions { flex-direction: column; gap: 6px; align-items: stretch; max-width: 108px; margin-left: auto; }
     .t-stories .actions .btn { width: 100%; padding: 12px 8px; font-size: 12px; white-space: nowrap; }
+
+    /* Eventos (6 col): Capa, Nome, Status e Ações (Tipo e Período ocultos) */
+    .t-events thead th:nth-child(3), .t-events tbody td:nth-child(3),
+    .t-events thead th:nth-child(4), .t-events tbody td:nth-child(4) { display: none; }
+    .t-events .actions,
+    .t-reservations .actions { flex-direction: column; gap: 6px; align-items: stretch; max-width: 108px; margin-left: auto; }
+    .t-events .actions .btn,
+    .t-reservations .actions .btn { width: 100%; padding: 11px 8px; font-size: 12px; white-space: nowrap; }
+
+    /* Reservas (6 col): Cliente (contato embutido na célula), Itens,
+       Status e Ações (colunas Contato e Data ocultas) */
+    .t-reservations thead th:nth-child(2), .t-reservations tbody td:nth-child(2),
+    .t-reservations thead th:nth-child(5), .t-reservations tbody td:nth-child(5) { display: none; }
+    .res-contact-inline { display: block; }
+
+    /* Toolbar de reservas: busca em linha própria, filtro divide com botões */
+    .res-toolbar input[type="search"] { flex-basis: 100%; }
+    .res-toolbar select { flex: 1; }
+    .res-toolbar .btn { flex: 1; white-space: nowrap; }
+
+    /* Cabeçalho de seção com 2 botões (sorteio + novo evento) quebra linha */
+    .section-header { flex-wrap: wrap; gap: 10px; }
+
+    .event-context { padding: 14px 16px; }
+    .totals-panel  { gap: 10px; }
+
+    /* iOS não dá zoom ao focar campos com fonte ≥ 16px */
+    .form-group input, .form-group select, .form-group textarea,
+    .res-toolbar input[type="search"], .res-toolbar select,
+    .status-select { font-size: 16px; }
 }
 
 /* ─── Theme toggle (claro/escuro) ─── */
@@ -815,3 +885,133 @@ tbody tr:hover td {
 [data-theme="dark"] .btn-deceased-opt        { background: #2a2c34; color: #9aa0aa; }
 [data-theme="dark"] .btn-deceased-opt:hover  { background: #34363f; }
 [data-theme="dark"] .badge-deceased { background: #2a2c34; color: #9aa0aa; }
+
+/* ════════════════════════════════════════════════════════════
+   FASE 6.3 — Eventos & Reservas
+   ════════════════════════════════════════════════════════════ */
+
+/* ─── Badges de status de evento ─── */
+.badge-rascunho  { background: #f3f4f6; color: #6b7280; }
+.badge-ativo     { background: #dcfce7; color: #16a34a; }
+.badge-encerrado { background: #fef3c7; color: #d97706; }
+.badge-arquivado { background: #e5e7eb; color: #4b5563; }
+
+/* ─── Badges de status de reserva ─── */
+.badge-reservado { background: #fef3c7; color: #d97706; }
+.badge-pago      { background: #dcfce7; color: #16a34a; }
+.badge-entregue  { background: #dbeafe; color: #2563eb; }
+.badge-cancelado { background: #fee2e2; color: #dc2626; }
+
+[data-theme="dark"] .badge-rascunho,
+[data-theme="dark"] .badge-arquivado { background: #2a2c34; color: #9aa0aa; }
+
+/* ─── Painel de totais do evento ─── */
+.totals-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    margin: 18px 0 26px;
+}
+.totals-panel .stat-card { margin: 0; }
+
+/* ─── Barra de seleção/contexto do evento ─── */
+.event-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    margin-bottom: 8px;
+}
+.event-context h2 { margin: 0; font-size: 19px; }
+.event-context .event-context-meta { color: var(--gray); font-size: 13px; margin-top: 2px; }
+[data-theme="dark"] .event-context { background: #1e1f26; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+
+/* ─── Toolbar de busca/filtro de reservas ─── */
+.res-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 14px 0 18px;
+}
+.res-toolbar input[type="search"],
+.res-toolbar select {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
+    background: #fff;
+    color: var(--dark);
+}
+.res-toolbar input[type="search"] { flex: 1; min-width: 200px; }
+.res-toolbar .res-toolbar-spacer { flex: 1; }
+[data-theme="dark"] .res-toolbar input,
+[data-theme="dark"] .res-toolbar select { background: #262830; color: var(--dark); }
+
+/* ─── Itens da reserva (números/produtos) ─── */
+.res-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.res-chip {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+}
+[data-theme="dark"] .res-chip { background: #2a2c34; color: #cbd2dc; }
+
+/* Campo de status como select inline na tabela */
+.status-select {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font: inherit;
+    font-size: 13px;
+    background: #fff;
+    color: var(--dark);
+    cursor: pointer;
+}
+[data-theme="dark"] .status-select { background: #262830; color: var(--dark); }
+
+/* Separador de seção no formulário do evento */
+.form-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--gray);
+    margin: 22px 0 4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+.form-section-title:first-of-type { border-top: none; padding-top: 0; }
+
+.muted-hint { color: var(--gray); font-size: 13px; }
+
+/* Contato embutido na célula do cliente — só aparece no mobile,
+   quando a coluna Contato é ocultada */
+.res-contact-inline {
+    display: none;
+    color: var(--gray);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* Itens da rifa/venda dentro do modal de reserva */
+.res-item-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.res-item-row input { flex: 1; }

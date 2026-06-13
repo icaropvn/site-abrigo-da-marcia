@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin · Eventos — Abrigo da Márcia</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="../../styles/admin.css?v=6">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/supabase-config.js"></script>
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
+            <h1>Painel Admin</h1>
+            <nav class="admin-nav">
+                <a href="index.html">Cães</a>
+                <a href="historias.html">Histórias</a>
+                <a href="eventos.html" class="active">Eventos</a>
+                <a href="seguranca.html">Segurança</a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="theme-toggle" aria-label="Alternar tema"></button>
+            <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+        </div>
+    </header>
+
+    <!-- ── Main ── -->
+    <main class="admin-main">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">—</div>
+                <div class="stat-label">Total de eventos</div>
+            </div>
+            <div class="stat-card available">
+                <div class="stat-value" id="stat-active">—</div>
+                <div class="stat-label">Evento ativo</div>
+            </div>
+        </div>
+
+        <!-- Tabela de eventos -->
+        <div class="section-header">
+            <h2>Eventos</h2>
+            <div class="actions">
+                <a class="btn btn-ghost" href="sorteio.html"><svg width="1.15em" height="1.15em" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 20.4V3.6C3 3.26863 3.26863 3 3.6 3H20.4C20.7314 3 21 3.26863 21 3.6V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4Z" stroke="currentColor" stroke-width="1.5"></path><path d="M7.5 8C7.22386 8 7 7.77614 7 7.5C7 7.22386 7.22386 7 7.5 7C7.77614 7 8 7.22386 8 7.5C8 7.77614 7.77614 8 7.5 8Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 12.5C11.7239 12.5 11.5 12.2761 11.5 12C11.5 11.7239 11.7239 11.5 12 11.5C12.2761 11.5 12.5 11.7239 12.5 12C12.5 12.2761 12.2761 12.5 12 12.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16.5 17C16.2239 17 16 16.7761 16 16.5C16 16.2239 16.2239 16 16.5 16C16.7761 16 17 16.2239 17 16.5C17 16.7761 16.7761 17 16.5 17Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg> Tela de sorteio</a>
+                <button class="btn btn-primary" id="add-event-btn">+ Novo evento</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="t-events">
+                <thead>
+                    <tr>
+                        <th>Capa</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Período</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="events-tbody">
+                    <tr class="loading-row"><td colspan="6">Carregando…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ── Seção de reservas (oculta até escolher um evento) ── -->
+        <section id="reservations-section" style="display:none; margin-top:42px">
+            <div class="event-context">
+                <div>
+                    <h2 id="rc-event-name">—</h2>
+                    <div class="event-context-meta" id="rc-event-meta"></div>
+                </div>
+                <button class="btn btn-ghost btn-sm" id="rc-close">Fechar reservas</button>
+            </div>
+
+            <!-- Painel de totais -->
+            <div class="totals-panel" id="totals-panel"></div>
+
+            <!-- Toolbar -->
+            <div class="res-toolbar">
+                <input type="search" id="res-search" placeholder="Buscar por nome, contato ou número…">
+                <select id="res-filter-status">
+                    <option value="">Todos os status</option>
+                    <option value="reservado">Reservado</option>
+                    <option value="pago">Pago</option>
+                    <option value="entregue">Entregue</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+                <span class="res-toolbar-spacer"></span>
+                <button class="btn btn-ghost btn-sm" id="export-csv-btn">Exportar CSV</button>
+                <button class="btn btn-primary btn-sm" id="add-reservation-btn">+ Nova reserva</button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="t-reservations">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Contato</th>
+                            <th id="th-items">Itens</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservations-tbody">
+                        <tr class="loading-row"><td colspan="6">Carregando…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- ══════════ Modal: evento ══════════ -->
+    <div class="modal-overlay" id="event-modal">
+        <div class="modal-box">
+            <button class="modal-close-btn" id="ev-modal-close">&times;</button>
+            <h2 id="ev-modal-title">Novo evento</h2>
+
+            <div id="ev-form-alert" class="alert"></div>
+
+            <form id="event-form">
+                <input type="hidden" id="ev-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ev-type">Tipo *</label>
+                        <select id="ev-type" required>
+                            <option value="rifa">Rifa</option>
+                            <option value="venda">Venda de produtos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ev-name">Nome *</label>
+                        <input id="ev-name" type="text" required maxlength="120" placeholder="Ex: Rifa do Dia das Mães">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ev-description">Descrição</label>
+                    <textarea id="ev-description" maxlength="800" placeholder="Detalhes do evento, divulgação…"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ev-starts">Início *</label>
+                        <input id="ev-starts" type="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ev-ends">Fim *</label>
+                        <input id="ev-ends" type="date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ev-goal">Meta de arrecadação (R$)
+                        <span class="tooltip-icon" tabindex="0" data-tip="Opcional. A meta pode ser ultrapassada — serve só para a barra de progresso.">?</span>
+                    </label>
+                    <input id="ev-goal" type="number" min="0" step="0.01" placeholder="Ex: 2000.00">
+                </div>
+
+                <!-- ── Campos de rifa ── -->
+                <div id="ev-raffle-fields">
+                    <div class="form-section-title">Rifa</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ev-raffle-total">Quantidade de números *</label>
+                            <input id="ev-raffle-total" type="number" min="1" max="10000" placeholder="Ex: 100">
+                        </div>
+                        <div class="form-group">
+                            <label for="ev-raffle-price">Valor por número (R$) *</label>
+                            <input id="ev-raffle-price" type="number" min="0.01" step="0.01" placeholder="Ex: 10.00">
+                            <small class="muted-hint" id="ev-price-hint"></small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ev-raffle-prize">Prêmio</label>
+                            <input id="ev-raffle-prize" type="text" maxlength="200" placeholder="Ex: Cesta de café da manhã">
+                        </div>
+                        <div class="form-group">
+                            <label for="ev-raffle-max">Máx. de números por reserva
+                                <span class="tooltip-icon" tabindex="0" data-tip="Quantos números uma mesma pessoa pode reservar de uma vez. Padrão: 5.">?</span>
+                            </label>
+                            <input id="ev-raffle-max" type="number" min="1" max="50" value="5" placeholder="5">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── PIX ── -->
+                <div class="form-section-title">Pagamento (PIX)</div>
+                <p class="muted-hint" style="margin:0 0 4px">
+                    Informe a chave + nome + cidade (o site gera o QR Code), <strong>ou</strong> cole um copia-e-cola pronto.
+                </p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ev-pix-key">Chave PIX</label>
+                        <input id="ev-pix-key" type="text" maxlength="120" placeholder="e-mail, telefone, CPF/CNPJ ou aleatória">
+                    </div>
+                    <div class="form-group">
+                        <label for="ev-pix-city">Cidade do recebedor</label>
+                        <input id="ev-pix-city" type="text" maxlength="60" placeholder="Ex: Ribeirao Preto">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ev-pix-name">Nome do recebedor</label>
+                    <input id="ev-pix-name" type="text" maxlength="60" placeholder="Ex: Abrigo da Marcia">
+                </div>
+                <div class="form-group">
+                    <label for="ev-pix-payload">Copia-e-cola pronto (opcional)
+                        <span class="tooltip-icon" tabindex="0" data-tip="Se preenchido, tem prioridade sobre os campos acima. Útil para colar o código do PagSeguro.">?</span>
+                    </label>
+                    <textarea id="ev-pix-payload" maxlength="600" placeholder="00020126…"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ev-pay-instructions">Instruções de pagamento</label>
+                    <input id="ev-pay-instructions" type="text" maxlength="200" placeholder="Ex: Envie o comprovante no WhatsApp (16) 99999-0000">
+                </div>
+
+                <!-- ── Imagens ── -->
+                <div class="form-section-title">Imagens</div>
+                <div class="form-group">
+                    <label>Capa</label>
+                    <div class="img-preview-wrap" id="ev-cover-wrap" style="cursor:pointer">
+                        <img id="ev-cover-img" alt="Capa" style="display:none">
+                        <div class="img-preview-placeholder" id="ev-cover-placeholder">Clique para escolher a capa</div>
+                    </div>
+                    <input type="file" id="ev-cover-file" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none">
+                    <small class="muted-hint">JPG, PNG ou WebP. Máximo 5 MB.</small>
+                </div>
+                <div class="form-group">
+                    <label>Galeria de divulgação <span class="photos-counter" id="ev-photos-counter">(0/5)</span></label>
+                    <div class="photos-grid" id="ev-photos-grid"></div>
+                    <input type="file" id="ev-photos-file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">
+                    <small class="muted-hint">Até 5 imagens. Máximo 5 MB cada.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="ev-modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="ev-save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ══════════ Modal: reserva ══════════ -->
+    <div class="modal-overlay" id="reservation-modal">
+        <div class="modal-box">
+            <button class="modal-close-btn" id="res-modal-close">&times;</button>
+            <h2 id="res-modal-title">Nova reserva</h2>
+
+            <div id="res-form-alert" class="alert"></div>
+
+            <form id="reservation-form">
+                <input type="hidden" id="res-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="res-name">Cliente *</label>
+                        <input id="res-name" type="text" required maxlength="100" placeholder="Nome do cliente">
+                    </div>
+                    <div class="form-group">
+                        <label for="res-contact">Contato *</label>
+                        <input id="res-contact" type="text" required maxlength="100" placeholder="Telefone ou e-mail">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="res-status">Status</label>
+                        <select id="res-status">
+                            <option value="reservado">Reservado</option>
+                            <option value="pago">Pago</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="res-notes">Anotações (interno)</label>
+                        <input id="res-notes" type="text" maxlength="300" placeholder="Ex: pagou via WhatsApp">
+                    </div>
+                </div>
+
+                <!-- Itens da rifa -->
+                <div id="res-raffle-block">
+                    <div class="form-section-title">Números da rifa</div>
+                    <div id="res-numbers-list"></div>
+                    <button type="button" class="btn btn-ghost btn-sm" id="res-add-number">+ Adicionar número</button>
+                    <small class="muted-hint" style="display:block;margin-top:6px" id="res-numbers-hint"></small>
+                </div>
+
+                <!-- Aviso para eventos de venda -->
+                <div id="res-venda-note" style="display:none">
+                    <p class="muted-hint" style="margin-top:14px">
+                        A reserva de produtos (com variações e quantidades) chega na fase 6.5. Por enquanto,
+                        registre os dados do cliente e use as anotações para detalhar o pedido.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="res-modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="res-save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ══════════ Confirmação genérica ══════════ -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3 id="confirm-title">Confirmar</h3>
+            <p id="confirm-msg">Tem certeza?</p>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const MAX_PHOTOS = 5;
+
+        // Ícone de etiqueta para eventos sem capa (currentColor segue o tema)
+        const ICON_LABEL = '<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 17.4V6.6C3 6.26863 3.26863 6 3.6 6H16.6789C16.8795 6 17.0668 6.10026 17.1781 6.26718L20.7781 11.6672C20.9125 11.8687 20.9125 12.1313 20.7781 12.3328L17.1781 17.7328C17.0668 17.8997 16.8795 18 16.6789 18H3.6C3.26863 18 3 17.7314 3 17.4Z" stroke="currentColor" stroke-width="1.5"></path></svg>';
+
+        let allEvents     = [];
+        let editingEventId = null;
+        let coverItem     = { url: null, file: null };   // capa do evento
+        let photoItems    = [];                           // galeria: {url,file,preview}
+
+        let currentEvent  = null;                         // evento selecionado p/ reservas
+        let allReservations = [];                         // reservas do evento atual (com itens)
+        let editingReservationId = null;
+        let confirmCallback = null;
+
+        // ── Utils ───────────────────────────────────────────────
+        function esc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        function slugify(s) {
+            return String(s || 'evento')
+                .toLowerCase()
+                .normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'evento';
+        }
+        function formatMoney(v) {
+            return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        function formatDate(iso) {
+            if (!iso) return '';
+            var p = String(iso).slice(0, 10).split('-');
+            return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+        }
+        const STATUS_LABEL = { reservado:'Reservado', pago:'Pago', entregue:'Entregue', cancelado:'Cancelado' };
+        const EVENT_STATUS_LABEL = { rascunho:'Rascunho', ativo:'Ativo', encerrado:'Encerrado', arquivado:'Arquivado' };
+
+        // ── Auth guard ──────────────────────────────────────────
+        async function init() {
+            const { data } = await sb.auth.getSession();
+            if (!data.session) { window.location.href = 'login.html'; return; }
+            // Exige o 2º fator (AAL2) quando há 2FA cadastrado
+            const aal = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+            if (aal.data && aal.data.nextLevel === 'aal2' && aal.data.currentLevel !== 'aal2') {
+                window.location.href = 'login.html'; return;
+            }
+            document.getElementById('admin-email').textContent = data.session.user.email;
+            await loadEvents();
+            bindGlobal();
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', async function() {
+            await sb.auth.signOut();
+            window.location.href = 'login.html';
+        });
+
+        // ════════════ EVENTOS ════════════
+        async function loadEvents() {
+            const { data, error } = await sb
+                .from('events').select('*').order('created_at', { ascending: false });
+            if (error) { showEventsError(error.message); return; }
+            allEvents = data || [];
+            renderEventsTable();
+            renderEventStats();
+            if (currentEvent) {
+                const fresh = allEvents.find(e => e.id === currentEvent.id);
+                if (fresh) currentEvent = fresh;
+            }
+        }
+
+        function renderEventStats() {
+            document.getElementById('stat-total').textContent = allEvents.length;
+            const active = allEvents.find(e => e.status === 'ativo');
+            document.getElementById('stat-active').textContent = active ? active.name : '—';
+        }
+
+        function renderEventsTable() {
+            const tbody = document.getElementById('events-tbody');
+            tbody.innerHTML = '';
+            if (!allEvents.length) {
+                tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Nenhum evento cadastrado.</td></tr>';
+                return;
+            }
+            allEvents.forEach(function(ev) {
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' +
+                        (ev.cover_url
+                            ? '<img class="dog-thumb" src="' + esc(ev.cover_url) + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+                            : '') +
+                        '<div class="dog-no-img" style="display:' + (ev.cover_url ? 'none' : 'flex') + '">' + ICON_LABEL + '</div>' +
+                    '</td>' +
+                    '<td><strong>' + esc(ev.name) + '</strong></td>' +
+                    '<td>' + (ev.type === 'rifa' ? 'Rifa' : 'Venda') + '</td>' +
+                    '<td>' + formatDate(ev.starts_at) + '<br>' + formatDate(ev.ends_at) + '</td>' +
+                    '<td><span class="badge badge-' + ev.status + '">' + EVENT_STATUS_LABEL[ev.status] + '</span></td>' +
+                    '<td><div class="actions">' + eventActions(ev) + '</div></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eventActions(ev) {
+            let html = '';
+            if (ev.status === 'rascunho')  html += '<button class="btn btn-success btn-sm js-ev-status" data-id="' + ev.id + '" data-to="ativo">Ativar</button>';
+            if (ev.status === 'ativo')     html += '<button class="btn btn-warning btn-sm js-ev-status" data-id="' + ev.id + '" data-to="encerrado">Encerrar</button>';
+            if (ev.status === 'encerrado') {
+                html += '<button class="btn btn-success btn-sm js-ev-status" data-id="' + ev.id + '" data-to="ativo">Reativar</button>';
+                html += '<button class="btn btn-secondary btn-sm js-ev-status" data-id="' + ev.id + '" data-to="arquivado">Arquivar</button>';
+            }
+            html += '<button class="btn btn-primary btn-sm js-ev-reservations" data-id="' + ev.id + '">Reservas</button>';
+            html += '<button class="btn btn-edit btn-sm js-ev-edit" data-id="' + ev.id + '">Editar</button>';
+            if (ev.status === 'rascunho' || ev.status === 'arquivado')
+                html += '<button class="btn btn-danger btn-sm js-ev-delete" data-id="' + ev.id + '">Remover</button>';
+            return html;
+        }
+
+        function showEventsError(msg) {
+            document.getElementById('events-tbody').innerHTML =
+                '<tr class="loading-row"><td colspan="6">Erro: ' + esc(msg) + '</td></tr>';
+        }
+
+        // ── Delegação de ações da tabela de eventos ─────────────
+        document.getElementById('events-tbody').addEventListener('click', function(e) {
+            const t = e.target;
+            const editB = t.closest('.js-ev-edit');
+            const delB  = t.closest('.js-ev-delete');
+            const stB   = t.closest('.js-ev-status');
+            const resB  = t.closest('.js-ev-reservations');
+
+            if (editB) {
+                const ev = allEvents.find(x => x.id === editB.dataset.id);
+                if (ev) openEventModal(ev);
+            } else if (delB) {
+                const ev = allEvents.find(x => x.id === delB.dataset.id);
+                if (ev) askConfirm('Remover evento?',
+                    'Remover "' + ev.name + '" e todas as suas reservas permanentemente? Esta ação não pode ser desfeita.',
+                    function() { return deleteEvent(ev.id); });
+            } else if (stB) {
+                const ev = allEvents.find(x => x.id === stB.dataset.id);
+                if (ev) confirmStatusChange(ev, stB.dataset.to);
+            } else if (resB) {
+                const ev = allEvents.find(x => x.id === resB.dataset.id);
+                if (ev) openReservations(ev);
+            }
+        });
+
+        function confirmStatusChange(ev, to) {
+            const msgs = {
+                ativo:     'Tornar "' + ev.name + '" o evento ativo? (apenas um evento pode estar ativo por vez)',
+                encerrado: 'Encerrar "' + ev.name + '"? Ele deixa de receber novas reservas.',
+                arquivado: 'Arquivar "' + ev.name + '"? Continua visível no histórico público.'
+            };
+            askConfirm('Alterar status', msgs[to] || 'Confirmar?', function() {
+                return changeEventStatus(ev.id, to);
+            });
+        }
+
+        async function changeEventStatus(id, to) {
+            const { error } = await sb.from('events').update({ status: to }).eq('id', id);
+            if (error) {
+                if (/events_um_ativo/.test(error.message))
+                    return Promise.reject(new Error('Já existe um evento ativo. Encerre-o antes de ativar outro.'));
+                return Promise.reject(error);
+            }
+            await loadEvents();
+            if (currentEvent && currentEvent.id === id) refreshReservationContext();
+        }
+
+        async function deleteEvent(id) {
+            const { error } = await sb.from('events').delete().eq('id', id);
+            if (error) return Promise.reject(error);
+            if (currentEvent && currentEvent.id === id) closeReservations();
+            await loadEvents();
+        }
+
+        // ── Modal de evento ─────────────────────────────────────
+        document.getElementById('add-event-btn').addEventListener('click', function() { openEventModal(null); });
+
+        function toggleRaffleFields() {
+            const isRifa = document.getElementById('ev-type').value === 'rifa';
+            document.getElementById('ev-raffle-fields').style.display = isRifa ? '' : 'none';
+        }
+        document.getElementById('ev-type').addEventListener('change', toggleRaffleFields);
+
+        // ── Valor por número sugerido (meta ÷ quantidade) ───────
+        // O preenchimento automático só acontece quando META ou
+        // QUANTIDADE mudam — nunca enquanto o admin digita/apaga no
+        // próprio campo de valor (apagar com backspace funciona).
+        // O valor manual prevalece e não altera meta nem quantidade.
+        let lastAutoPrice = null;
+
+        function suggestedPrice() {
+            const goal  = parseFloat(document.getElementById('ev-goal').value);
+            const total = parseInt(document.getElementById('ev-raffle-total').value, 10);
+            if (!(goal > 0) || !(total > 0)) return null;
+            return Math.round((goal / total) * 100) / 100;
+        }
+
+        function updatePriceHint() {
+            const hint      = document.getElementById('ev-price-hint');
+            const input     = document.getElementById('ev-raffle-price');
+            const suggested = suggestedPrice();
+            if (suggested === null) { hint.textContent = ''; return; }
+            const current = input.value === '' ? null : Number(input.value);
+            if (current !== null && current !== suggested) {
+                hint.textContent = 'Valor definido manualmente — sugerido pela meta: ' + formatMoney(suggested) + '.';
+            } else {
+                hint.textContent = 'Calculado pela meta ÷ números (' + formatMoney(suggested) + '). Ajuste se quiser.';
+            }
+        }
+
+        function autoFillPrice() {
+            const input     = document.getElementById('ev-raffle-price');
+            const suggested = suggestedPrice();
+            if (suggested !== null) {
+                const current = input.value === '' ? null : Number(input.value);
+                // só sobrescreve se o campo está vazio ou ainda segue o cálculo
+                if (current === null || current === lastAutoPrice) {
+                    input.value = suggested.toFixed(2);
+                    lastAutoPrice = suggested;
+                }
+            }
+            updatePriceHint();
+        }
+
+        document.getElementById('ev-goal').addEventListener('input', autoFillPrice);
+        document.getElementById('ev-raffle-total').addEventListener('input', autoFillPrice);
+        document.getElementById('ev-raffle-price').addEventListener('input', function() {
+            lastAutoPrice = null;   // digitou/apagou: o valor passa a ser do admin
+            updatePriceHint();
+        });
+
+        function openEventModal(ev) {
+            editingEventId = ev ? ev.id : null;
+            document.getElementById('ev-modal-title').textContent = ev ? 'Editar evento' : 'Novo evento';
+            document.getElementById('ev-form-alert').className = 'alert';
+
+            document.getElementById('ev-id').value          = ev ? ev.id : '';
+            document.getElementById('ev-type').value         = ev ? ev.type : 'rifa';
+            document.getElementById('ev-name').value         = ev ? ev.name : '';
+            document.getElementById('ev-description').value  = ev && ev.description ? ev.description : '';
+            document.getElementById('ev-starts').value       = ev ? (ev.starts_at || '').slice(0,10) : '';
+            document.getElementById('ev-ends').value         = ev ? (ev.ends_at || '').slice(0,10) : '';
+            document.getElementById('ev-goal').value         = ev && ev.goal_amount != null ? ev.goal_amount : '';
+            document.getElementById('ev-raffle-total').value = ev && ev.raffle_total_numbers != null ? ev.raffle_total_numbers : '';
+            document.getElementById('ev-raffle-price').value = ev && ev.raffle_number_price != null ? ev.raffle_number_price : '';
+            document.getElementById('ev-raffle-prize').value = ev && ev.raffle_prize ? ev.raffle_prize : '';
+            document.getElementById('ev-raffle-max').value   = ev && ev.raffle_max_per_reservation != null ? ev.raffle_max_per_reservation : 5;
+            document.getElementById('ev-pix-key').value      = ev && ev.pix_key ? ev.pix_key : '';
+            document.getElementById('ev-pix-name').value     = ev && ev.pix_merchant_name ? ev.pix_merchant_name : '';
+            document.getElementById('ev-pix-city').value     = ev && ev.pix_merchant_city ? ev.pix_merchant_city : '';
+            document.getElementById('ev-pix-payload').value  = ev && ev.pix_payload ? ev.pix_payload : '';
+            document.getElementById('ev-pay-instructions').value = ev && ev.payment_instructions ? ev.payment_instructions : '';
+
+            // capa
+            coverItem = { url: ev && ev.cover_url ? ev.cover_url : null, file: null };
+            renderCover();
+            document.getElementById('ev-cover-file').value = '';
+
+            // galeria
+            photoItems = (ev && ev.gallery ? ev.gallery : []).map(function(url) {
+                return { url: url, file: null, preview: url };
+            });
+            renderPhotos();
+            document.getElementById('ev-photos-file').value = '';
+
+            lastAutoPrice = null;
+            updatePriceHint();
+            toggleRaffleFields();
+            document.getElementById('event-modal').classList.add('open');
+        }
+
+        function closeEventModal() {
+            document.getElementById('event-modal').classList.remove('open');
+            editingEventId = null;
+            coverItem = { url: null, file: null };
+            photoItems = [];
+        }
+        document.getElementById('ev-modal-close').addEventListener('click', closeEventModal);
+        document.getElementById('ev-modal-cancel').addEventListener('click', closeEventModal);
+        document.getElementById('event-modal').addEventListener('click', function(e) { if (e.target === this) closeEventModal(); });
+
+        // ── Capa ────────────────────────────────────────────────
+        function renderCover() {
+            const img = document.getElementById('ev-cover-img');
+            const ph  = document.getElementById('ev-cover-placeholder');
+            const preview = coverItem.file ? coverItem._preview : coverItem.url;
+            if (preview) {
+                img.src = preview; img.style.display = 'block'; ph.style.display = 'none';
+            } else {
+                img.style.display = 'none'; ph.style.display = 'flex';
+            }
+        }
+        document.getElementById('ev-cover-wrap').addEventListener('click', function() {
+            document.getElementById('ev-cover-file').click();
+        });
+        document.getElementById('ev-cover-file').addEventListener('change', function() {
+            const file = (this.files || [])[0];
+            this.value = '';
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { showEvAlert('A capa deve ter no máximo 5 MB.', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = function(ev) { coverItem = { url: null, file: file, _preview: ev.target.result }; renderCover(); };
+            reader.readAsDataURL(file);
+        });
+
+        // ── Galeria ─────────────────────────────────────────────
+        function renderPhotos() {
+            const grid = document.getElementById('ev-photos-grid');
+            grid.innerHTML = '';
+            photoItems.forEach(function(item, i) {
+                const cell = document.createElement('div');
+                cell.className = 'photo-thumb';
+                cell.innerHTML =
+                    '<img src="' + esc(item.preview) + '" alt="Foto ' + (i+1) + '">' +
+                    '<button type="button" class="photo-remove" data-index="' + i + '" aria-label="Remover">&times;</button>';
+                grid.appendChild(cell);
+            });
+            if (photoItems.length < MAX_PHOTOS) {
+                const add = document.createElement('button');
+                add.type = 'button'; add.className = 'photos-add'; add.id = 'ev-photos-add-btn';
+                add.innerHTML = '<span>+</span>Adicionar';
+                grid.appendChild(add);
+            }
+            document.getElementById('ev-photos-counter').textContent = '(' + photoItems.length + '/' + MAX_PHOTOS + ')';
+        }
+        document.getElementById('ev-photos-grid').addEventListener('click', function(e) {
+            const rm  = e.target.closest('.photo-remove');
+            const add = e.target.closest('#ev-photos-add-btn');
+            if (rm) { photoItems.splice(parseInt(rm.dataset.index, 10), 1); renderPhotos(); }
+            else if (add) { document.getElementById('ev-photos-file').click(); }
+        });
+        document.getElementById('ev-photos-file').addEventListener('change', function() {
+            const files = Array.from(this.files || []);
+            this.value = '';
+            files.forEach(function(file) {
+                if (photoItems.length >= MAX_PHOTOS) return;
+                if (file.size > 5 * 1024 * 1024) { showEvAlert('"' + file.name + '" passa de 5 MB e foi ignorada.', 'error'); return; }
+                const reader = new FileReader();
+                reader.onload = function(ev) { photoItems.push({ url: null, file: file, preview: ev.target.result }); renderPhotos(); };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        async function uploadImage(file, slug) {
+            const ext  = file.name.split('.').pop().toLowerCase();
+            const path = 'events/' + slug + '-' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + ext;
+            const { error } = await sb.storage.from('event-photos').upload(path, file, { upsert: true });
+            if (error) throw error;
+            return sb.storage.from('event-photos').getPublicUrl(path).data.publicUrl;
+        }
+
+        // ── Salvar evento ───────────────────────────────────────
+        document.getElementById('event-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('ev-save-btn');
+            btn.disabled = true; btn.textContent = 'Salvando…';
+            try {
+                const type = document.getElementById('ev-type').value;
+                const name = document.getElementById('ev-name').value.trim();
+                const starts = document.getElementById('ev-starts').value;
+                const ends   = document.getElementById('ev-ends').value;
+
+                if (ends < starts) throw new Error('A data de fim não pode ser anterior à de início.');
+
+                const rTotal = document.getElementById('ev-raffle-total').value;
+                const rPrice = document.getElementById('ev-raffle-price').value;
+                if (type === 'rifa' && (!rTotal || !rPrice))
+                    throw new Error('Rifa exige quantidade de números e valor por número.');
+
+                const slug = slugify(name);
+
+                // upload da capa
+                let coverUrl = coverItem.url;
+                if (coverItem.file) coverUrl = await uploadImage(coverItem.file, slug);
+
+                // upload da galeria
+                const gallery = [];
+                for (const item of photoItems) {
+                    if (item.file) gallery.push(await uploadImage(item.file, slug));
+                    else if (item.url) gallery.push(item.url);
+                }
+
+                const goal = document.getElementById('ev-goal').value;
+                const payload = {
+                    type: type,
+                    name: name,
+                    description: document.getElementById('ev-description').value.trim() || null,
+                    starts_at: starts,
+                    ends_at: ends,
+                    goal_amount: goal ? Number(goal) : null,
+                    cover_url: coverUrl,
+                    gallery: gallery,
+                    pix_key: document.getElementById('ev-pix-key').value.trim() || null,
+                    pix_merchant_name: document.getElementById('ev-pix-name').value.trim() || null,
+                    pix_merchant_city: document.getElementById('ev-pix-city').value.trim() || null,
+                    pix_payload: document.getElementById('ev-pix-payload').value.trim() || null,
+                    payment_instructions: document.getElementById('ev-pay-instructions').value.trim() || null,
+                    raffle_total_numbers: type === 'rifa' ? Number(rTotal) : null,
+                    raffle_number_price:  type === 'rifa' ? Number(rPrice) : null,
+                    raffle_max_per_reservation: type === 'rifa' ? (Number(document.getElementById('ev-raffle-max').value) || 5) : 5,
+                    raffle_prize: type === 'rifa' ? (document.getElementById('ev-raffle-prize').value.trim() || null) : null
+                };
+
+                let error;
+                if (editingEventId) ({ error } = await sb.from('events').update(payload).eq('id', editingEventId));
+                else                ({ error } = await sb.from('events').insert(payload));
+                if (error) throw error;
+
+                closeEventModal();
+                await loadEvents();
+                if (currentEvent) refreshReservationContext();
+            } catch (err) {
+                showEvAlert(err.message || 'Erro ao salvar.', 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Salvar';
+            }
+        });
+
+        function showEvAlert(msg, type) {
+            const el = document.getElementById('ev-form-alert');
+            el.textContent = msg; el.className = 'alert alert-' + type + ' show';
+        }
+
+        // ════════════ RESERVAS ════════════
+        function openReservations(ev) {
+            currentEvent = ev;
+            document.getElementById('reservations-section').style.display = '';
+            refreshReservationContext();
+            loadReservations();
+            document.getElementById('reservations-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function closeReservations() {
+            currentEvent = null;
+            allReservations = [];
+            document.getElementById('reservations-section').style.display = 'none';
+        }
+        document.getElementById('rc-close').addEventListener('click', closeReservations);
+
+        function refreshReservationContext() {
+            if (!currentEvent) return;
+            document.getElementById('rc-event-name').textContent = currentEvent.name;
+            const parts = [
+                (currentEvent.type === 'rifa' ? 'Rifa' : 'Venda'),
+                EVENT_STATUS_LABEL[currentEvent.status],
+                formatDate(currentEvent.starts_at) + ' a ' + formatDate(currentEvent.ends_at)
+            ];
+            if (currentEvent.type === 'rifa')
+                parts.push(currentEvent.raffle_total_numbers + ' números a ' + formatMoney(currentEvent.raffle_number_price));
+            document.getElementById('rc-event-meta').textContent = parts.join(' · ');
+            document.getElementById('th-items').textContent = currentEvent.type === 'rifa' ? 'Números' : 'Itens';
+        }
+
+        async function loadReservations() {
+            const tbody = document.getElementById('reservations-tbody');
+            tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Carregando…</td></tr>';
+            const { data, error } = await sb
+                .from('reservations')
+                .select('*, reservation_items(*)')
+                .eq('event_id', currentEvent.id)
+                .order('created_at', { ascending: false });
+            if (error) {
+                tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Erro: ' + esc(error.message) + '</td></tr>';
+                return;
+            }
+            allReservations = data || [];
+            renderTotals();
+            renderReservations();
+        }
+
+        function renderTotals() {
+            const active = allReservations.filter(r => r.status !== 'cancelado');
+            const itemsOf = r => (r.reservation_items || []);
+            const sum = (rs, fn) => rs.reduce((acc, r) => acc + itemsOf(r).reduce((a, it) => a + fn(it), 0), 0);
+
+            const money = it => (it.quantity || 0) * Number(it.unit_price || 0);
+            // "A receber" e "Confirmado" são mutuamente exclusivos: ao marcar
+            // como pago, o valor sai de um e entra no outro (sem dupla contagem).
+            const pending = active.filter(r => r.status === 'reservado');
+            const paid    = active.filter(r => r.status === 'pago' || r.status === 'entregue');
+
+            const reservationCount = active.length;
+            const itemsSold     = sum(active, it => it.quantity || 0);
+            const amountPending = sum(pending, money);
+            const amountPaid    = sum(paid, money);
+
+            const cards = [];
+            cards.push(card(reservationCount, 'Reservas ativas'));
+            if (currentEvent.type === 'rifa') {
+                cards.push(card(itemsSold + ' / ' + (currentEvent.raffle_total_numbers || '—'), 'Números vendidos'));
+            } else {
+                cards.push(card(itemsSold, 'Itens vendidos'));
+            }
+            cards.push(card(formatMoney(amountPending), 'A receber (reservado)', 'pending'));
+            cards.push(card(formatMoney(amountPaid), 'Confirmado (pago)', 'available'));
+            document.getElementById('totals-panel').innerHTML = cards.join('');
+
+            function card(value, label, cls) {
+                return '<div class="stat-card ' + (cls || '') + '">' +
+                    '<div class="stat-value">' + esc(value) + '</div>' +
+                    '<div class="stat-label">' + esc(label) + '</div></div>';
+            }
+        }
+
+        function itemsLabel(r) {
+            const items = r.reservation_items || [];
+            if (!items.length) return '<span class="muted-hint">—</span>';
+            return '<div class="res-items">' + items.map(function(it) {
+                if (it.raffle_number != null)
+                    return '<span class="res-chip">Nº ' + it.raffle_number + '</span>';
+                let v = it.variation ? Object.keys(it.variation).map(k => it.variation[k]).join('/') : '';
+                return '<span class="res-chip">' + (it.quantity || 1) + 'x' + (v ? ' ' + esc(v) : '') + '</span>';
+            }).join('') + '</div>';
+        }
+
+        function getFilteredReservations() {
+            const q = document.getElementById('res-search').value.trim().toLowerCase();
+            const st = document.getElementById('res-filter-status').value;
+            return allReservations.filter(function(r) {
+                if (st && r.status !== st) return false;
+                if (!q) return true;
+                if ((r.customer_name || '').toLowerCase().includes(q)) return true;
+                if ((r.contact || '').toLowerCase().includes(q)) return true;
+                const nums = (r.reservation_items || []).map(it => String(it.raffle_number)).join(' ');
+                return nums.includes(q);
+            });
+        }
+
+        function renderReservations() {
+            const tbody = document.getElementById('reservations-tbody');
+            const list = getFilteredReservations();
+            tbody.innerHTML = '';
+            if (!list.length) {
+                tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Nenhuma reserva encontrada.</td></tr>';
+                return;
+            }
+            list.forEach(function(r) {
+                const tr = document.createElement('tr');
+                if (r.status === 'cancelado') tr.className = 'row-inactive';
+                tr.innerHTML =
+                    '<td><strong>' + esc(r.customer_name) + '</strong>' +
+                        // contato embutido: visível só no mobile, onde a coluna Contato some
+                        '<small class="res-contact-inline">' + esc(r.contact) + '</small>' +
+                        (r.notes ? '<br><small class="muted-hint">' + esc(r.notes) + '</small>' : '') + '</td>' +
+                    '<td>' + esc(r.contact) + '</td>' +
+                    '<td>' + itemsLabel(r) + '</td>' +
+                    '<td>' + statusSelect(r) + '</td>' +
+                    '<td>' + formatDate(r.created_at) + '</td>' +
+                    '<td><div class="actions">' +
+                        '<button class="btn btn-edit btn-sm js-res-edit" data-id="' + r.id + '">Editar</button>' +
+                        '<button class="btn btn-danger btn-sm js-res-delete" data-id="' + r.id + '">Remover</button>' +
+                    '</div></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function statusSelect(r) {
+            const opts = ['reservado','pago','entregue','cancelado'].map(function(s) {
+                return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + STATUS_LABEL[s] + '</option>';
+            }).join('');
+            return '<select class="status-select js-res-status" data-id="' + r.id + '">' + opts + '</select>';
+        }
+
+        document.getElementById('res-search').addEventListener('input', renderReservations);
+        document.getElementById('res-filter-status').addEventListener('change', renderReservations);
+
+        // Delegação da tabela de reservas
+        document.getElementById('reservations-tbody').addEventListener('change', async function(e) {
+            const sel = e.target.closest('.js-res-status');
+            if (!sel) return;
+            const r = allReservations.find(x => x.id === sel.dataset.id);
+            if (!r || r.status === sel.value) return;
+            const newStatus = sel.value;
+            const { error } = await sb.from('reservations').update({ status: newStatus }).eq('id', r.id);
+            if (error) { alert('Erro ao alterar status: ' + error.message); sel.value = r.status; return; }
+            await loadReservations();
+        });
+
+        document.getElementById('reservations-tbody').addEventListener('click', function(e) {
+            const editB = e.target.closest('.js-res-edit');
+            const delB  = e.target.closest('.js-res-delete');
+            if (editB) {
+                const r = allReservations.find(x => x.id === editB.dataset.id);
+                if (r) openReservationModal(r);
+            } else if (delB) {
+                const r = allReservations.find(x => x.id === delB.dataset.id);
+                if (r) askConfirm('Remover reserva?',
+                    'Remover a reserva de "' + r.customer_name + '" permanentemente? Para apenas liberar o número, use o status "Cancelado".',
+                    function() { return deleteReservation(r.id); });
+            }
+        });
+
+        async function deleteReservation(id) {
+            const { error } = await sb.from('reservations').delete().eq('id', id);
+            if (error) return Promise.reject(error);
+            await loadReservations();
+        }
+
+        // ── Modal de reserva ────────────────────────────────────
+        document.getElementById('add-reservation-btn').addEventListener('click', function() { openReservationModal(null); });
+
+        function openReservationModal(r) {
+            editingReservationId = r ? r.id : null;
+            document.getElementById('res-modal-title').textContent = r ? 'Editar reserva' : 'Nova reserva';
+            document.getElementById('res-form-alert').className = 'alert';
+            document.getElementById('res-id').value      = r ? r.id : '';
+            document.getElementById('res-name').value    = r ? r.customer_name : '';
+            document.getElementById('res-contact').value = r ? r.contact : '';
+            document.getElementById('res-status').value  = r ? r.status : 'reservado';
+            document.getElementById('res-notes').value   = r && r.notes ? r.notes : '';
+
+            const isRifa = currentEvent.type === 'rifa';
+            document.getElementById('res-raffle-block').style.display = isRifa ? '' : 'none';
+            document.getElementById('res-venda-note').style.display   = isRifa ? 'none' : '';
+            if (isRifa) {
+                const nums = (r ? (r.reservation_items || []).filter(it => it.raffle_number != null).map(it => it.raffle_number) : []);
+                renderNumberInputs(nums.length ? nums : ['']);
+                document.getElementById('res-numbers-hint').textContent =
+                    'Números de 1 a ' + currentEvent.raffle_total_numbers + '. Números já tomados por outra reserva ativa serão rejeitados.';
+            }
+
+            document.getElementById('reservation-modal').classList.add('open');
+        }
+
+        function closeReservationModal() {
+            document.getElementById('reservation-modal').classList.remove('open');
+            editingReservationId = null;
+        }
+        document.getElementById('res-modal-close').addEventListener('click', closeReservationModal);
+        document.getElementById('res-modal-cancel').addEventListener('click', closeReservationModal);
+        document.getElementById('reservation-modal').addEventListener('click', function(e) { if (e.target === this) closeReservationModal(); });
+
+        function renderNumberInputs(values) {
+            const wrap = document.getElementById('res-numbers-list');
+            wrap.innerHTML = '';
+            values.forEach(function(v) { wrap.appendChild(numberRow(v)); });
+        }
+        function numberRow(value) {
+            const row = document.createElement('div');
+            row.className = 'res-item-row';
+            row.innerHTML =
+                '<input type="number" class="js-res-number" min="1" max="' + (currentEvent.raffle_total_numbers || 10000) +
+                    '" value="' + (value === '' ? '' : value) + '" placeholder="Número">' +
+                '<button type="button" class="btn btn-ghost btn-sm js-remove-number">&times;</button>';
+            return row;
+        }
+        document.getElementById('res-add-number').addEventListener('click', function() {
+            document.getElementById('res-numbers-list').appendChild(numberRow(''));
+        });
+        document.getElementById('res-numbers-list').addEventListener('click', function(e) {
+            const rm = e.target.closest('.js-remove-number');
+            if (rm) rm.closest('.res-item-row').remove();
+        });
+
+        // ── Salvar reserva (criar/editar) ───────────────────────
+        document.getElementById('reservation-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('res-save-btn');
+            btn.disabled = true; btn.textContent = 'Salvando…';
+            try {
+                const name    = document.getElementById('res-name').value.trim();
+                const contact = document.getElementById('res-contact').value.trim();
+                const status  = document.getElementById('res-status').value;
+                const notes   = document.getElementById('res-notes').value.trim() || null;
+                if (name.length < 2) throw new Error('Informe o nome do cliente.');
+                if (contact.length < 8) throw new Error('Informe um contato válido (telefone ou e-mail).');
+
+                const isRifa = currentEvent.type === 'rifa';
+                let numbers = [];
+                if (isRifa) {
+                    numbers = Array.from(document.querySelectorAll('.js-res-number'))
+                        .map(i => parseInt(i.value, 10))
+                        .filter(n => !isNaN(n));
+                    numbers = Array.from(new Set(numbers));
+                    for (const n of numbers) {
+                        if (n < 1 || n > currentEvent.raffle_total_numbers)
+                            throw new Error('Número ' + n + ' fora do intervalo (1 a ' + currentEvent.raffle_total_numbers + ').');
+                    }
+                }
+
+                const resPayload = { event_id: currentEvent.id, customer_name: name, contact: contact, status: status, notes: notes };
+
+                let reservationId = editingReservationId;
+                if (editingReservationId) {
+                    const { error } = await sb.from('reservations').update(resPayload).eq('id', editingReservationId);
+                    if (error) throw error;
+                } else {
+                    const { data, error } = await sb.from('reservations').insert(resPayload).select('id').single();
+                    if (error) throw error;
+                    reservationId = data.id;
+                }
+
+                if (isRifa) await syncRaffleNumbers(reservationId, numbers, status);
+
+                closeReservationModal();
+                await loadReservations();
+            } catch (err) {
+                showResAlert(translateItemError(err), 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Salvar';
+            }
+        });
+
+        // Reconcilia os números da reserva com os digitados.
+        async function syncRaffleNumbers(reservationId, numbers, status) {
+            const existing = (allReservations.find(r => r.id === reservationId) || {}).reservation_items || [];
+            const existingNums = existing.filter(it => it.raffle_number != null).map(it => it.raffle_number);
+            const released = (status === 'cancelado');
+
+            // remover os que saíram
+            const toDelete = existing.filter(it => it.raffle_number != null && numbers.indexOf(it.raffle_number) === -1);
+            for (const it of toDelete) {
+                const { error } = await sb.from('reservation_items').delete().eq('id', it.id);
+                if (error) throw error;
+            }
+            // inserir os novos
+            const toInsert = numbers.filter(n => existingNums.indexOf(n) === -1).map(function(n) {
+                return {
+                    reservation_id: reservationId, event_id: currentEvent.id, raffle_number: n,
+                    released: released, quantity: 1, unit_price: currentEvent.raffle_number_price
+                };
+            });
+            if (toInsert.length) {
+                const { error } = await sb.from('reservation_items').insert(toInsert);
+                if (error) throw error;
+            }
+        }
+
+        function translateItemError(err) {
+            const m = (err && err.message) || '';
+            if (/raffle_numero_unico|duplicate key/.test(m))
+                return 'Um dos números já está reservado por outra pessoa. Escolha outro.';
+            return m || 'Erro ao salvar a reserva.';
+        }
+
+        function showResAlert(msg, type) {
+            const el = document.getElementById('res-form-alert');
+            el.textContent = msg; el.className = 'alert alert-' + type + ' show';
+        }
+
+        // ── Exportar CSV ────────────────────────────────────────
+        document.getElementById('export-csv-btn').addEventListener('click', function() {
+            const rows = [['reserva_id','cliente','contato','status','criada_em','tipo_item','numero_rifa','variacao','quantidade','preco_unit']];
+            allReservations.forEach(function(r) {
+                const items = r.reservation_items || [];
+                if (!items.length) {
+                    rows.push([r.id, r.customer_name, r.contact, r.status, r.created_at, '', '', '', '', '']);
+                    return;
+                }
+                items.forEach(function(it) {
+                    rows.push([
+                        r.id, r.customer_name, r.contact, r.status, r.created_at,
+                        it.raffle_number != null ? 'rifa' : 'produto',
+                        it.raffle_number != null ? it.raffle_number : '',
+                        it.variation ? JSON.stringify(it.variation) : '',
+                        it.quantity, it.unit_price
+                    ]);
+                });
+            });
+            const csv = rows.map(function(row) {
+                return row.map(function(cell) {
+                    const s = String(cell == null ? '' : cell);
+                    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+                }).join(',');
+            }).join('\r\n');
+
+            const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'reservas-' + slugify(currentEvent.name) + '-' + new Date().toISOString().slice(0,10) + '.csv';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        });
+
+        // ── Confirmação genérica ────────────────────────────────
+        function askConfirm(title, msg, cb) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-msg').textContent = msg;
+            confirmCallback = cb;
+            document.getElementById('confirm-overlay').classList.add('open');
+        }
+        document.getElementById('confirm-cancel').addEventListener('click', function() {
+            document.getElementById('confirm-overlay').classList.remove('open');
+            confirmCallback = null;
+        });
+        document.getElementById('confirm-ok').addEventListener('click', async function() {
+            const cb = confirmCallback;
+            confirmCallback = null;
+            document.getElementById('confirm-overlay').classList.remove('open');
+            if (!cb) return;
+            try { await cb(); }
+            catch (err) { alert('Erro: ' + (err.message || err)); }
+        });
+
+        function bindGlobal() {
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeEventModal();
+                    closeReservationModal();
+                    document.getElementById('confirm-overlay').classList.remove('open');
+                }
+            });
+            setupAutoRefresh();
+        }
+
+        // Recarrega os dados ao voltar o foco para a aba — assim mudanças
+        // feitas em outro dispositivo aparecem sem precisar recarregar à mão.
+        // Não recarrega se houver modal aberto (admin no meio de uma edição)
+        // nem em rajada (intervalo mínimo entre recargas).
+        function setupAutoRefresh() {
+            let lastRefresh = Date.now();
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState !== 'visible') return;
+                if (Date.now() - lastRefresh < 3000) return;
+                if (document.querySelector('.modal-overlay.open, .confirm-overlay.open')) return;
+                lastRefresh = Date.now();
+                loadEvents();
+                if (currentEvent) loadReservations();
+            });
+        }
+
+        init();
+    })();
+    </script>
+    <script src="../../js/theme-toggle.js"></script>
+</body>
+</html>

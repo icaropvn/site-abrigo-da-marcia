@@ -1,0 +1,261 @@
+/* ════════════════════════════════════════════════════════════
+   FASE 6.4 — Tela de Sorteio (admin, pensada para transmissão)
+   Palco sempre escuro (independe do tema do site) para ficar
+   bonito em live; usa a paleta e a fonte Afacad do site.
+   ════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;700;900&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --vermelhoPrincipal: #F15A55;
+    --amareloDestaque:   #FFAD28;
+    --brancoPrincipal:   #F6F6F6;
+    --palcoFundo:        #14141a;
+    --palcoCard:         #1e1f26;
+    --palcoBorda:        #2e3038;
+    --palcoTextoSuave:   #9aa0aa;
+}
+
+body {
+    font-family: afacad, 'Afacad', arial, sans-serif;
+    background: radial-gradient(ellipse at 50% 30%, #21222b 0%, var(--palcoFundo) 70%);
+    color: var(--brancoPrincipal);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ─── Barra de controles (some no modo apresentação) ─── */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: rgba(20, 20, 26, .85);
+    border-bottom: 1px solid var(--palcoBorda);
+}
+
+.controls img { height: 34px; }
+
+.controls select {
+    flex: 1;
+    min-width: 180px;
+    max-width: 420px;
+    padding: 8px 12px;
+    border: 1px solid var(--palcoBorda);
+    border-radius: 8px;
+    background: var(--palcoCard);
+    color: var(--brancoPrincipal);
+    font: inherit;
+    font-size: 15px;
+}
+
+.controls .spacer { flex: 1; }
+
+.btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter .15s, transform .1s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn:hover  { filter: brightness(1.1); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.btn-primary { background: var(--vermelhoPrincipal); color: #fff; }
+.btn-ghost {
+    background: transparent;
+    color: var(--palcoTextoSuave);
+    border: 1px solid var(--palcoBorda);
+}
+.btn-gold { background: var(--amareloDestaque); color: #1a1208; }
+
+/* Botão grande do palco */
+.btn-big {
+    font-size: 24px;
+    padding: 16px 46px;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(241, 90, 85, .35);
+}
+
+/* ─── Palco ─── */
+.stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px 20px 50px;
+    gap: 18px;
+}
+
+.stage .event-name {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.1;
+}
+
+.stage .event-prize {
+    font-size: clamp(17px, 2.5vw, 24px);
+    color: var(--amareloDestaque);
+    font-weight: 500;
+}
+
+.stage .pool-info {
+    font-size: 16px;
+    color: var(--palcoTextoSuave);
+}
+
+/* Círculo do número */
+.number-circle {
+    width: clamp(220px, 38vmin, 340px);
+    height: clamp(220px, 38vmin, 340px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--palcoCard);
+    border: 6px solid var(--palcoBorda);
+    margin: 14px 0;
+    transition: border-color .3s, box-shadow .3s;
+}
+
+.number-circle .number {
+    font-size: clamp(80px, 16vmin, 150px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    color: var(--brancoPrincipal);
+}
+
+.number-circle.spinning {
+    border-color: var(--vermelhoPrincipal);
+    box-shadow: 0 0 40px rgba(241, 90, 85, .35);
+}
+
+.number-circle.winner {
+    border-color: var(--amareloDestaque);
+    box-shadow: 0 0 60px rgba(255, 173, 40, .45);
+    animation: winner-pop .5s ease-out;
+}
+.number-circle.winner .number { color: var(--amareloDestaque); }
+
+@keyframes winner-pop {
+    0%   { transform: scale(.85); }
+    60%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+.winner-name {
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 700;
+    min-height: 1.3em;
+}
+.winner-name strong { color: var(--amareloDestaque); }
+.winner-name .icon-gift {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+    color: var(--amareloDestaque);
+}
+
+.stage .hint {
+    font-size: 15px;
+    color: var(--palcoTextoSuave);
+    max-width: 460px;
+}
+
+.stage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+/* Selo de resultado confirmado */
+.confirmed-tag .icon-check {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+}
+
+.confirmed-tag {
+    display: inline-block;
+    background: rgba(34, 197, 94, .15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, .4);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.stage-alert {
+    display: none;
+    background: rgba(239, 68, 68, .15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, .4);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 15px;
+    max-width: 520px;
+}
+.stage-alert.show { display: block; }
+
+/* ─── Modo apresentação (controles ocultos) ─── */
+body.presentation .controls { display: none; }
+
+.show-controls {
+    display: none;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    opacity: .25;
+    transition: opacity .2s;
+    z-index: 5;
+}
+.show-controls:hover { opacity: 1; }
+body.presentation .show-controls { display: block; }
+
+/* ─── Confete ─── */
+.confetti {
+    position: fixed;
+    top: -16px;
+    width: 10px;
+    height: 16px;
+    z-index: 3;
+    pointer-events: none;
+    animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+    to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: .6;
+    }
+}
+
+@media (width < 600px) {
+    .controls { padding: 10px 12px; gap: 8px; }
+    /* seletor de rifa em linha própria; botões dividem a linha de baixo */
+    .controls select { flex-basis: 100%; max-width: none; order: 1; }
+    .controls .spacer { display: none; }
+    .controls .btn { flex: 1; order: 2; padding: 9px 10px; font-size: 14px; white-space: nowrap; }
+    .btn-big  { font-size: 20px; padding: 14px 34px; }
+    .stage { padding: 20px 14px 36px; gap: 14px; }
+    .stage-actions { width: 100%; }
+    .stage-actions .btn-big { width: 100%; }
+}
