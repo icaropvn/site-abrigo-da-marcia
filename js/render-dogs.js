@@ -5,6 +5,14 @@ function calcAge(birthYear) {
     return years === 1 ? '1 ano' : years + ' anos';
 }
 
+// Rank numérico do porte para ordenação (pequeno < médio < grande).
+function sizeRank(size) {
+    if (size === 'Porte pequeno') return 1;
+    if (size === 'Porte médio')  return 2;
+    if (size === 'Porte grande') return 3;
+    return 99;
+}
+
 function safeUrl(url) {
     try {
         var u = new URL(url);
@@ -18,11 +26,17 @@ function renderDogs(dogs) {
 
     catalog.innerHTML = '';
 
-    dogs.forEach(function(dog) {
+    dogs.forEach(function(dog, i) {
         var card = document.createElement('div');
         card.className = 'catalog-card';
         // data-index permite o modal buscar o objeto completo do cão
         card.dataset.index = dogs.indexOf(dog);
+        // Dados para ordenação (catalog-filters.js). data-order = ordem original
+        // (vinda do servidor: destaque primeiro) usada na opção "Destaque".
+        card.dataset.order = i;
+        card.dataset.name = dog.name || '';
+        card.dataset.birthYear = dog.birth_year || '';
+        card.dataset.sizeRank = sizeRank(dog.size);
 
         // Carrossel de fotos (buildCarousel definido em carousel.js)
         var photos = dog.photos && dog.photos.length ? dog.photos
@@ -83,6 +97,7 @@ function normalizeDog(dog) {
         name:        dog.name,
         gender:      dog.gender,
         age:         dog.birth_year ? calcAge(dog.birth_year) : (dog.age || '—'),
+        birth_year:  dog.birth_year || null,
         size:        dog.size,
         description: dog.description,
         image:       dog.image,

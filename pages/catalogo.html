@@ -103,6 +103,18 @@
                     <option value="Porte grande">Grande</option>
                 </select>
             </div>
+            <div class="filter-group">
+                <label for="filter-sort">Ordenar por</label>
+                <select id="filter-sort">
+                    <option value="default">Destaque</option>
+                    <option value="name-az">Nome (A–Z)</option>
+                    <option value="name-za">Nome (Z–A)</option>
+                    <option value="size-sm">Porte (pequeno → grande)</option>
+                    <option value="size-lg">Porte (grande → pequeno)</option>
+                    <option value="age-young">Idade (mais novo → mais velho)</option>
+                    <option value="age-old">Idade (mais velho → mais novo)</option>
+                </select>
+            </div>
             <button id="filter-reset">Limpar filtros</button>
         </div>
         <div id="filter-results" style="display: none;">
