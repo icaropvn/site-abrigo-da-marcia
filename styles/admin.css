@@ -1125,7 +1125,8 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
 .ev-product-head .js-prod-name  { flex: 1 1 auto; min-width: 0; }
 .ev-product-head .js-prod-price { flex: 0 0 110px; min-width: 0; }
 .ev-product-head .js-prod-remove { flex: 0 0 auto; }
-.ev-product-body { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+/* Imagens no topo (linha) e variações abaixo, ocupando a largura toda */
+.ev-product-body { display: flex; flex-direction: column; gap: 14px; }
 .ev-product-img {
     width: 96px;
     height: 96px;
@@ -1149,16 +1150,22 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
     padding: 4px;
     color: var(--gray);
 }
-.ev-product-attrs { flex: 1 1 240px; min-width: 0; }
+.ev-product-attrs { width: 100%; min-width: 0; }
 
 /* ── Builder de variações (atributos) ── */
+/* Cada variação é um painel sutil, para distinguir uma linha da outra */
 .prod-attr-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    background: #f6f8fb;
+    border: 1px solid var(--border);
+    border-radius: 10px;
 }
-.prod-attr-row .js-attr-name    { flex: 0 0 38%; min-width: 0; }
+[data-theme="dark"] .prod-attr-row { background: #20222a; }
+.prod-attr-row .js-attr-name    { flex: 0 0 clamp(140px, 28%, 220px); min-width: 0; }
 /* Caixa de chips: parece um input e cresce com as opções */
 .prod-attr-row .js-attr-chips {
     flex: 1;
@@ -1170,7 +1177,9 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
     padding: 6px 8px;
     border: 1.5px solid var(--border);
     border-radius: 8px;
+    background: #fff;
 }
+.prod-attr-row .js-attr-name { background: #fff; }
 .prod-attr-row .js-attr-chips:focus-within { border-color: var(--red); }
 .prod-attr-row .js-attr-chip-input {
     flex: 1;
@@ -1204,7 +1213,8 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
     opacity: .65;
 }
 .attr-chip-x:hover { opacity: 1; }
-[data-theme="dark"] .prod-attr-row .js-attr-chips { background: #262830; }
+[data-theme="dark"] .prod-attr-row .js-attr-chips,
+[data-theme="dark"] .prod-attr-row .js-attr-name { background: #262830; }
 [data-theme="dark"] .prod-attr-row .js-attr-chip-input { color: var(--dark); }
 [data-theme="dark"] .attr-chip { background: #2a2c34; color: #cbd2dc; }
 
