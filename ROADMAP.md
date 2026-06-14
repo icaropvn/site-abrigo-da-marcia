@@ -221,7 +221,7 @@ Novas seções no painel admin existente (`pages/admin/`), no mesmo padrão visu
 
 ### 6.4 | Tela de Sorteio
 
-> **✅ Implementado (2026-06-12)** em `pages/admin/sorteio.html` + `styles/sorteio.css` (palco escuro dedicado, independente do tema). Sorteia entre números **Pago ou Entregue** com `crypto.getRandomValues`, animação de roleta desacelerando + confete, botão "Confirmar resultado" grava `raffle_winner_number`, "Sortear novamente" antes de confirmar e "Refazer sorteio" (limpa o resultado) depois. Modo apresentação oculta os controles para a live (ESC restaura). Acesso pelo botão "🎲 Tela de sorteio" no admin de eventos. Pendente teste no navegador após o schema da 6.1 rodar no Supabase.
+> **✅ Implementado (2026-06-12)** em `pages/admin/sorteio.html` + `styles/sorteio.css` (palco escuro dedicado, independente do tema). Sorteia entre números **Pago ou Entregue** com `crypto.getRandomValues`, animação de roleta desacelerando + confete, botão "Confirmar resultado" grava `raffle_winner_number`, "Sortear novamente" antes de confirmar e "Refazer sorteio" (limpa o resultado) depois. Modo apresentação oculta os controles para a live (ESC restaura). **Acesso (2026-06-14): botão "Sortear" em cada rifa ativa/encerrada na tabela de eventos**, que abre `sorteio.html?event=<id>` já vinculado àquela rifa (a tela pré-seleciona o evento da URL). O antigo botão "Tela de sorteio" no topo da página foi removido. Pendente teste no navegador após o schema da 6.1 rodar no Supabase.
 
 **O QUÊ:**
 Página dedicada com a estética do site, pensada para ser exibida em **transmissão ao vivo**.
@@ -245,6 +245,26 @@ Estende a infraestrutura da rifa para eventos de venda. Implementar **somente ap
 2. **Página pública**: vitrine dos produtos; formulário monta o pedido por combinações de variação + quantidade (ex: 3 camisetas masculinas M + 2 femininas P) com cálculo do total antes de confirmar.
 3. **Reserva** usa o mesmo fluxo da rifa (mesma RPC, mesmos status, mesmo PIX); o painel de totais passa a somar `quantidade × preço`.
 4. **Validação de variações na RPC**: como cada produto define seus próprios atributos (ex: camiseta com Gênero + Tamanho, caneca só com Cor, pizza sem nenhum), a `variation` enviada pelo cliente é conferida contra o `attributes` do produto no banco — exatamente as chaves definidas, valores dentro das `options`, preço sempre o do banco. JSON fora da definição → reserva rejeitada.
+
+> **✅ Implementado (2026-06-14).** Backend já vinha pronto na 6.1 (`event_products`,
+> branch `venda` da RPC `create_reservation` com validação de variações, view
+> `event_totals` somando `quantidade × preço`). Frontend desta etapa:
+> - **Admin** (`pages/admin/eventos.html`): os **produtos são cadastrados dentro do
+>   modal do evento** (seção "Produtos" visível para tipo=venda) — ≥1 produto
+>   obrigatório, com botão "+ Adicionar produto" para múltiplos. Cada produto tem
+>   nome, preço, imagem opcional e **variações configuráveis** (nome + opções por
+>   vírgula; nomes únicos por produto; opção única = informação fixa, já
+>   pré-selecionada). No salvar, `reconcileProducts` insere/atualiza/remove (remoção
+>   bloqueada se o produto já está em reserva — FK `on delete restrict`). O modal de
+>   reserva tem o montador de pedido (produto + variação + quantidade por linha,
+>   total ao vivo); admin grava direto na tabela (`syncProductItems`). Chips de
+>   itens mostram nome do produto + variação.
+> - **Público** (`js/render-events.js` + `styles/eventos.css`): vitrine de produtos
+>   (`event_products`) com seletor de variação + quantidade, carrinho com total e
+>   barra de ação fixa (reusa `.raffle-actionbar`); reserva pela mesma RPC/PIX. O
+>   modal de reserva foi generalizado (`openReserveModal(ev, opts)` com `items`
+>   genéricos; openers `openRaffleReserveModal`/`openSaleReserveModal`).
+> - Cache-bust: `render-events.js?v=2`, `eventos.css?v=2`, admin `admin.css?v=8`.
 
 ---
 
@@ -314,7 +334,7 @@ Coletar o mínimo, informar a finalidade e **excluir de verdade** os dados de ev
 | 6 | Página pública de eventos (rifa + PIX QR Code) | 🚧 Implementado — pendente teste com schema executado |
 | 6 | Admin — eventos, reservas, totais, CSV | 🚧 Implementado — pendente teste com schema executado |
 | 6 | Tela de sorteio | 🚧 Implementado — pendente teste com schema executado |
-| 6 | Venda de produtos (variações configuráveis) | 🔜 Planejado (após rifa) |
+| 6 | Venda de produtos (variações configuráveis) | ✅ Implementado (2026-06-14) — pendente teste no navegador |
 | 6 | Retenção LGPD + limpeza de dados | 🔜 Planejado |
 
 ---

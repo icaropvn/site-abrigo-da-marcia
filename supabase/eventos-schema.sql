@@ -106,13 +106,53 @@ create table if not exists event_products (
   event_id   uuid          not null references events(id) on delete cascade,
   name       text          not null,
   price      numeric(10,2) not null check (price > 0),
-  image      text,
+  -- até 3 imagens (URLs); a 1ª é a capa exibida na vitrine
+  images     jsonb         not null default '[]' check (jsonb_typeof(images) = 'array'),
   attributes jsonb         not null default '[]' check (jsonb_typeof(attributes) = 'array'),
+  -- tabela de medidas (opcional): imagem OU manual, nunca os dois.
+  -- size_chart manual = [{"label":"Altura","value":"30 cm"}, ...]
+  size_chart_image text,
+  size_chart       jsonb   check (size_chart is null or jsonb_typeof(size_chart) = 'array'),
   sort_order integer       not null default 0,
-  created_at timestamptz   default now()
+  created_at timestamptz   default now(),
+  constraint event_products_sizechart_one check (size_chart_image is null or size_chart is null)
 );
 
 create index if not exists event_products_event on event_products (event_id);
+
+-- ──────────────────────────────────────────────────────────
+-- MIGRAÇÃO — produtos: imagem única → até 3 imagens + medidas
+-- Idempotente (pode rodar mais de uma vez). Aplica-se a bancos
+-- que já tinham event_products com a coluna `image`.
+-- ──────────────────────────────────────────────────────────
+alter table event_products add column if not exists images           jsonb not null default '[]';
+alter table event_products add column if not exists size_chart_image text;
+alter table event_products add column if not exists size_chart       jsonb;
+
+do $$
+begin
+  -- move a imagem única antiga para o array `images` e descarta a coluna
+  if exists (select 1 from information_schema.columns
+             where table_name = 'event_products' and column_name = 'image') then
+    update event_products
+       set images = jsonb_build_array(image)
+     where image is not null and images = '[]'::jsonb;
+    alter table event_products drop column image;
+  end if;
+
+  if not exists (select 1 from pg_constraint where conname = 'event_products_images_arr') then
+    alter table event_products add constraint event_products_images_arr
+      check (jsonb_typeof(images) = 'array');
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'event_products_sizechart_arr') then
+    alter table event_products add constraint event_products_sizechart_arr
+      check (size_chart is null or jsonb_typeof(size_chart) = 'array');
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'event_products_sizechart_one') then
+    alter table event_products add constraint event_products_sizechart_one
+      check (size_chart_image is null or size_chart is null);
+  end if;
+end $$;
 
 -- ──────────────────────────────────────────────────────────
 -- 3. TABELA: reservations (dados pessoais — acesso restrito)

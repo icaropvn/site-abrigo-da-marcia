@@ -12,10 +12,10 @@
             document.documentElement.setAttribute('data-theme', t);
         })();
     </script>
-    <link rel="stylesheet" href="../../styles/admin.css?v=6">
+    <link rel="stylesheet" href="../../styles/admin.css?v=8">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
-    <script src="../../js/admin-common.js"></script>
+    <script src="../../js/admin-common.js?v=2"></script>
 </head>
 <body>
 
@@ -57,7 +57,6 @@
         <div class="section-header">
             <h2>Eventos</h2>
             <div class="actions">
-                <a class="btn btn-ghost" href="sorteio.html"><svg width="1.15em" height="1.15em" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 20.4V3.6C3 3.26863 3.26863 3 3.6 3H20.4C20.7314 3 21 3.26863 21 3.6V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4Z" stroke="currentColor" stroke-width="1.5"></path><path d="M7.5 8C7.22386 8 7 7.77614 7 7.5C7 7.22386 7.22386 7 7.5 7C7.77614 7 8 7.22386 8 7.5C8 7.77614 7.77614 8 7.5 8Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 12.5C11.7239 12.5 11.5 12.2761 11.5 12C11.5 11.7239 11.7239 11.5 12 11.5C12.2761 11.5 12.5 11.7239 12.5 12C12.5 12.2761 12.2761 12.5 12 12.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16.5 17C16.2239 17 16 16.7761 16 16.5C16 16.2239 16.2239 16 16.5 16C16.7761 16 17 16.2239 17 16.5C17 16.7761 16.7761 17 16.5 17Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg> Tela de sorteio</a>
                 <button class="btn btn-primary" id="add-event-btn">+ Novo evento</button>
             </div>
         </div>
@@ -204,6 +203,18 @@
                     </div>
                 </div>
 
+                <!-- ── Produtos (venda) ── -->
+                <div id="ev-products-section" style="display:none">
+                    <div class="form-section-title">Produtos</div>
+                    <p class="muted-hint" style="margin:0 0 10px">
+                        Cadastre ao menos um produto. Cada produto pode ter variações (ex:
+                        <em>Tamanho: P, M, G</em> · <em>Sabor: calabresa, mussarela</em>). Variação com
+                        uma única opção (ex: <em>Tamanho: único</em>) é registrada como informação fixa.
+                    </p>
+                    <div id="ev-products-list"></div>
+                    <button type="button" class="btn btn-ghost btn-sm" id="ev-add-product">+ Adicionar produto</button>
+                </div>
+
                 <!-- ── PIX ── -->
                 <div class="form-section-title">Pagamento (PIX)</div>
                 <p class="muted-hint" style="margin:0 0 4px">
@@ -306,12 +317,15 @@
                     <small class="muted-hint" style="display:block;margin-top:6px" id="res-numbers-hint"></small>
                 </div>
 
-                <!-- Aviso para eventos de venda -->
-                <div id="res-venda-note" style="display:none">
-                    <p class="muted-hint" style="margin-top:14px">
-                        A reserva de produtos (com variações e quantidades) chega na fase 6.5. Por enquanto,
-                        registre os dados do cliente e use as anotações para detalhar o pedido.
-                    </p>
+                <!-- Itens da venda (produtos + variação + quantidade) -->
+                <div id="res-venda-block" style="display:none">
+                    <div class="form-section-title">Itens do pedido</div>
+                    <div id="res-products-list"></div>
+                    <button type="button" class="btn btn-ghost btn-sm" id="res-add-product">+ Adicionar item</button>
+                    <div class="res-order-total" id="res-order-total"></div>
+                    <small class="muted-hint" id="res-venda-empty" style="display:none;margin-top:6px">
+                        Este evento ainda não tem produtos cadastrados. Use "Gerenciar produtos" antes de criar reservas.
+                    </small>
                 </div>
 
                 <div class="modal-footer">
@@ -352,6 +366,12 @@
         let allReservations = [];                         // reservas do evento atual (com itens)
         let editingReservationId = null;
         let confirmCallback = null;
+
+        let eventProducts = [];                           // produtos do evento atual (tela de reservas)
+        // Produtos editados dentro do modal do evento (venda):
+        let formProductImages = {};                       // estado por card: { [pid]: { images:[{url,file,preview}], sizeImage:{url,file,preview}|null } }
+        let loadedProductIds = [];                        // ids dos produtos já no banco (p/ diff de remoção)
+        let pidCounter = 0;
 
         // ── Utils ───────────────────────────────────────────────
         // esc(), slugify(), formatMoney() e formatDate() vêm de js/admin-common.js.
@@ -445,6 +465,9 @@
                 if (!ev.summary)
                     html += '<button class="btn btn-danger btn-sm js-ev-purge" data-id="' + ev.id + '">Limpar dados</button>';
             }
+            // Sortear: leva à tela de sorteio já vinculada a esta rifa (só rifa ativa/encerrada).
+            if (ev.type === 'rifa' && (ev.status === 'ativo' || ev.status === 'encerrado'))
+                html += '<a class="btn btn-secondary btn-sm" href="sorteio.html?event=' + ev.id + '">Sortear</a>';
             html += '<button class="btn btn-primary btn-sm js-ev-reservations" data-id="' + ev.id + '">Reservas</button>';
             // Editar fica indisponível no arquivado (registro congelado) — reabra para editar.
             if (ev.status !== 'arquivado')
@@ -569,11 +592,15 @@
         // ── Modal de evento ─────────────────────────────────────
         document.getElementById('add-event-btn').addEventListener('click', function() { openEventModal(null); });
 
-        function toggleRaffleFields() {
-            const isRifa = document.getElementById('ev-type').value === 'rifa';
-            document.getElementById('ev-raffle-fields').style.display = isRifa ? '' : 'none';
+        function toggleTypeFields() {
+            const type = document.getElementById('ev-type').value;
+            document.getElementById('ev-raffle-fields').style.display    = type === 'rifa'  ? '' : 'none';
+            document.getElementById('ev-products-section').style.display = type === 'venda' ? '' : 'none';
+            // Venda exige ≥1 produto: garante um card inicial.
+            if (type === 'venda' && !document.querySelector('#ev-products-list .ev-product-card'))
+                addProductCard(null);
         }
-        document.getElementById('ev-type').addEventListener('change', toggleRaffleFields);
+        document.getElementById('ev-type').addEventListener('change', toggleTypeFields);
 
         // ── Valor por número sugerido (meta ÷ quantidade) ───────
         // O preenchimento automático só acontece quando META ou
@@ -623,7 +650,7 @@
             updatePriceHint();
         });
 
-        function openEventModal(ev) {
+        async function openEventModal(ev) {
             editingEventId = ev ? ev.id : null;
             document.getElementById('ev-modal-title').textContent = ev ? 'Editar evento' : 'Novo evento';
             document.getElementById('ev-form-alert').className = 'alert';
@@ -659,9 +686,15 @@
             renderPhotos();
             document.getElementById('ev-photos-file').value = '';
 
+            // produtos (venda): carrega os existentes ao editar
+            document.getElementById('ev-products-list').innerHTML = '';
+            formProductImages = {};
+            loadedProductIds = [];
+            if (ev && ev.type === 'venda') await loadProductsIntoForm(ev.id);
+
             lastAutoPrice = null;
             updatePriceHint();
-            toggleRaffleFields();
+            toggleTypeFields();   // se venda e lista vazia, cria 1 card
             document.getElementById('event-modal').classList.add('open');
         }
 
@@ -670,6 +703,9 @@
             editingEventId = null;
             coverItem = { url: null, file: null };
             photoItems = [];
+            document.getElementById('ev-products-list').innerHTML = '';
+            formProductImages = {};
+            loadedProductIds = [];
         }
         document.getElementById('ev-modal-close').addEventListener('click', closeEventModal);
         document.getElementById('ev-modal-cancel').addEventListener('click', closeEventModal);
@@ -689,14 +725,14 @@
         document.getElementById('ev-cover-wrap').addEventListener('click', function() {
             document.getElementById('ev-cover-file').click();
         });
-        document.getElementById('ev-cover-file').addEventListener('change', function() {
+        document.getElementById('ev-cover-file').addEventListener('change', async function() {
             const file = (this.files || [])[0];
             this.value = '';
             if (!file) return;
-            if (file.size > 5 * 1024 * 1024) { showEvAlert('A capa deve ter no máximo 5 MB.', 'error'); return; }
-            const reader = new FileReader();
-            reader.onload = function(ev) { coverItem = { url: null, file: file, _preview: ev.target.result }; renderCover(); };
-            reader.readAsDataURL(file);
+            const ready = await prepareImage(file, 'A capa');
+            if (!ready) return;
+            coverItem = { url: null, file: ready.file, _preview: ready.preview };
+            renderCover();
         });
 
         // ── Galeria ─────────────────────────────────────────────
@@ -725,17 +761,47 @@
             if (rm) { photoItems.splice(parseInt(rm.dataset.index, 10), 1); renderPhotos(); }
             else if (add) { document.getElementById('ev-photos-file').click(); }
         });
-        document.getElementById('ev-photos-file').addEventListener('change', function() {
+        document.getElementById('ev-photos-file').addEventListener('change', async function() {
             const files = Array.from(this.files || []);
             this.value = '';
-            files.forEach(function(file) {
-                if (photoItems.length >= MAX_PHOTOS) return;
-                if (file.size > 5 * 1024 * 1024) { showEvAlert('"' + file.name + '" passa de 5 MB e foi ignorada.', 'error'); return; }
-                const reader = new FileReader();
-                reader.onload = function(ev) { photoItems.push({ url: null, file: file, preview: ev.target.result }); renderPhotos(); };
-                reader.readAsDataURL(file);
-            });
+            for (const file of files) {
+                if (photoItems.length >= MAX_PHOTOS) break;
+                const ready = await prepareImage(file, '"' + file.name + '"');
+                if (!ready) continue;
+                photoItems.push({ url: null, file: ready.file, preview: ready.preview });
+                renderPhotos();
+            }
         });
+
+        // Comprime a imagem (compressImage de admin-common.js) e devolve
+        // { file, preview } pronto para uso; null em caso de erro (já avisa
+        // por toast). `label` personaliza a mensagem de "passou de 5 MB".
+        async function prepareImage(file, label) {
+            // Fallbacks defensivos: se admin-common.js estiver em cache/desatualizado,
+            // os helpers podem não existir — degradamos sem compressão e avisamos por
+            // alert, em vez de falhar em silêncio dentro do async.
+            const notify  = (typeof adminToast === 'function') ? adminToast : function(m) { alert(m); };
+            const compress = (typeof compressImage === 'function')
+                ? compressImage : function(f) { return Promise.resolve(f); };
+            try {
+                const out = await compress(file, { maxDim: 1600, quality: 0.82 });
+                if (out.size > 5 * 1024 * 1024) {
+                    notify((label || 'A imagem') + ' continua acima de 5 MB mesmo após a compressão. Reduza o tamanho e tente de novo.', 'error');
+                    return null;
+                }
+                const preview = await new Promise(function(res, rej) {
+                    const r = new FileReader();
+                    r.onload  = function() { res(r.result); };
+                    r.onerror = function() { rej(new Error('read')); };
+                    r.readAsDataURL(out);
+                });
+                return { file: out, preview: preview };
+            } catch (err) {
+                console.error('prepareImage:', err);
+                notify('Não foi possível processar essa imagem. Tente outra.', 'error');
+                return null;
+            }
+        }
 
         async function uploadImage(file, slug) {
             const ext  = file.name.split('.').pop().toLowerCase();
@@ -762,6 +828,10 @@
                 const rPrice = document.getElementById('ev-raffle-price').value;
                 if (type === 'rifa' && (!rTotal || !rPrice))
                     throw new Error('Rifa exige quantidade de números e valor por número.');
+
+                // Venda: valida os produtos antes de gravar o evento (falha cedo).
+                let formProducts = [];
+                if (type === 'venda') formProducts = collectFormProducts();
 
                 const slug = slugify(name, 'evento');
 
@@ -797,10 +867,19 @@
                     raffle_prize: type === 'rifa' ? (document.getElementById('ev-raffle-prize').value.trim() || null) : null
                 };
 
+                let eventId = editingEventId;
                 let error;
-                if (editingEventId) ({ error } = await sb.from('events').update(payload).eq('id', editingEventId));
-                else                ({ error } = await sb.from('events').insert(payload));
+                if (editingEventId) {
+                    ({ error } = await sb.from('events').update(payload).eq('id', editingEventId));
+                } else {
+                    let data;
+                    ({ data, error } = await sb.from('events').insert(payload).select('id').single());
+                    if (!error && data) eventId = data.id;
+                }
                 if (error) throw error;
+
+                // Produtos: sincroniza os da venda; em rifa, limpa eventuais órfãos.
+                await reconcileProducts(eventId, type === 'venda' ? formProducts : []);
 
                 closeEventModal();
                 await loadEvents();
@@ -823,11 +902,13 @@
             document.getElementById('reservations-section').style.display = '';
             refreshReservationContext();
             loadReservations();
+            if (ev.type === 'venda') loadEventProducts(); else eventProducts = [];
             document.getElementById('reservations-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         function closeReservations() {
             currentEvent = null;
             allReservations = [];
+            eventProducts = [];
             document.getElementById('reservations-section').style.display = 'none';
         }
         document.getElementById('rc-close').addEventListener('click', closeReservations);
@@ -913,8 +994,10 @@
             return '<div class="res-items">' + items.map(function(it) {
                 if (it.raffle_number != null)
                     return '<span class="res-chip">Nº ' + it.raffle_number + '</span>';
+                const prod = eventProducts.find(p => p.id === it.product_id);
+                const name = prod ? prod.name : 'Produto';
                 let v = it.variation ? Object.keys(it.variation).map(k => it.variation[k]).join('/') : '';
-                return '<span class="res-chip">' + (it.quantity || 1) + 'x' + (v ? ' ' + esc(v) : '') + '</span>';
+                return '<span class="res-chip">' + (it.quantity || 1) + 'x ' + esc(name) + (v ? ' (' + esc(v) + ')' : '') + '</span>';
             }).join('') + '</div>';
         }
 
@@ -1045,12 +1128,17 @@
 
             const isRifa = currentEvent.type === 'rifa';
             document.getElementById('res-raffle-block').style.display = isRifa ? '' : 'none';
-            document.getElementById('res-venda-note').style.display   = isRifa ? 'none' : '';
+            document.getElementById('res-venda-block').style.display  = isRifa ? 'none' : '';
             if (isRifa) {
                 const nums = (r ? (r.reservation_items || []).filter(it => it.raffle_number != null).map(it => it.raffle_number) : []);
                 renderNumberInputs(nums.length ? nums : ['']);
                 document.getElementById('res-numbers-hint').textContent =
                     'Números de 1 a ' + currentEvent.raffle_total_numbers + '. Números já tomados por outra reserva ativa serão rejeitados.';
+            } else {
+                document.getElementById('res-venda-empty').style.display = eventProducts.length ? 'none' : '';
+                const prodItems = (r ? (r.reservation_items || []).filter(it => it.product_id != null) : []);
+                renderProductItemRows(prodItems.length ? prodItems : [null]);
+                updateOrderTotal();
             }
 
             document.getElementById('reservation-modal').classList.add('open');
@@ -1101,6 +1189,7 @@
 
                 const isRifa = currentEvent.type === 'rifa';
                 let numbers = [];
+                let productItems = [];
                 if (isRifa) {
                     numbers = Array.from(document.querySelectorAll('.js-res-number'))
                         .map(i => parseInt(i.value, 10))
@@ -1110,6 +1199,9 @@
                         if (n < 1 || n > currentEvent.raffle_total_numbers)
                             throw new Error('Número ' + n + ' fora do intervalo (1 a ' + currentEvent.raffle_total_numbers + ').');
                     }
+                } else {
+                    productItems = collectProductItems();
+                    if (!productItems.length) throw new Error('Adicione ao menos um produto ao pedido.');
                 }
 
                 const resPayload = { event_id: currentEvent.id, customer_name: name, contact: contact, status: status, notes: notes };
@@ -1125,6 +1217,7 @@
                 }
 
                 if (isRifa) await syncRaffleNumbers(reservationId, numbers, status);
+                else        await syncProductItems(reservationId, productItems);
 
                 closeReservationModal();
                 await loadReservations();
@@ -1160,6 +1253,117 @@
             }
         }
 
+        // ── Itens de venda (produto + variação + quantidade) ────
+        function renderProductItemRows(items) {
+            const wrap = document.getElementById('res-products-list');
+            wrap.innerHTML = '';
+            items.forEach(function(it) { wrap.appendChild(productRow(it)); });
+        }
+
+        function productRow(item) {
+            const row = document.createElement('div');
+            row.className = 'res-product-row';
+            const opts = '<option value="">Produto…</option>' + eventProducts.map(function(p) {
+                return '<option value="' + p.id + '"' + (item && item.product_id === p.id ? ' selected' : '') + '>' +
+                    esc(p.name) + ' — ' + formatMoney(p.price) + '</option>';
+            }).join('');
+            row.innerHTML =
+                '<select class="js-res-product">' + opts + '</select>' +
+                '<span class="js-res-variations"></span>' +
+                '<input type="number" class="js-res-qty" min="1" max="100" value="' + (item && item.quantity ? item.quantity : 1) + '">' +
+                '<button type="button" class="btn btn-ghost btn-sm js-remove-product" aria-label="Remover item">&times;</button>';
+            fillVariations(row, item ? item.product_id : '', item ? item.variation : null);
+            return row;
+        }
+
+        // Reconstrói os selects de variação conforme o produto escolhido na linha.
+        function fillVariations(row, productId, currentVariation) {
+            const wrap = row.querySelector('.js-res-variations');
+            wrap.innerHTML = '';
+            const product = eventProducts.find(p => p.id === productId);
+            if (!product) return;
+            (product.attributes || []).forEach(function(attr) {
+                const opts = attr.options || [];
+                const single = opts.length === 1;   // opção única: já vem selecionada
+                const sel = document.createElement('select');
+                sel.className = 'js-res-variation';
+                sel.dataset.attr = attr.name;
+                let html = single ? '' : '<option value="">' + esc(attr.name) + '…</option>';
+                opts.forEach(function(opt) {
+                    const isSel = single || (currentVariation && currentVariation[attr.name] === opt);
+                    html += '<option value="' + esc(opt) + '"' + (isSel ? ' selected' : '') + '>' + esc(opt) + '</option>';
+                });
+                sel.innerHTML = html;
+                wrap.appendChild(sel);
+            });
+        }
+
+        // Lê as linhas do pedido; valida produto + variações completas + quantidade.
+        function collectProductItems() {
+            const rows = document.querySelectorAll('#res-products-list .res-product-row');
+            const items = [];
+            rows.forEach(function(row) {
+                const pid = row.querySelector('.js-res-product').value;
+                if (!pid) return;
+                const product = eventProducts.find(p => p.id === pid);
+                if (!product) return;
+                const variation = {};
+                let ok = true;
+                row.querySelectorAll('.js-res-variation').forEach(function(sel) {
+                    if (!sel.value) ok = false; else variation[sel.dataset.attr] = sel.value;
+                });
+                if (!ok) throw new Error('Escolha todas as opções de "' + product.name + '".');
+                let qty = parseInt(row.querySelector('.js-res-qty').value, 10);
+                if (isNaN(qty) || qty < 1) qty = 1;
+                if (qty > 100) qty = 100;
+                items.push({ product_id: pid, variation: variation, quantity: qty, unit_price: Number(product.price) });
+            });
+            return items;
+        }
+
+        function updateOrderTotal() {
+            let total = 0;
+            try {
+                collectProductItems().forEach(function(it) { total += it.quantity * it.unit_price; });
+            } catch (e) { /* pedido incompleto: total parcial não exibido */ }
+            const el = document.getElementById('res-order-total');
+            el.textContent = total ? 'Total do pedido: ' + formatMoney(total) : '';
+        }
+
+        // Reescreve os itens de produto da reserva (admin grava direto na tabela).
+        async function syncProductItems(reservationId, items) {
+            const existing = (allReservations.find(r => r.id === reservationId) || {}).reservation_items || [];
+            const prodItems = existing.filter(it => it.product_id != null);
+            for (const it of prodItems) {
+                const { error } = await sb.from('reservation_items').delete().eq('id', it.id);
+                if (error) throw error;
+            }
+            const toInsert = items.map(function(it) {
+                return {
+                    reservation_id: reservationId, event_id: currentEvent.id,
+                    product_id: it.product_id, variation: it.variation,
+                    quantity: it.quantity, unit_price: it.unit_price
+                };
+            });
+            if (toInsert.length) {
+                const { error } = await sb.from('reservation_items').insert(toInsert);
+                if (error) throw error;
+            }
+        }
+
+        document.getElementById('res-add-product').addEventListener('click', function() {
+            document.getElementById('res-products-list').appendChild(productRow(null));
+        });
+        document.getElementById('res-products-list').addEventListener('click', function(e) {
+            const rm = e.target.closest('.js-remove-product');
+            if (rm) { rm.closest('.res-product-row').remove(); updateOrderTotal(); }
+        });
+        document.getElementById('res-products-list').addEventListener('change', function(e) {
+            const psel = e.target.closest('.js-res-product');
+            if (psel) fillVariations(psel.closest('.res-product-row'), psel.value, null);
+            updateOrderTotal();
+        });
+
         function translateItemError(err) {
             const m = (err && err.message) || '';
             if (/raffle_numero_unico|duplicate key/.test(m))
@@ -1170,6 +1374,309 @@
         function showResAlert(msg, type) {
             const el = document.getElementById('res-form-alert');
             el.textContent = msg; el.className = 'alert alert-' + type + ' show';
+        }
+
+        // ════════════ PRODUTOS (eventos de venda) ════════════
+        // Leitura para a tela de reservas (montador de pedido + chips).
+        async function loadEventProducts() {
+            if (!currentEvent) { eventProducts = []; return; }
+            const { data, error } = await sb.from('event_products')
+                .select('*').eq('event_id', currentEvent.id)
+                .order('sort_order', { ascending: true }).order('created_at', { ascending: true });
+            eventProducts = error ? [] : (data || []);
+            if (allReservations.length) renderReservations();   // atualiza nomes nos chips
+        }
+
+        // ── Produtos dentro do modal do evento (cards inline) ───
+        async function loadProductsIntoForm(eventId) {
+            const { data } = await sb.from('event_products')
+                .select('*').eq('event_id', eventId)
+                .order('sort_order', { ascending: true }).order('created_at', { ascending: true });
+            const list = data || [];
+            loadedProductIds = list.map(function(p) { return p.id; });
+            list.forEach(addProductCard);
+        }
+
+        function prodCard(pid) {
+            return document.querySelector('#ev-products-list .ev-product-card[data-pid="' + pid + '"]');
+        }
+
+        function addProductCard(product) {
+            const pid = 'p' + (pidCounter++);
+            // Estado do card: até 3 imagens + imagem da tabela de medidas.
+            // Cada imagem = { url, file, preview }. URLs existentes vêm do banco.
+            const imgs = (product && Array.isArray(product.images) ? product.images : [])
+                .filter(function(u) { return u; }).slice(0, 3)
+                .map(function(u) { return { url: u, file: null, preview: u }; });
+            const sizeImg = product && product.size_chart_image
+                ? { url: product.size_chart_image, file: null, preview: product.size_chart_image } : null;
+            formProductImages[pid] = { images: imgs, sizeImage: sizeImg };
+
+            const manualRows = product && Array.isArray(product.size_chart) ? product.size_chart : [];
+            const mode = sizeImg ? 'image' : (manualRows.length ? 'manual' : 'none');
+
+            const card = document.createElement('div');
+            card.className = 'ev-product-card';
+            card.dataset.pid = pid;
+            card.dataset.id  = product && product.id ? product.id : '';
+            card.innerHTML =
+                '<div class="ev-product-head">' +
+                    '<input type="text" class="js-prod-name" maxlength="80" placeholder="Nome do produto" value="' + (product ? esc(product.name) : '') + '">' +
+                    '<input type="number" class="js-prod-price" min="0.01" step="0.01" placeholder="Preço" value="' + (product && product.price != null ? product.price : '') + '">' +
+                    '<button type="button" class="btn btn-danger btn-sm js-prod-remove" aria-label="Remover produto">&times;</button>' +
+                '</div>' +
+                '<div class="ev-product-body">' +
+                    '<div class="ev-product-media">' +
+                        '<div class="prod-images js-prod-images"></div>' +
+                        '<input type="file" class="js-prod-img-file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">' +
+                        '<small class="prod-media-hint">Até 3 imagens · a 1ª é a capa</small>' +
+                    '</div>' +
+                    '<div class="ev-product-attrs">' +
+                        '<div class="prod-attrs-list"></div>' +
+                        '<button type="button" class="btn btn-ghost btn-sm js-add-attr">+ Adicionar opção</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ev-product-sizechart">' +
+                    '<div class="sizechart-label">Tabela de medidas <span class="muted">(opcional)</span></div>' +
+                    '<div class="size-modes">' +
+                        '<label><input type="radio" name="size-' + pid + '" class="js-size-mode" value="none"' + (mode === 'none' ? ' checked' : '') + '> Nenhuma</label>' +
+                        '<label><input type="radio" name="size-' + pid + '" class="js-size-mode" value="image"' + (mode === 'image' ? ' checked' : '') + '> Imagem</label>' +
+                        '<label><input type="radio" name="size-' + pid + '" class="js-size-mode" value="manual"' + (mode === 'manual' ? ' checked' : '') + '> Manual</label>' +
+                    '</div>' +
+                    '<div class="js-size-image" style="display:none">' +
+                        '<div class="ev-product-img js-size-img-wrap">' +
+                            '<img class="js-size-img" alt="" style="display:none">' +
+                            '<div class="js-size-img-ph img-preview-placeholder">Imagem da tabela</div>' +
+                            '<input type="file" class="js-size-img-file" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="js-size-manual" style="display:none">' +
+                        '<div class="js-size-rows"></div>' +
+                        '<button type="button" class="btn btn-ghost btn-sm js-size-add-row">+ Adicionar linha</button>' +
+                    '</div>' +
+                '</div>';
+            document.getElementById('ev-products-list').appendChild(card);
+
+            const attrsList = card.querySelector('.prod-attrs-list');
+            (product && Array.isArray(product.attributes) ? product.attributes : []).forEach(function(a) {
+                attrsList.appendChild(attrRow(a));
+            });
+            const rowsBox = card.querySelector('.js-size-rows');
+            manualRows.forEach(function(r) { rowsBox.appendChild(sizeRow(r)); });
+
+            renderProdImages(pid);
+            renderSizeChart(pid);
+            return card;
+        }
+
+        function attrRow(attr) {
+            const row = document.createElement('div');
+            row.className = 'prod-attr-row';
+            row.innerHTML =
+                '<input type="text" class="js-attr-name" maxlength="40" placeholder="Variação (ex: Tamanho)" value="' + (attr ? esc(attr.name) : '') + '">' +
+                '<input type="text" class="js-attr-options" maxlength="200" placeholder="Opções por vírgula (ex: P, M, G)" value="' + (attr ? esc((attr.options || []).join(', ')) : '') + '">' +
+                '<button type="button" class="btn btn-ghost btn-sm js-remove-attr" aria-label="Remover variação">&times;</button>';
+            return row;
+        }
+
+        function sizeRow(r) {
+            const row = document.createElement('div');
+            row.className = 'size-row';
+            row.innerHTML =
+                '<input type="text" class="js-size-label" maxlength="40" placeholder="Medida (ex: Altura)" value="' + (r ? esc(r.label) : '') + '">' +
+                '<input type="text" class="js-size-value" maxlength="40" placeholder="Valor (ex: 30 cm)" value="' + (r ? esc(r.value) : '') + '">' +
+                '<button type="button" class="btn btn-ghost btn-sm js-size-remove-row" aria-label="Remover linha">&times;</button>';
+            return row;
+        }
+
+        // Galeria de imagens do produto (thumbs + botão de adicionar até 3).
+        function renderProdImages(pid) {
+            const card = prodCard(pid);
+            if (!card) return;
+            const box  = card.querySelector('.js-prod-images');
+            const list = (formProductImages[pid] && formProductImages[pid].images) || [];
+            let html = list.map(function(it, i) {
+                return '<div class="prod-thumb">' +
+                        '<img src="' + esc(it.preview) + '" alt="">' +
+                        (i === 0 ? '<span class="prod-thumb-cover">Capa</span>' : '') +
+                        '<button type="button" class="prod-thumb-remove js-prod-img-remove" data-idx="' + i + '" aria-label="Remover imagem">&times;</button>' +
+                    '</div>';
+            }).join('');
+            if (list.length < 3)
+                html += '<button type="button" class="prod-add-img js-prod-img-add"><span>+</span>Imagem</button>';
+            box.innerHTML = html;
+        }
+
+        // Mostra/esconde imagem×manual conforme o modo e renderiza o preview da
+        // imagem de medidas.
+        function renderSizeChart(pid) {
+            const card = prodCard(pid);
+            if (!card) return;
+            const mode = (card.querySelector('.js-size-mode:checked') || {}).value || 'none';
+            card.querySelector('.js-size-image').style.display  = mode === 'image'  ? '' : 'none';
+            card.querySelector('.js-size-manual').style.display = mode === 'manual' ? '' : 'none';
+            const st  = formProductImages[pid] && formProductImages[pid].sizeImage;
+            const img = card.querySelector('.js-size-img');
+            const ph  = card.querySelector('.js-size-img-ph');
+            if (st && st.preview) { img.src = st.preview; img.style.display = 'block'; ph.style.display = 'none'; }
+            else { img.style.display = 'none'; ph.style.display = 'flex'; }
+        }
+
+        document.getElementById('ev-add-product').addEventListener('click', function() { addProductCard(null); });
+
+        // Delegação dos cards de produto (remover produto/variação/imagem/linha,
+        // adicionar variação/imagem/linha, abrir seletores de arquivo).
+        document.getElementById('ev-products-list').addEventListener('click', function(e) {
+            const card = e.target.closest('.ev-product-card');
+            if (!card) return;
+            if (e.target.closest('.js-prod-remove'))   { card.remove(); return; }
+            if (e.target.closest('.js-add-attr'))       { card.querySelector('.prod-attrs-list').appendChild(attrRow(null)); return; }
+            if (e.target.closest('.js-remove-attr'))    { e.target.closest('.prod-attr-row').remove(); return; }
+            if (e.target.closest('.js-prod-img-add'))   { card.querySelector('.js-prod-img-file').click(); return; }
+            const rmImg = e.target.closest('.js-prod-img-remove');
+            if (rmImg) {
+                formProductImages[card.dataset.pid].images.splice(parseInt(rmImg.dataset.idx, 10), 1);
+                renderProdImages(card.dataset.pid);
+                return;
+            }
+            if (e.target.closest('.js-size-img-wrap'))  { card.querySelector('.js-size-img-file').click(); return; }
+            if (e.target.closest('.js-size-add-row'))    { card.querySelector('.js-size-rows').appendChild(sizeRow(null)); return; }
+            if (e.target.closest('.js-size-remove-row')) { e.target.closest('.size-row').remove(); return; }
+        });
+        document.getElementById('ev-products-list').addEventListener('change', async function(e) {
+            const card = e.target.closest('.ev-product-card');
+            if (!card) return;
+            const pid = card.dataset.pid;
+
+            if (e.target.classList.contains('js-size-mode')) { renderSizeChart(pid); return; }
+
+            const prodFile = e.target.closest('.js-prod-img-file');
+            if (prodFile) {
+                const files = Array.from(prodFile.files || []);
+                prodFile.value = '';
+                const st = formProductImages[pid];
+                for (const file of files) {
+                    if (st.images.length >= 3) break;
+                    const ready = await prepareImage(file, 'A imagem do produto');
+                    if (!ready) continue;
+                    st.images.push({ url: null, file: ready.file, preview: ready.preview });
+                    renderProdImages(pid);
+                }
+                return;
+            }
+
+            const sizeFile = e.target.closest('.js-size-img-file');
+            if (sizeFile) {
+                const file = (sizeFile.files || [])[0];
+                sizeFile.value = '';
+                if (!file) return;
+                const ready = await prepareImage(file, 'A imagem da tabela de medidas');
+                if (!ready) return;
+                formProductImages[pid].sizeImage = { url: null, file: ready.file, preview: ready.preview };
+                renderSizeChart(pid);
+            }
+        });
+
+        // Lê as variações de um card. Valida opções e nomes únicos no produto.
+        function collectAttributesIn(card) {
+            const rows = card.querySelectorAll('.prod-attr-row');
+            const attrs = [];
+            rows.forEach(function(row) {
+                const name = row.querySelector('.js-attr-name').value.trim();
+                const options = row.querySelector('.js-attr-options').value
+                    .split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+                const uniq = [];
+                options.forEach(function(o) { if (uniq.indexOf(o) === -1) uniq.push(o); });
+                if (!name) return;   // variação sem nome: ignorada
+                if (!uniq.length) throw new Error('A variação "' + name + '" precisa de ao menos uma opção.');
+                attrs.push({ name: name, options: uniq });
+            });
+            const names = attrs.map(function(a) { return a.name.toLowerCase(); });
+            if (new Set(names).size !== names.length)
+                throw new Error('Há variações com o mesmo nome no mesmo produto.');
+            return attrs;
+        }
+
+        // Lê as linhas da tabela de medidas manual de um card. Retorna null se
+        // não houver linhas preenchidas (= sem tabela).
+        function collectSizeRows(card) {
+            const rows = [];
+            card.querySelectorAll('.size-row').forEach(function(row) {
+                const label = row.querySelector('.js-size-label').value.trim();
+                const value = row.querySelector('.js-size-value').value.trim();
+                if (!label && !value) return;   // linha vazia: ignorada
+                if (!label || !value) throw new Error('Cada linha da tabela de medidas precisa de medida e valor.');
+                rows.push({ label: label, value: value });
+            });
+            return rows.length ? rows : null;
+        }
+
+        // Lê os cards de produto do modal e valida (≥1 produto, nome e preço).
+        function collectFormProducts() {
+            const cards = document.querySelectorAll('#ev-products-list .ev-product-card');
+            const products = [];
+            cards.forEach(function(card) {
+                const name  = card.querySelector('.js-prod-name').value.trim();
+                const price = Number(card.querySelector('.js-prod-price').value);
+                if (name.length < 2) throw new Error('Cada produto precisa de um nome (mín. 2 letras).');
+                if (!(price > 0))    throw new Error('O produto "' + (name || '?') + '" precisa de um preço maior que zero.');
+                const sizeMode = (card.querySelector('.js-size-mode:checked') || {}).value || 'none';
+                products.push({
+                    id: card.dataset.id || null, pid: card.dataset.pid,
+                    name: name, price: price, attributes: collectAttributesIn(card),
+                    sizeMode: sizeMode,
+                    sizeRows: sizeMode === 'manual' ? collectSizeRows(card) : null
+                });
+            });
+            if (!products.length) throw new Error('Cadastre ao menos um produto para o evento de venda.');
+            return products;
+        }
+
+        // Sincroniza os produtos do evento no banco: insere/atualiza os do form e
+        // remove os que saíram (bloqueado se o produto já está em uma reserva).
+        async function reconcileProducts(eventId, formProducts) {
+            const keepIds = [];
+            for (let i = 0; i < formProducts.length; i++) {
+                const fp = formProducts[i];
+                const st = formProductImages[fp.pid] || { images: [], sizeImage: null };
+
+                // Imagens do produto: mantém as URLs já salvas e sobe as novas.
+                const images = [];
+                for (const it of st.images) {
+                    if (it.file)     images.push(await uploadImage(it.file, slugify(fp.name, 'produto')));
+                    else if (it.url) images.push(it.url);
+                }
+
+                // Tabela de medidas: imagem OU manual (nunca ambos).
+                let sizeChartImage = null, sizeChart = null;
+                if (fp.sizeMode === 'image') {
+                    if (st.sizeImage && st.sizeImage.file)     sizeChartImage = await uploadImage(st.sizeImage.file, slugify(fp.name, 'medidas'));
+                    else if (st.sizeImage && st.sizeImage.url) sizeChartImage = st.sizeImage.url;
+                } else if (fp.sizeMode === 'manual') {
+                    sizeChart = fp.sizeRows;   // null se não houver linhas
+                }
+
+                const payload = {
+                    event_id: eventId, name: fp.name, price: fp.price,
+                    images: images, attributes: fp.attributes,
+                    size_chart_image: sizeChartImage, size_chart: sizeChart,
+                    sort_order: i
+                };
+                if (fp.id) {
+                    const { error } = await sb.from('event_products').update(payload).eq('id', fp.id);
+                    if (error) throw error;
+                    keepIds.push(fp.id);
+                } else {
+                    const { data, error } = await sb.from('event_products').insert(payload).select('id').single();
+                    if (error) throw error;
+                    keepIds.push(data.id);
+                }
+            }
+            const toDelete = loadedProductIds.filter(function(id) { return keepIds.indexOf(id) === -1; });
+            for (const id of toDelete) {
+                const { error } = await sb.from('event_products').delete().eq('id', id);
+                if (error) throw new Error('Um produto removido já está em uma reserva e não pôde ser excluído. Cancele/limpe as reservas dele antes.');
+            }
         }
 
         // ── Exportar CSV ────────────────────────────────────────

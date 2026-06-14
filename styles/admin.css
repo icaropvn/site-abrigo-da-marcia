@@ -535,6 +535,32 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
 .alert-error   { background: #fee2e2; color: #dc2626; }
 .alert-success { background: #dcfce7; color: #16a34a; }
 
+/* ── Toasts (notificações flutuantes, via adminToast em admin-common.js) ── */
+.admin-toasts {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: min(90vw, 360px);
+}
+.admin-toast {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.35;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity .25s ease, transform .25s ease;
+}
+.admin-toast.show { opacity: 1; transform: translateY(0); }
+.admin-toast-error   { background: #fee2e2; color: #dc2626; }
+.admin-toast-success { background: #dcfce7; color: #16a34a; }
+.admin-toast-info    { background: #e0f2fe; color: #0369a1; }
+
 /* ─── Loading ─── */
 .loading-row td {
     text-align: center;
@@ -896,6 +922,8 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
 [data-theme="dark"] .img-preview-wrap,
 [data-theme="dark"] .photos-add,
 [data-theme="dark"] .photo-thumb,
+[data-theme="dark"] .prod-add-img,
+[data-theme="dark"] .prod-thumb,
 [data-theme="dark"] .age-preview-badge,
 [data-theme="dark"] .form-group input,
 [data-theme="dark"] .form-group select,
@@ -1063,3 +1091,149 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
     margin-bottom: 8px;
 }
 .res-item-row input { flex: 1; }
+
+/* ── Venda: itens do pedido na reserva ── */
+.res-product-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.res-product-row .js-res-product { flex: 1 1 180px; min-width: 0; }
+.res-product-row .js-res-variations { display: flex; flex-wrap: wrap; gap: 8px; }
+.res-product-row .js-res-qty { width: 70px; flex: 0 0 auto; }
+.res-order-total {
+    margin-top: 10px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* ── Produtos: cards inline no modal do evento ── */
+#ev-products-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
+.ev-product-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+}
+.ev-product-head {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.ev-product-head .js-prod-name  { flex: 1 1 auto; min-width: 0; }
+.ev-product-head .js-prod-price { flex: 0 0 110px; min-width: 0; }
+.ev-product-head .js-prod-remove { flex: 0 0 auto; }
+.ev-product-body { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.ev-product-img {
+    width: 96px;
+    height: 96px;
+    flex: 0 0 auto;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: var(--border);
+}
+.ev-product-img .js-prod-img { width: 100%; height: 100%; object-fit: cover; }
+.ev-product-img .js-prod-img-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px;
+    padding: 4px;
+    color: var(--gray);
+}
+.ev-product-attrs { flex: 1 1 240px; min-width: 0; }
+
+/* ── Builder de variações (atributos) ── */
+.prod-attr-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.prod-attr-row .js-attr-name    { flex: 0 0 38%; min-width: 0; }
+.prod-attr-row .js-attr-options { flex: 1; min-width: 0; }
+
+/* ── Galeria de imagens do produto (até 3) ── */
+.ev-product-media { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; }
+.prod-images { display: flex; gap: 6px; flex-wrap: wrap; }
+.prod-thumb {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+.prod-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.prod-thumb-cover {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, .6);
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-top-right-radius: 6px;
+}
+.prod-thumb-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .6);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+}
+.prod-add-img {
+    width: 72px;
+    height: 72px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: none;
+    color: var(--gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 11px;
+    cursor: pointer;
+}
+.prod-add-img:hover { border-color: var(--red); color: var(--red); }
+.prod-add-img span { font-size: 22px; line-height: 1; }
+.prod-media-hint { color: var(--gray); font-size: 11px; }
+
+/* ── Tabela de medidas (admin) ── */
+.ev-product-sizechart {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+}
+.sizechart-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.sizechart-label .muted { font-weight: 400; color: var(--gray); }
+.size-modes {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+.size-modes label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.ev-product-img .js-size-img { width: 100%; height: 100%; object-fit: cover; }
+.size-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.size-row .js-size-label { flex: 0 0 40%; min-width: 0; }
+.size-row .js-size-value { flex: 1; min-width: 0; }

@@ -118,7 +118,11 @@
             select.innerHTML = raffles.map(function(ev) {
                 return '<option value="' + ev.id + '">' + esc(ev.name) + ' (' + ev.status + ')</option>';
             }).join('');
-            selectEvent(raffles[0].id);
+            // Pré-seleciona a rifa indicada na URL (?event=ID), vinda do botão
+            // "Sortear" do evento; senão, a mais recente.
+            const wanted = new URLSearchParams(location.search).get('event');
+            const initial = (wanted && raffles.some(function(e) { return e.id === wanted; })) ? wanted : raffles[0].id;
+            selectEvent(initial);
         }
 
         async function selectEvent(id) {

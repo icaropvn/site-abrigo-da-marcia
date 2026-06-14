@@ -374,6 +374,356 @@ main .event-sale-note {
     color: var(--cinzaFooter);
 }
 
+/* ── Venda de produtos: vitrine + carrinho ── */
+main .sale-section { margin-top: 40px; }
+
+main .sale-grid {
+    display: grid;
+    grid-template-columns: 1fr;   /* mobile: 1 card por linha (full-width) */
+    gap: 20px;
+}
+@media (min-width: 720px) {
+    /* desktop/tablet: cards maiores; a imagem cresce junto com o card */
+    main .sale-grid { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+}
+
+main .sale-card {
+    border: 1px solid rgba(241, 90, 85, 0.4);
+    border-radius: 18px;
+    background-color: #fff;
+    padding: 20px;
+}
+
+/* Cabeçalho "Nome | Preço" */
+main .sale-card-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 12px;
+    margin-bottom: 18px;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 800;
+    line-height: 1.1;
+}
+main .sale-card-name { color: var(--pretoPrincipal); }
+main .sale-card-sep  { color: rgba(0, 0, 0, .22); font-weight: 400; }
+
+/* Corpo: imagem (esq.) + opções (dir.); cresce na vertical conforme as opções */
+main .sale-card-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 18px;
+    align-items: start;
+}
+main .sale-card-main--nomedia { display: block; }
+main .sale-card-media { min-width: 0; }
+main .sale-card-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+main .sale-options-head {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cinzaFooter);
+}
+
+/* ── Galeria do card de produto (até 3 imagens) ── */
+main .sale-card-gallery {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.04);
+}
+main .sale-gallery-track img { cursor: zoom-in; }
+main .sale-gallery-track {
+    display: flex;
+    height: 100%;
+    transition: transform .3s ease;
+}
+main .sale-gallery-track img {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+}
+main .sale-gallery-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+main .sale-gallery-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .6);
+    box-shadow: 0 0 3px rgba(0, 0, 0, .5);
+    cursor: pointer;
+}
+main .sale-gallery-dot.is-active { background: #fff; }
+
+/* ── Botão "Medidas" (secundário discreto → vermelho no hover) ── */
+main .sale-measure-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    border: 1px solid rgba(0, 0, 0, .18);
+    border-radius: 999px;
+    background: none;
+    color: var(--cinzaFooter);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+main .sale-measure-btn:hover {
+    border-color: var(--vermelhoPrincipal);
+    color: var(--vermelhoPrincipal);
+}
+
+/* ── Modal de medidas ── */
+.measure-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, .6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.measure-modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 460px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+.measure-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--cinzaFooter);
+    cursor: pointer;
+}
+.measure-modal-title { margin: 0 28px 16px 0; font-size: 18px; color: var(--pretoPrincipal); }
+.measure-img { width: 100%; height: auto; border-radius: 8px; display: block; }
+
+/* Estado de carregamento / erro da imagem da tabela */
+.measure-loading,
+.measure-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 36px 8px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--cinzaFooter);
+}
+.measure-error { color: var(--vermelhoPrincipal); }
+.measure-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(0, 0, 0, .12);
+    border-top-color: var(--vermelhoPrincipal);
+    border-radius: 50%;
+    animation: measure-spin .8s linear infinite;
+}
+@keyframes measure-spin { to { transform: rotate(360deg); } }
+.measure-retry {
+    border: 1px solid var(--vermelhoPrincipal);
+    border-radius: 999px;
+    padding: 7px 16px;
+    background: none;
+    color: var(--vermelhoPrincipal);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.measure-retry:hover { background: var(--vermelhoPrincipal); color: #fff; }
+.measure-table { width: 100%; border-collapse: collapse; }
+.measure-table th,
+.measure-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    font-size: 14px;
+}
+.measure-table th { font-weight: 600; color: var(--pretoPrincipal); width: 45%; }
+.measure-table td { color: var(--cinzaFooter); }
+
+[data-theme="dark"] main .sale-card-gallery { background-color: #262626; }
+[data-theme="dark"] .measure-modal-content { background: #1f1f24; }
+[data-theme="dark"] .measure-spinner { border-color: rgba(255, 255, 255, .15); border-top-color: var(--vermelhoPrincipal); }
+[data-theme="dark"] .measure-modal-title { color: #f0f0f0; }
+[data-theme="dark"] .measure-table th { color: #f0f0f0; }
+[data-theme="dark"] .measure-table th,
+[data-theme="dark"] .measure-table td { border-bottom-color: rgba(255, 255, 255, .12); }
+[data-theme="dark"] main .sale-measure-btn { border-color: rgba(255, 255, 255, .2); }
+
+/* ── Lightbox (toque para ampliar as imagens do produto) ── */
+.sale-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0, 0, 0, .9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.sale-lightbox-img {
+    max-width: 92vw;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 8px;
+    user-select: none;
+}
+.sale-lightbox-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    border: none;
+    background: none;
+    color: #fff;
+    font-size: 34px;
+    line-height: 1;
+    cursor: pointer;
+}
+.sale-lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+.sale-lightbox-prev { left: 14px; }
+.sale-lightbox-next { right: 14px; }
+.sale-lightbox-arrow:hover { background: rgba(255, 255, 255, .3); }
+
+/* Guarda p/ telas muito estreitas: empilha imagem sobre as opções */
+@media (max-width: 340px) {
+    main .sale-card-main { grid-template-columns: 1fr; }
+    main .sale-card-media { max-width: 240px; }
+}
+
+main .sale-card-price { color: var(--vermelhoPrincipal); }
+
+main .sale-attr {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--cinzaFooter);
+}
+
+main .sale-attr-select,
+main .sale-qty {
+    font-size: 16px;
+    padding: 9px 10px;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    border-radius: 8px;
+    font-family: inherit;
+    background-color: #fff;
+    color: var(--pretoPrincipal);
+}
+
+main .sale-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: stretch;
+    margin-top: 4px;
+}
+main .sale-qty { width: 64px; flex: 0 0 auto; }
+
+main .sale-add {
+    flex: 1 1 120px;
+    min-width: 0;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 14px;
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out;
+}
+main .sale-add:hover { background-color: var(--pretoPrincipal); }
+
+main .sale-card-msg {
+    font-size: 13.5px;
+    color: var(--vermelhoPrincipal);
+    margin: 0;
+}
+main .sale-card-closed { color: var(--cinzaFooter); }
+
+/* Carrinho */
+main .sale-order {
+    margin-top: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    padding: 18px 20px;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+main .sale-order h3 {
+    font-size: 20px;
+    color: var(--pretoPrincipal);
+    margin: 0 0 12px;
+}
+
+main .sale-order-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+main .sale-order-name { color: var(--pretoPrincipal); }
+main .sale-order-name small { color: var(--cinzaFooter); font-weight: 400; }
+main .sale-order-qty  { color: var(--cinzaFooter); font-size: 14px; }
+main .sale-order-line { font-weight: 700; color: var(--pretoPrincipal); }
+
+main .sale-order-remove {
+    border: none;
+    background: none;
+    color: var(--cinzaFooter);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+}
+main .sale-order-remove:hover { color: var(--vermelhoPrincipal); }
+
 /* ── Histórico de eventos anteriores ── */
 main #past-events {
     margin-top: 80px;
@@ -672,6 +1022,29 @@ main #past-events-list {
 
 [data-theme="dark"] main .raffle-dot-free  { background-color: #1e1e1e; }
 [data-theme="dark"] main .raffle-dot-taken { background-color: #3a3a3a; border-color: #4a4a4a; }
+
+/* Venda — dark */
+[data-theme="dark"] main .sale-card {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+[data-theme="dark"] main .sale-card-img { background-color: #262626; }
+[data-theme="dark"] main .sale-card-body h3 { color: #f0f0f0; }
+[data-theme="dark"] main .sale-attr-select,
+[data-theme="dark"] main .sale-qty {
+    background-color: #262626;
+    border-color: #3a3a3a;
+    color: #f0f0f0;
+}
+[data-theme="dark"] main .sale-add:hover { background-color: #fff; color: var(--vermelhoPrincipal); }
+[data-theme="dark"] main .sale-order {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+[data-theme="dark"] main .sale-order h3,
+[data-theme="dark"] main .sale-order-name,
+[data-theme="dark"] main .sale-order-line { color: #f0f0f0; }
+[data-theme="dark"] main .sale-order-row { border-color: #333; }
 
 [data-theme="dark"] #reserve-form input {
     background-color: #2a2a2a;

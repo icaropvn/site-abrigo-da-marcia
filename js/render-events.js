@@ -2,8 +2,8 @@
 // dedicada (#event-area): evento ativo com grade da rifa + reserva via
 // RPC create_reservation, e histórico dos últimos eventos encerrados.
 // Dados vêm do Supabase (tabelas events/event_totals/raffle_board).
-// Eventos de venda (type='venda') mostram só a divulgação — reservas
-// online de produtos chegam na fase 6.5.
+// Eventos de venda (type='venda') mostram a vitrine de produtos com
+// carrinho (variação + quantidade) e reservam pela mesma RPC.
 
 (function() {
     function eventsConfigured() {
@@ -48,8 +48,26 @@
         'NOME_INVALIDO':          'Informe seu nome completo (mínimo 2 letras).',
         'CONTATO_INVALIDO':       'Informe um telefone ou e-mail válido.',
         'NUMERO_INVALIDO':        'Número inválido para esta rifa. Recarregue a página e tente novamente.',
-        'RIFA_LIMITE_NUMEROS':    'Você selecionou números demais para uma única reserva. Reduza a quantidade.'
+        'RIFA_LIMITE_NUMEROS':    'Você selecionou números demais para uma única reserva. Reduza a quantidade.',
+        'PRODUTO_INVALIDO':       'Um dos produtos do pedido não está mais disponível. Recarregue a página.',
+        'QUANTIDADE_INVALIDA':    'Quantidade inválida em um dos itens do pedido.',
+        'VARIACAO_INVALIDA':      'Há uma opção inválida no seu pedido. Recarregue a página e refaça a seleção.',
+        'ITEM_INVALIDO':          'Há um item inválido no seu pedido. Recarregue a página e tente novamente.',
+        'ITENS_INVALIDOS':        'Adicione ao menos um item ao pedido antes de reservar.'
     };
+
+    // Escapa texto para uso em innerHTML (nomes/opções vêm do admin).
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    // "M · Masculina" a partir do objeto de variação
+    function variationLabel(variation) {
+        if (!variation) return '';
+        return Object.keys(variation).map(function(k) { return variation[k]; }).join(' · ');
+    }
 
     function friendlyError(err) {
         var code = (err && err.code) || '';
@@ -346,23 +364,25 @@
     }
 
     // ── Modal de reserva (rifa) ─────────────────────────────────
-    var modalState = { event: null, numbers: [] };
+    // items = payload da RPC (rifa: [{raffle_number}], venda: [{product_id,quantity,variation}])
+    // summary/total alimentam o passo de confirmação + PIX.
+    var modalState = { event: null, items: [], total: 0, summary: '' };
 
     function describeNumbers(numbers) {
         if (numbers.length === 1) return 'o número ' + numbers[0];
         return 'os números ' + numbers.join(', ');
     }
 
-    function openReserveModal(ev, numbers) {
+    // Abre o modal de reserva de forma genérica.
+    // opts = { title, subtitle, items, total, summary }
+    function openReserveModal(ev, opts) {
         modalState.event   = ev;
-        modalState.numbers = numbers.slice();
+        modalState.items   = opts.items;
+        modalState.total   = opts.total;
+        modalState.summary = opts.summary;
 
-        var total = numbers.length * Number(ev.raffle_number_price || 0);
-        document.getElementById('reserve-title').textContent =
-            numbers.length === 1 ? 'Reservar o número ' + numbers[0]
-                                  : 'Reservar ' + numbers.length + ' números';
-        document.getElementById('reserve-subtitle').textContent =
-            ev.name + ' — ' + describeNumbers(numbers) + '. Total: ' + formatMoney(total) + '.';
+        document.getElementById('reserve-title').textContent    = opts.title;
+        document.getElementById('reserve-subtitle').textContent = opts.subtitle;
 
         document.getElementById('reserve-form-step').style.display = '';
         document.getElementById('reserve-success-step').style.display = 'none';
@@ -375,6 +395,38 @@
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         document.getElementById('reserve-name').focus();
+    }
+
+    // Rifa: monta os parâmetros do modal a partir dos números selecionados.
+    function openRaffleReserveModal(ev, numbers) {
+        var total = numbers.length * Number(ev.raffle_number_price || 0);
+        openReserveModal(ev, {
+            title: numbers.length === 1 ? 'Reservar o número ' + numbers[0]
+                                        : 'Reservar ' + numbers.length + ' números',
+            subtitle: ev.name + ' — ' + describeNumbers(numbers) + '. Total: ' + formatMoney(total) + '.',
+            items: numbers.map(function(n) { return { raffle_number: n }; }),
+            total: total,
+            summary: numbers.length === 1 ? 'Número ' + numbers[0] + ' reservado'
+                                          : 'Números ' + numbers.join(', ') + ' reservados'
+        });
+    }
+
+    // Venda: monta os parâmetros do modal a partir do pedido (carrinho).
+    function openSaleReserveModal(ev, order) {
+        var total = order.reduce(function(a, o) { return a + o.quantity * Number(o.product.price || 0); }, 0);
+        var lines = order.map(function(o) {
+            var v = variationLabel(o.variation);
+            return o.quantity + 'x ' + o.product.name + (v ? ' (' + v + ')' : '');
+        });
+        openReserveModal(ev, {
+            title: 'Concluir pedido',
+            subtitle: ev.name + ' — ' + lines.join('; ') + '. Total: ' + formatMoney(total) + '.',
+            items: order.map(function(o) {
+                return { product_id: o.product.id, quantity: o.quantity, variation: o.variation };
+            }),
+            total: total,
+            summary: 'Pedido confirmado: ' + lines.join('; ')
+        });
     }
 
     function closeReserveModal() {
@@ -391,15 +443,14 @@
         el.style.display = '';
     }
 
-    // Confirmação + PIX (QR Code e copia-e-cola)
-    function showSuccess(ev, numbers, total) {
+    // Confirmação + PIX (QR Code e copia-e-cola) — usa o modalState atual
+    function showSuccess() {
+        var ev    = modalState.event;
+        var total = modalState.total;
         document.getElementById('reserve-form-step').style.display = 'none';
         document.getElementById('reserve-success-step').style.display = '';
-        var label = numbers.length === 1
-            ? 'Número ' + numbers[0] + ' reservado'
-            : 'Números ' + numbers.join(', ') + ' reservados';
         document.getElementById('reserve-success-summary').textContent =
-            label + ' em "' + ev.name + '". Valor: ' + formatMoney(total) + '.';
+            modalState.summary + ' em "' + ev.name + '". Valor: ' + formatMoney(total) + '.';
 
         // pix_payload pronto (ex: PagSeguro) tem prioridade;
         // senão o site monta o BR Code com chave + nome + cidade
@@ -535,17 +586,17 @@
             document.getElementById('reserve-error').style.display = 'none';
 
             try {
-                var items = modalState.numbers.map(function(n) { return { raffle_number: n }; });
                 var result = await fetchJson('rpc/create_reservation', {
                     body: {
                         p_event_id: modalState.event.id,
                         p_name:     name,
                         p_contact:  contact,
-                        p_items:    items,
+                        p_items:    modalState.items,
                         p_website:  website
                     }
                 });
-                showSuccess(modalState.event, modalState.numbers, result.total);
+                modalState.total = result.total;   // total autoritativo do banco
+                showSuccess();
                 if (clearSelection) clearSelection();
                 if (reloadGrid) reloadGrid();
             } catch (err) {
@@ -655,7 +706,7 @@
 
             actionBar.addEventListener('click', function(e) {
                 if (e.target.closest('#raffle-reserve')) {
-                    if (selected.length) openReserveModal(ev, selected.slice().sort(function(a, b) { return a - b; }));
+                    if (selected.length) openRaffleReserveModal(ev, selected.slice().sort(function(a, b) { return a - b; }));
                 } else if (e.target.closest('#raffle-clear')) {
                     clearSelection();
                 }
@@ -664,12 +715,378 @@
             setupReserveModal(loadGrid, clearSelection);
             await loadGrid();
         } else {
-            // Venda de produtos: reservas online chegam na fase 6.5
+            await renderSaleSection(area, ev);
+        }
+    }
+
+    // ── Venda de produtos: vitrine + carrinho + reserva ─────────
+
+    // Ícone de régua (inline, currentColor) do botão "Medidas".
+    var RULER_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M15.4 22H8.6C8.26863 22 8 21.7314 8 21.4V2.6C8 2.26863 8.26863 2 8.6 2H15.4C15.7314 2 16 2.26863 16 2.6V21.4C16 21.7314 15.7314 22 15.4 22Z"/>' +
+        '<path d="M16 17H13"/><path d="M16 7H13"/>' +
+        '<path d="M13 12H23M23 12L21 14M23 12L21 10"/>' +
+        '<path d="M1 12L3 10M1 12L3 14M1 12H8"/>' +
+        '</svg>';
+
+    function hasSizeChart(product) {
+        return !!(product.size_chart_image || (Array.isArray(product.size_chart) && product.size_chart.length));
+    }
+
+    // Galeria do card (até 3 imagens): trilho deslizante + pontos.
+    // Navegação por swipe (mobile) e pelos pontos (clicáveis). Sem setas:
+    // cobriam a imagem e os pontos já sinalizam que há mais fotos.
+    function saleGalleryHtml(imgs, name) {
+        var slides = imgs.map(function(u) {
+            return '<img src="' + esc(u) + '" alt="' + esc(name) + '" loading="lazy" draggable="false">';
+        }).join('');
+        var dots = imgs.length > 1 ?
+            '<div class="sale-gallery-dots">' + imgs.map(function(_u, i) {
+                return '<span class="sale-gallery-dot' + (i === 0 ? ' is-active' : '') + '" data-i="' + i + '"></span>';
+            }).join('') + '</div>' : '';
+        return '<div class="sale-card-gallery" data-idx="0" data-count="' + imgs.length + '">' +
+                  '<div class="sale-gallery-track">' + slides + '</div>' + dots +
+               '</div>';
+    }
+
+    // Move a galeria para o slide idx (com clamp) e atualiza os pontos.
+    function setSlide(gallery, idx) {
+        var count = parseInt(gallery.dataset.count, 10) || 1;
+        idx = Math.max(0, Math.min(count - 1, idx));
+        gallery.dataset.idx = idx;
+        gallery.querySelector('.sale-gallery-track').style.transform = 'translateX(' + (-idx * 100) + '%)';
+        gallery.querySelectorAll('.sale-gallery-dot').forEach(function(d, i) {
+            d.classList.toggle('is-active', i === idx);
+        });
+    }
+
+    // Liga setas, pontos e swipe (mobile) das galerias dentro de `root`.
+    function wireGalleries(root) {
+        root.querySelectorAll('.sale-card-gallery').forEach(function(gallery) {
+            var swiped = false;   // evita abrir o lightbox ao terminar um swipe
+            gallery.addEventListener('click', function(e) {
+                var dot = e.target.closest('.sale-gallery-dot');
+                if (dot) { setSlide(gallery, parseInt(dot.dataset.i, 10)); return; }
+                if (!swiped && e.target.closest('.sale-gallery-track')) {
+                    var srcs = Array.prototype.map.call(
+                        gallery.querySelectorAll('.sale-gallery-track img'),
+                        function(im) { return im.src; });
+                    openLightbox(srcs, +gallery.dataset.idx);
+                }
+            });
+            var x0 = null;
+            gallery.addEventListener('touchstart', function(e) { x0 = e.touches[0].clientX; }, { passive: true });
+            gallery.addEventListener('touchend', function(e) {
+                if (x0 === null) return;
+                var dx = e.changedTouches[0].clientX - x0;
+                if (Math.abs(dx) > 40) {
+                    setSlide(gallery, (+gallery.dataset.idx) + (dx < 0 ? 1 : -1));
+                    swiped = true;
+                    setTimeout(function() { swiped = false; }, 50);
+                }
+                x0 = null;
+            });
+        });
+    }
+
+    // Modal de medidas (singleton, criado sob demanda). Mostra a imagem da
+    // tabela OU a tabela manual (rótulo/valor).
+    function ensureMeasureModal() {
+        var m = document.getElementById('measure-modal');
+        if (m) return m;
+        m = document.createElement('div');
+        m.id = 'measure-modal';
+        m.className = 'measure-modal';
+        m.style.display = 'none';
+        m.innerHTML =
+            '<div class="measure-modal-content">' +
+                '<button type="button" class="measure-modal-close" aria-label="Fechar">&times;</button>' +
+                '<h3 class="measure-modal-title">Tabela de medidas</h3>' +
+                '<div class="measure-modal-body"></div>' +
+            '</div>';
+        document.body.appendChild(m);
+        function close() { m.style.display = 'none'; }
+        m.addEventListener('click', function(e) {
+            if (e.target === m || e.target.closest('.measure-modal-close')) close();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && m.style.display !== 'none') close();
+        });
+        return m;
+    }
+
+    // Carrega a imagem da tabela refletindo o estado real: spinner enquanto
+    // baixa, a imagem ao concluir, ou um erro com "Tentar novamente" se falhar.
+    // `bust` força nova requisição (usado no retry).
+    function renderMeasureImage(body, product, bust) {
+        body.innerHTML =
+            '<div class="measure-loading" role="status">' +
+                '<span class="measure-spinner" aria-hidden="true"></span>' +
+                '<span>Carregando tabela…</span>' +
+            '</div>' +
+            '<img class="measure-img" alt="Tabela de medidas de ' + esc(product.name) + '" style="display:none">';
+        var img    = body.querySelector('.measure-img');
+        var status = body.querySelector('.measure-loading');
+        img.onload = function() {
+            status.remove();
+            img.style.display = 'block';
+        };
+        img.onerror = function() {
+            status.className = 'measure-error';
+            status.innerHTML =
+                '<span>Não foi possível carregar a tabela de medidas. Verifique sua conexão.</span>' +
+                '<button type="button" class="measure-retry">Tentar novamente</button>';
+            status.querySelector('.measure-retry').addEventListener('click', function() {
+                renderMeasureImage(body, product, true);
+            });
+        };
+        var src = product.size_chart_image;
+        if (bust) src += (src.indexOf('?') === -1 ? '?' : '&') + 'r=' + Date.now();
+        img.src = src;   // src depois dos handlers: dispara onload mesmo se cacheada
+    }
+
+    function openMeasureModal(product) {
+        var m = ensureMeasureModal();
+        m.querySelector('.measure-modal-title').textContent = 'Medidas — ' + product.name;
+        var body = m.querySelector('.measure-modal-body');
+        if (product.size_chart_image) {
+            renderMeasureImage(body, product, false);
+        } else {
+            var rows = (product.size_chart || []).map(function(r) {
+                return '<tr><th>' + esc(r.label) + '</th><td>' + esc(r.value) + '</td></tr>';
+            }).join('');
+            body.innerHTML = '<table class="measure-table">' + rows + '</table>';
+        }
+        m.style.display = 'flex';
+    }
+
+    // Lightbox: toque na imagem do card amplia em tela cheia (com navegação).
+    function ensureLightbox() {
+        var lb = document.getElementById('sale-lightbox');
+        if (lb) return lb;
+        lb = document.createElement('div');
+        lb.id = 'sale-lightbox';
+        lb.className = 'sale-lightbox';
+        lb.style.display = 'none';
+        lb.innerHTML =
+            '<button type="button" class="sale-lightbox-close" aria-label="Fechar">&times;</button>' +
+            '<button type="button" class="sale-lightbox-arrow sale-lightbox-prev" aria-label="Imagem anterior">‹</button>' +
+            '<img class="sale-lightbox-img" alt="">' +
+            '<button type="button" class="sale-lightbox-arrow sale-lightbox-next" aria-label="Próxima imagem">›</button>';
+        document.body.appendChild(lb);
+        function close() { lb.style.display = 'none'; lb._srcs = null; }
+        function show(i) {
+            var srcs = lb._srcs || [];
+            if (!srcs.length) return;
+            lb._idx = (i + srcs.length) % srcs.length;
+            lb.querySelector('.sale-lightbox-img').src = srcs[lb._idx];
+            var multi = srcs.length > 1 ? '' : 'none';
+            lb.querySelector('.sale-lightbox-prev').style.display = multi;
+            lb.querySelector('.sale-lightbox-next').style.display = multi;
+        }
+        lb._show = show;
+        lb.addEventListener('click', function(e) {
+            if (e.target.closest('.sale-lightbox-next'))      show(lb._idx + 1);
+            else if (e.target.closest('.sale-lightbox-prev')) show(lb._idx - 1);
+            else if (e.target === lb || e.target.closest('.sale-lightbox-close')) close();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (lb.style.display === 'none') return;
+            if (e.key === 'Escape')           close();
+            else if (e.key === 'ArrowRight')  show(lb._idx + 1);
+            else if (e.key === 'ArrowLeft')   show(lb._idx - 1);
+        });
+        var x0 = null;
+        lb.addEventListener('touchstart', function(e) { x0 = e.touches[0].clientX; }, { passive: true });
+        lb.addEventListener('touchend', function(e) {
+            if (x0 === null) return;
+            var dx = e.changedTouches[0].clientX - x0;
+            if (Math.abs(dx) > 40) show(lb._idx + (dx < 0 ? 1 : -1));
+            x0 = null;
+        });
+        return lb;
+    }
+
+    function openLightbox(srcs, idx) {
+        var lb = ensureLightbox();
+        lb._srcs = srcs;
+        lb.style.display = 'flex';
+        lb._show(idx || 0);
+    }
+
+    function buildProductCard(product, idx, openForRes) {
+        var card = document.createElement('div');
+        card.className = 'sale-card';
+        card.dataset.index = idx;
+        var imgs  = Array.isArray(product.images) ? product.images.filter(function(u) { return u; }) : [];
+        var attrs = Array.isArray(product.attributes) ? product.attributes : [];
+
+        // Cabeçalho: "Nome | Preço"
+        var html = '<div class="sale-card-title">' +
+                       '<span class="sale-card-name">' + esc(product.name) + '</span>' +
+                       '<span class="sale-card-sep">|</span>' +
+                       '<span class="sale-card-price">' + formatMoney(product.price) + '</span>' +
+                   '</div>';
+
+        // Corpo: imagem (esq.) + opções (dir.). Sem imagem → opções ocupam tudo.
+        html += '<div class="sale-card-main' + (imgs.length ? '' : ' sale-card-main--nomedia') + '">';
+        if (imgs.length)
+            html += '<div class="sale-card-media">' + saleGalleryHtml(imgs, product.name) + '</div>';
+
+        html += '<div class="sale-card-options">';
+        if (attrs.length) html += '<p class="sale-options-head">Escolha Seu Modelo</p>';
+        attrs.forEach(function(attr) {
+            var opts = attr.options || [];
+            var single = opts.length === 1;   // opção única: já vem selecionada
+            html += '<label class="sale-attr"><span>' + esc(attr.name) + '</span>' +
+                    '<select class="sale-attr-select" data-attr="' + esc(attr.name) + '">';
+            if (!single) html += '<option value="">Selecione…</option>';
+            opts.forEach(function(opt) {
+                html += '<option value="' + esc(opt) + '"' + (single ? ' selected' : '') + '>' + esc(opt) + '</option>';
+            });
+            html += '</select></label>';
+        });
+        if (hasSizeChart(product))
+            html += '<button type="button" class="sale-measure-btn">' + RULER_ICON + '<span>Medidas</span></button>';
+        if (openForRes) {
+            html += '<div class="sale-card-actions">' +
+                    '<input type="number" class="sale-qty" min="1" max="100" value="1" aria-label="Quantidade">' +
+                    '<button type="button" class="sale-add">Adicionar ao pedido</button>' +
+                    '</div>' +
+                    '<p class="sale-card-msg" style="display:none"></p>';
+        } else {
+            html += '<p class="sale-card-msg sale-card-closed">Pedidos encerrados.</p>';
+        }
+        html += '</div></div>';   // .sale-card-options + .sale-card-main
+        card.innerHTML = html;
+        return card;
+    }
+
+    async function renderSaleSection(area, ev) {
+        var products = [];
+        try {
+            products = await fetchJson('event_products?event_id=eq.' + ev.id + '&order=sort_order.asc,created_at.asc');
+        } catch (e) { /* lista vazia abaixo */ }
+
+        if (!products || !products.length) {
             var note = document.createElement('p');
             note.className = 'event-sale-note';
-            note.textContent = 'Para fazer seu pedido neste evento, entre em contato com o abrigo pelo e-mail ou redes sociais.';
+            note.textContent = 'Os produtos deste evento ainda não foram cadastrados. Acompanhe nossas redes sociais!';
             area.appendChild(note);
+            return;
         }
+
+        var openForRes = isOpenForReservations(ev);
+        var order = [];   // { product, variation:{}, quantity }
+
+        var section = document.createElement('div');
+        section.className = 'sale-section';
+        var grid = document.createElement('div');
+        grid.className = 'sale-grid';
+        section.appendChild(grid);
+        area.appendChild(section);
+        products.forEach(function(p, i) { grid.appendChild(buildProductCard(p, i, openForRes)); });
+        wireGalleries(grid);
+
+        // Painel do pedido (carrinho) + barra de ação fixa (reusa estilos da rifa)
+        var orderPanel = document.createElement('div');
+        orderPanel.className = 'sale-order';
+        orderPanel.style.display = 'none';
+        section.appendChild(orderPanel);
+
+        var actionBar = document.createElement('div');
+        actionBar.className = 'raffle-actionbar';
+        actionBar.style.display = 'none';
+        area.appendChild(actionBar);
+
+        function renderOrder() {
+            var totalItems = order.reduce(function(a, o) { return a + o.quantity; }, 0);
+            var total      = order.reduce(function(a, o) { return a + o.quantity * Number(o.product.price || 0); }, 0);
+            document.body.classList.toggle('has-raffle-bar', order.length > 0);
+            if (!order.length) {
+                orderPanel.style.display = 'none'; orderPanel.innerHTML = '';
+                actionBar.style.display  = 'none'; actionBar.innerHTML  = '';
+                return;
+            }
+            orderPanel.style.display = '';
+            orderPanel.innerHTML = '<h3>Seu pedido</h3>' + order.map(function(o, i) {
+                var v = variationLabel(o.variation);
+                return '<div class="sale-order-row">' +
+                    '<span class="sale-order-name">' + esc(o.product.name) + (v ? ' <small>' + esc(v) + '</small>' : '') + '</span>' +
+                    '<span class="sale-order-qty">' + o.quantity + 'x ' + formatMoney(o.product.price) + '</span>' +
+                    '<span class="sale-order-line">' + formatMoney(o.quantity * o.product.price) + '</span>' +
+                    '<button type="button" class="sale-order-remove" data-i="' + i + '" aria-label="Remover item">&times;</button>' +
+                    '</div>';
+            }).join('');
+            actionBar.style.display = '';
+            actionBar.innerHTML =
+                '<div class="raffle-actionbar-info">' +
+                    '<strong>' + totalItems + (totalItems > 1 ? ' itens no pedido' : ' item no pedido') + '</strong>' +
+                    '<span class="raffle-actionbar-total">' + formatMoney(total) + '</span>' +
+                '</div>' +
+                '<div class="raffle-actionbar-buttons">' +
+                    '<button type="button" class="raffle-clear" id="sale-clear">Limpar</button>' +
+                    '<button type="button" class="raffle-reserve" id="sale-reserve">Reservar</button>' +
+                '</div>';
+        }
+
+        function clearOrder() { order = []; renderOrder(); }
+
+        grid.addEventListener('click', function(e) {
+            var measure = e.target.closest('.sale-measure-btn');
+            if (measure) {
+                var mc = measure.closest('.sale-card');
+                openMeasureModal(products[parseInt(mc.dataset.index, 10)]);
+                return;
+            }
+            var add = e.target.closest('.sale-add');
+            if (!add || !openForRes) return;
+            var card = add.closest('.sale-card');
+            var product = products[parseInt(card.dataset.index, 10)];
+            var msg = card.querySelector('.sale-card-msg');
+
+            var variation = {};
+            var ok = true;
+            card.querySelectorAll('.sale-attr-select').forEach(function(sel) {
+                if (!sel.value) ok = false; else variation[sel.dataset.attr] = sel.value;
+            });
+            if (!ok) {
+                msg.textContent = 'Escolha todas as opções antes de adicionar.';
+                msg.style.display = '';
+                return;
+            }
+            msg.style.display = 'none';
+
+            var qty = parseInt(card.querySelector('.sale-qty').value, 10);
+            if (isNaN(qty) || qty < 1) qty = 1;
+            if (qty > 100) qty = 100;
+
+            // mesma combinação produto+variação acumula quantidade
+            var vKey = JSON.stringify(variation);
+            var existing = order.filter(function(o) {
+                return o.product.id === product.id && JSON.stringify(o.variation) === vKey;
+            })[0];
+            if (existing) existing.quantity = Math.min(100, existing.quantity + qty);
+            else order.push({ product: product, variation: variation, quantity: qty });
+            renderOrder();
+        });
+
+        orderPanel.addEventListener('click', function(e) {
+            var rm = e.target.closest('.sale-order-remove');
+            if (!rm) return;
+            order.splice(parseInt(rm.dataset.i, 10), 1);
+            renderOrder();
+        });
+
+        actionBar.addEventListener('click', function(e) {
+            if (e.target.closest('#sale-reserve')) {
+                if (order.length) openSaleReserveModal(ev, order);
+            } else if (e.target.closest('#sale-clear')) {
+                clearOrder();
+            }
+        });
+
+        setupReserveModal(null, clearOrder);
     }
 
     function renderEmpty(area) {
