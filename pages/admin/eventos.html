@@ -398,6 +398,14 @@
                 tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Nenhum evento cadastrado.</td></tr>';
                 return;
             }
+            // IDs no histórico público: encerrados/arquivados, 3 mais recentes por
+            // ends_at desc (mesma regra do público). Arquivados fora disso podem ser
+            // removidos por completo (registro + imagens) para liberar espaço.
+            const publicHistoryIds = new Set(
+                allEvents.filter(function(e) { return e.status === 'encerrado' || e.status === 'arquivado'; })
+                    .sort(function(a, b) { return String(b.ends_at || '').localeCompare(String(a.ends_at || '')); })
+                    .slice(0, 3).map(function(e) { return e.id; })
+            );
             allEvents.forEach(function(ev) {
                 const tr = document.createElement('tr');
                 tr.innerHTML =
@@ -410,7 +418,12 @@
                     '<td><strong>' + esc(ev.name) + '</strong></td>' +
                     '<td>' + (ev.type === 'rifa' ? 'Rifa' : 'Venda') + '</td>' +
                     '<td>' + formatDate(ev.starts_at) + '<br>' + formatDate(ev.ends_at) + '</td>' +
-                    '<td><span class="badge badge-' + ev.status + '">' + EVENT_STATUS_LABEL[ev.status] + '</span></td>' +
+                    '<td><span class="badge badge-' + ev.status + '">' + EVENT_STATUS_LABEL[ev.status] + '</span>' +
+                        // Selos de auditoria: reaberto p/ correção e/ou dados pessoais limpos (LGPD)
+                        (ev.reopened_at ? '<br><small class="muted-hint" title="Reservas reabertas para correção após o arquivamento">Reaberto ' + formatDate(ev.reopened_at) + '</small>' : '') +
+                        (ev.summary && ev.summary.purged_at ? '<br><small class="muted-hint" title="Dados pessoais removidos (LGPD)">Dados limpos ' + formatDate(ev.summary.purged_at) + '</small>' : '') +
+                        (ev.status === 'arquivado' && !publicHistoryIds.has(ev.id) ? '<br><small class="muted-hint" title="Fora dos 3 mais recentes do histórico público — pode ser removido para liberar espaço">Fora do histórico</small>' : '') +
+                    '</td>' +
                     '<td><div class="actions">' + eventActions(ev) + '</div></td>';
                 tbody.appendChild(tr);
             });
@@ -424,8 +437,18 @@
                 html += '<button class="btn btn-success btn-sm js-ev-status" data-id="' + ev.id + '" data-to="ativo">Reativar</button>';
                 html += '<button class="btn btn-secondary btn-sm js-ev-status" data-id="' + ev.id + '" data-to="arquivado">Arquivar</button>';
             }
+            // Arquivado = histórico congelado. Para corrigir algo é preciso reabrir
+            // (volta a "encerrado"); a reabertura fica registrada em reopened_at.
+            if (ev.status === 'arquivado') {
+                html += '<button class="btn btn-warning btn-sm js-ev-status" data-id="' + ev.id + '" data-to="encerrado">Reabrir p/ correção</button>';
+                // Limpeza LGPD: some depois de limpo (summary preenchido pelo purge).
+                if (!ev.summary)
+                    html += '<button class="btn btn-danger btn-sm js-ev-purge" data-id="' + ev.id + '">Limpar dados</button>';
+            }
             html += '<button class="btn btn-primary btn-sm js-ev-reservations" data-id="' + ev.id + '">Reservas</button>';
-            html += '<button class="btn btn-edit btn-sm js-ev-edit" data-id="' + ev.id + '">Editar</button>';
+            // Editar fica indisponível no arquivado (registro congelado) — reabra para editar.
+            if (ev.status !== 'arquivado')
+                html += '<button class="btn btn-edit btn-sm js-ev-edit" data-id="' + ev.id + '">Editar</button>';
             if (ev.status === 'rascunho' || ev.status === 'arquivado')
                 html += '<button class="btn btn-danger btn-sm js-ev-delete" data-id="' + ev.id + '">Remover</button>';
             return html;
@@ -443,47 +466,100 @@
             const delB  = t.closest('.js-ev-delete');
             const stB   = t.closest('.js-ev-status');
             const resB  = t.closest('.js-ev-reservations');
+            const purgeB = t.closest('.js-ev-purge');
 
             if (editB) {
                 const ev = allEvents.find(x => x.id === editB.dataset.id);
                 if (ev) openEventModal(ev);
             } else if (delB) {
                 const ev = allEvents.find(x => x.id === delB.dataset.id);
-                if (ev) askConfirm('Remover evento?',
-                    'Remover "' + ev.name + '" e todas as suas reservas permanentemente? Esta ação não pode ser desfeita.',
-                    function() { return deleteEvent(ev.id); });
+                if (ev) confirmDeleteEvent(ev);
             } else if (stB) {
                 const ev = allEvents.find(x => x.id === stB.dataset.id);
                 if (ev) confirmStatusChange(ev, stB.dataset.to);
             } else if (resB) {
                 const ev = allEvents.find(x => x.id === resB.dataset.id);
                 if (ev) openReservations(ev);
+            } else if (purgeB) {
+                const ev = allEvents.find(x => x.id === purgeB.dataset.id);
+                if (ev) startPurgeFlow(ev);
             }
         });
 
         function confirmStatusChange(ev, to) {
+            // Reabertura de evento arquivado (arquivado → encerrado): texto e registro
+            // próprios — descongela o histórico para uma correção deliberada.
+            if (ev.status === 'arquivado' && to === 'encerrado') {
+                askConfirm('Reabrir para correção',
+                    'Reabrir "' + ev.name + '" para corrigir reservas? Ele volta a "Encerrado" e o histórico deixa de ficar congelado. A reabertura fica registrada na data de hoje.',
+                    function() { return changeEventStatus(ev.id, to, { reopened: true }); });
+                return;
+            }
             const msgs = {
                 ativo:     'Tornar "' + ev.name + '" o evento ativo? (apenas um evento pode estar ativo por vez)',
                 encerrado: 'Encerrar "' + ev.name + '"? Ele deixa de receber novas reservas.',
-                arquivado: 'Arquivar "' + ev.name + '"? Continua visível no histórico público.'
+                arquivado: 'Arquivar "' + ev.name + '"? Continua visível no histórico público; as reservas ficam somente-leitura.'
             };
             askConfirm('Alterar status', msgs[to] || 'Confirmar?', function() {
                 return changeEventStatus(ev.id, to);
             });
         }
 
-        async function changeEventStatus(id, to) {
-            const { error } = await sb.from('events').update({ status: to }).eq('id', id);
+        async function changeEventStatus(id, to, opts) {
+            const payload = { status: to };
+            // Registra a reabertura de um evento arquivado (correção pós-encerramento).
+            if (opts && opts.reopened) payload.reopened_at = new Date().toISOString();
+            const { error } = await sb.from('events').update(payload).eq('id', id);
             if (error) {
                 if (/events_um_ativo/.test(error.message))
                     return Promise.reject(new Error('Já existe um evento ativo. Encerre-o antes de ativar outro.'));
                 return Promise.reject(error);
             }
             await loadEvents();
-            if (currentEvent && currentEvent.id === id) refreshReservationContext();
+            // Reflete a troca de status na seção de reservas aberta: atualiza o
+            // currentEvent (status novo) e re-renderiza contexto + linhas (lock).
+            if (currentEvent && currentEvent.id === id) {
+                currentEvent = allEvents.find(function(x) { return x.id === id; }) || currentEvent;
+                refreshReservationContext();
+                renderReservations();
+            }
+        }
+
+        // Remoção completa de um evento (registro + reservas em cascata + imagens do
+        // Storage), com backup CSV prévio das reservas. Usado tanto para rascunhos
+        // quanto para arquivados "fora do histórico" (retenção/LGPD + economia).
+        async function confirmDeleteEvent(ev) {
+            const { data } = await sb.from('reservations')
+                .select('*, reservation_items(*)').eq('event_id', ev.id);
+            const reservations = data || [];
+            if (reservations.length) downloadReservationsCsv(ev, reservations);  // backup imediato
+            const extra = reservations.length
+                ? ' O backup CSV (' + reservations.length + ' reserva(s)) foi baixado agora.' : '';
+            askConfirm('Remover evento?',
+                'Remover "' + ev.name + '" — registro, reservas e imagens — permanentemente?' + extra +
+                ' Esta ação não pode ser desfeita.',
+                function() { return deleteEvent(ev.id); });
+        }
+
+        // Apaga as imagens do evento (capa + galeria) do bucket event-photos.
+        // Tolerante a falhas: um erro de Storage não impede a remoção do registro.
+        async function removeEventPhotos(ev) {
+            const urls = [];
+            if (ev.cover_url) urls.push(ev.cover_url);
+            (ev.gallery || []).forEach(function(u) { if (u) urls.push(u); });
+            const marker = '/event-photos/';
+            const paths = urls.map(function(u) {
+                const i = u.indexOf(marker);
+                return i === -1 ? null : decodeURIComponent(u.slice(i + marker.length));
+            }).filter(Boolean);
+            if (!paths.length) return;
+            try { await sb.storage.from('event-photos').remove(paths); }
+            catch (e) { console.warn('Falha ao remover imagens do Storage:', e); }
         }
 
         async function deleteEvent(id) {
+            const ev = allEvents.find(function(x) { return x.id === id; });
+            if (ev) await removeEventPhotos(ev);   // limpa o Storage antes (evita órfãos)
             const { error } = await sb.from('events').delete().eq('id', id);
             if (error) return Promise.reject(error);
             if (currentEvent && currentEvent.id === id) closeReservations();
@@ -756,6 +832,13 @@
         }
         document.getElementById('rc-close').addEventListener('click', closeReservations);
 
+        // Evento arquivado = histórico congelado: as reservas viram somente-leitura
+        // (sem editar/remover/trocar status/nova reserva). Para corrigir, reabra o
+        // evento pelo card (volta a "Encerrado").
+        function reservationsLocked() {
+            return !!currentEvent && currentEvent.status === 'arquivado';
+        }
+
         function refreshReservationContext() {
             if (!currentEvent) return;
             document.getElementById('rc-event-name').textContent = currentEvent.name;
@@ -766,8 +849,11 @@
             ];
             if (currentEvent.type === 'rifa')
                 parts.push(currentEvent.raffle_total_numbers + ' números a ' + formatMoney(currentEvent.raffle_number_price));
+            if (reservationsLocked()) parts.push('histórico congelado (somente leitura)');
             document.getElementById('rc-event-meta').textContent = parts.join(' · ');
             document.getElementById('th-items').textContent = currentEvent.type === 'rifa' ? 'Números' : 'Itens';
+            // Em evento arquivado, oculta "+ Nova reserva" (sem novas escritas no histórico).
+            document.getElementById('add-reservation-btn').style.display = reservationsLocked() ? 'none' : '';
         }
 
         async function loadReservations() {
@@ -840,6 +926,8 @@
                 if (!q) return true;
                 if ((r.customer_name || '').toLowerCase().includes(q)) return true;
                 if ((r.contact || '').toLowerCase().includes(q)) return true;
+                // busca por ID da reserva (prefixo curto exibido ou UUID completo colado)
+                if ((r.id || '').toLowerCase().includes(q.replace(/^#/, ''))) return true;
                 const nums = (r.reservation_items || []).map(it => String(it.raffle_number)).join(' ');
                 return nums.includes(q);
             });
@@ -860,20 +948,28 @@
                     '<td><strong>' + esc(r.customer_name) + '</strong>' +
                         // contato embutido: visível só no mobile, onde a coluna Contato some
                         '<small class="res-contact-inline">' + esc(r.contact) + '</small>' +
+                        // ID da reserva: handle estável p/ achar a linha no banco; clique copia o UUID completo
+                        '<button type="button" class="res-id js-res-copy" data-id="' + r.id + '"' +
+                            ' title="Copiar ID completo da reserva (para localizar no banco)">#' + esc(r.id.slice(0, 8)) + '</button>' +
                         (r.notes ? '<br><small class="muted-hint">' + esc(r.notes) + '</small>' : '') + '</td>' +
                     '<td>' + esc(r.contact) + '</td>' +
                     '<td>' + itemsLabel(r) + '</td>' +
                     '<td>' + statusSelect(r) + '</td>' +
                     '<td>' + formatDate(r.created_at) + '</td>' +
                     '<td><div class="actions">' +
-                        '<button class="btn btn-edit btn-sm js-res-edit" data-id="' + r.id + '">Editar</button>' +
-                        '<button class="btn btn-danger btn-sm js-res-delete" data-id="' + r.id + '">Remover</button>' +
+                        (reservationsLocked()
+                            ? '<span class="muted-hint">—</span>'
+                            : '<button class="btn btn-edit btn-sm js-res-edit" data-id="' + r.id + '">Editar</button>' +
+                              '<button class="btn btn-danger btn-sm js-res-delete" data-id="' + r.id + '">Remover</button>') +
                     '</div></td>';
                 tbody.appendChild(tr);
             });
         }
 
         function statusSelect(r) {
+            // Congelado: mostra o status como texto, sem permitir troca.
+            if (reservationsLocked())
+                return '<span class="status-locked">' + STATUS_LABEL[r.status] + '</span>';
             const opts = ['reservado','pago','entregue','cancelado'].map(function(s) {
                 return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + STATUS_LABEL[s] + '</option>';
             }).join('');
@@ -896,8 +992,24 @@
         });
 
         document.getElementById('reservations-tbody').addEventListener('click', function(e) {
+            const copyB = e.target.closest('.js-res-copy');
             const editB = e.target.closest('.js-res-edit');
             const delB  = e.target.closest('.js-res-delete');
+            if (copyB) {
+                const id = copyB.dataset.id;
+                const done = function() {
+                    const prev = copyB.textContent;
+                    copyB.textContent = 'copiado!';
+                    copyB.classList.add('is-copied');
+                    setTimeout(function() { copyB.textContent = prev; copyB.classList.remove('is-copied'); }, 1200);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(id).then(done).catch(function() { window.prompt('ID da reserva:', id); });
+                } else {
+                    window.prompt('ID da reserva:', id);
+                }
+                return;
+            }
             if (editB) {
                 const r = allReservations.find(x => x.id === editB.dataset.id);
                 if (r) openReservationModal(r);
@@ -916,7 +1028,10 @@
         }
 
         // ── Modal de reserva ────────────────────────────────────
-        document.getElementById('add-reservation-btn').addEventListener('click', function() { openReservationModal(null); });
+        document.getElementById('add-reservation-btn').addEventListener('click', function() {
+            if (reservationsLocked()) return;  // sem novas reservas em evento arquivado
+            openReservationModal(null);
+        });
 
         function openReservationModal(r) {
             editingReservationId = r ? r.id : null;
@@ -1058,9 +1173,11 @@
         }
 
         // ── Exportar CSV ────────────────────────────────────────
-        document.getElementById('export-csv-btn').addEventListener('click', function() {
+        // Monta e baixa o CSV de reservas de um evento. Reusado pelo botão "Exportar
+        // CSV" e pelo backup obrigatório antes da limpeza de dados (LGPD).
+        function downloadReservationsCsv(ev, reservations) {
             const rows = [['reserva_id','cliente','contato','status','criada_em','tipo_item','numero_rifa','variacao','quantidade','preco_unit']];
-            allReservations.forEach(function(r) {
+            reservations.forEach(function(r) {
                 const items = r.reservation_items || [];
                 if (!items.length) {
                     rows.push([r.id, r.customer_name, r.contact, r.status, r.created_at, '', '', '', '', '']);
@@ -1086,10 +1203,48 @@
             const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'reservas-' + slugify(currentEvent.name, 'evento') + '-' + new Date().toISOString().slice(0,10) + '.csv';
+            a.download = 'reservas-' + slugify(ev.name, 'evento') + '-' + new Date().toISOString().slice(0,10) + '.csv';
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
+        }
+
+        document.getElementById('export-csv-btn').addEventListener('click', function() {
+            downloadReservationsCsv(currentEvent, allReservations);
         });
+
+        // ── Limpeza de dados / LGPD ─────────────────────────────
+        // 2 passos obrigatórios: (1) baixa o CSV de backup; (2) confirma e chama
+        // purge_event_data, que grava os agregados não pessoais em events.summary e
+        // apaga reservas/itens na mesma transação. Só aparece em evento arquivado
+        // ainda não limpo (ver eventActions).
+        async function startPurgeFlow(ev) {
+            // A tela pode não estar aberta neste evento — busca as reservas dele.
+            const { data, error } = await sb
+                .from('reservations')
+                .select('*, reservation_items(*)')
+                .eq('event_id', ev.id)
+                .order('created_at', { ascending: false });
+            if (error) { alert('Erro ao buscar reservas: ' + error.message); return; }
+            const reservations = data || [];
+            if (!reservations.length) { alert('Este evento não tem reservas para limpar.'); return; }
+
+            // Passo 1 — backup obrigatório (download imediato).
+            downloadReservationsCsv(ev, reservations);
+
+            // Passo 2 — confirmação explícita da exclusão irreversível.
+            askConfirm('Limpar dados pessoais (LGPD)',
+                'O backup CSV de "' + ev.name + '" (' + reservations.length + ' reserva(s)) foi baixado agora. ' +
+                'Confirmar a remoção definitiva dos dados pessoais (nomes/contatos e reservas)? ' +
+                'O histórico público continua pelo resumo agregado. Esta ação não pode ser desfeita.',
+                function() { return purgeEventData(ev.id); });
+        }
+
+        async function purgeEventData(id) {
+            const { error } = await sb.rpc('purge_event_data', { p_event_id: id });
+            if (error) return Promise.reject(error);
+            if (currentEvent && currentEvent.id === id) loadReservations();  // recarrega se aberto
+            await loadEvents();
+        }
 
         // ── Confirmação genérica ────────────────────────────────
         function askConfirm(title, msg, cb) {

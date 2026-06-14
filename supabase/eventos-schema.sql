@@ -48,6 +48,10 @@ create table if not exists events (
                        check (raffle_max_per_reservation between 1 and 50),  -- nºs por reserva
   raffle_prize         text,
   raffle_winner_number integer     check (raffle_winner_number is null or raffle_winner_number >= 1),
+  -- marca quando um evento arquivado foi reaberto para correção (histórico):
+  -- enquanto arquivado as reservas são somente-leitura no admin; reabrir
+  -- (arquivado → encerrado) descongela e grava esta data
+  reopened_at          timestamptz,
   -- preenchido por purge_event_data() ANTES de deletar as reservas,
   -- para o histórico público continuar completo sem dados pessoais
   summary              jsonb,
@@ -84,6 +88,10 @@ alter table events add column if not exists raffle_max_per_reservation integer n
 alter table events drop constraint if exists events_raffle_max_check;
 alter table events add constraint events_raffle_max_check
   check (raffle_max_per_reservation between 1 and 50);
+
+-- Migração: registro de reabertura de evento arquivado (instalações anteriores
+-- a 2026-06-13). Seguro rodar mais de uma vez.
+alter table events add column if not exists reopened_at timestamptz;
 
 -- ──────────────────────────────────────────────────────────
 -- 2. TABELA: event_products (produtos de eventos de venda)
