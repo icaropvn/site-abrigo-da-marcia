@@ -12,7 +12,7 @@
             document.documentElement.setAttribute('data-theme', t);
         })();
     </script>
-    <link rel="stylesheet" href="../../styles/admin.css?v=6">
+    <link rel="stylesheet" href="../../styles/admin.css?v=7">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
     <script src="../../js/icons.js"></script>
@@ -487,11 +487,18 @@
         function renderPhotos() {
             const grid = document.getElementById('photos-grid');
             grid.innerHTML = '';
+            const last = photoItems.length - 1;
             photoItems.forEach(function(item, i) {
                 const cell = document.createElement('div');
                 cell.className = 'photo-thumb';
+                // A primeira foto é a capa. Botões ‹ › reordenam (mobile-friendly).
                 cell.innerHTML = `
                     <img src="${esc(item.preview)}" alt="Foto ${i + 1}">
+                    ${i === 0 ? '<span class="photo-cover-badge">Capa</span>' : ''}
+                    <div class="photo-move-group">
+                        <button type="button" class="photo-move" data-index="${i}" data-dir="-1" aria-label="Mover para a esquerda"${i === 0 ? ' disabled' : ''}>‹</button>
+                        <button type="button" class="photo-move" data-index="${i}" data-dir="1" aria-label="Mover para a direita"${i === last ? ' disabled' : ''}>›</button>
+                    </div>
                     <button type="button" class="photo-remove" data-index="${i}" aria-label="Remover foto">&times;</button>`;
                 grid.appendChild(cell);
             });
@@ -508,9 +515,16 @@
 
         document.getElementById('photos-grid').addEventListener('click', function(e) {
             const removeBtn = e.target.closest('.photo-remove');
+            const moveBtn   = e.target.closest('.photo-move');
             const addBtn    = e.target.closest('#photos-add-btn');
             if (removeBtn) {
                 photoItems.splice(parseInt(removeBtn.dataset.index, 10), 1);
+                renderPhotos();
+            } else if (moveBtn) {
+                const i = parseInt(moveBtn.dataset.index, 10);
+                const j = i + parseInt(moveBtn.dataset.dir, 10);
+                if (j < 0 || j >= photoItems.length) return;
+                const tmp = photoItems[i]; photoItems[i] = photoItems[j]; photoItems[j] = tmp;
                 renderPhotos();
             } else if (addBtn) {
                 document.getElementById('f-photos').click();
