@@ -270,7 +270,14 @@ Coletar o mínimo, informar a finalidade e **excluir de verdade** os dados de ev
 - Prazo de pagamento configurável por evento, com liberação automática de números não pagos.
 - Código de reserva privado para o cliente consultar/acompanhar o próprio pedido.
 - Confirmação por e-mail (exigiria Edge Function + serviço de envio).
-- Backup automático por e-mail antes da limpeza de dados + exclusão agendada via `pg_cron` (ver 6.6).
+- **Automações via `pg_cron`** (agrupar numa tarefa só — combinado 2026-06-13):
+  (a) auto-encerrar eventos `ativo` cujo `ends_at` passou há +7 dias (rede de
+  segurança caso o admin esqueça); (b) liberar números de reservas não pagas após
+  o prazo; (c) backup por e-mail + exclusão de dados agendada (ver 6.6). Exigem
+  habilitar a extensão `pg_cron` (e Edge Function + Resend para o e-mail).
+- **Testes automatizados** (combinado 2026-06-13): criar suíte conforme o projeto
+  crescer — candidatos: a RPC `create_reservation` (limites, validações, preço do
+  banco), o purge/retenção, e os helpers de `js/core/*` (já são módulos testáveis).
 - Grade da rifa em tempo real (Supabase Realtime).
 - Reserva multi-item unificada (carrinho).
 
@@ -407,17 +414,22 @@ js/
 
 ### Convenções
 - Módulos ES nativos (`import`/`export`); `<script type="module" src="…">` na página.
-- supabase-js via ESM: `import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'`
-  (ou vendorizar em `js/vendor/` p/ não depender de CDN — **decidir na Fase A**).
+- supabase-js via ESM **vendorizado** (decidido na Fase A, 2026-06-13): bundle
+  autossuficiente em `js/vendor/supabase-js@2.108.1.esm.js` (gerado com esbuild
+  `--bundle --platform=browser` — comando registrado no banner do arquivo). Sem
+  CDN em runtime → alinha com a CSP estrita. `core/supabase.js` importa dele.
 - Comentários em PT-BR. Validar cada módulo com `node --check` (agora são `.js`
   puros, sem precisar extrair IIFE) + teste manual no navegador.
 - O `<script>` inline de tema no `<head>` **permanece inline** (precisa rodar antes
   do paint p/ evitar flash); módulos são *deferred* e rodariam tarde demais.
 
 ### Fases (ordem de execução)
-- **Fase A — Fundação.** Criar `config.js` + `core/*` (basicamente migrar o conteúdo
-  de `admin-common.js`, `icons.js` e `supabase-config.js` para módulos que
-  *exportam*). Nada de página muda ainda. Decidir CDN vs vendor do supabase-js.
+- **Fase A — Fundação. ✅ CONCLUÍDA (2026-06-13).** Criados `js/config.js`
+  (creds, PIX_DEFAULTS, MAX_PHOTOS, STATUS_LABEL, EVENT_STATUS_LABEL) e
+  `js/core/{supabase,rest,dom,icons,auth}.js`, todos exportando o conteúdo antes
+  global de `admin-common.js`/`icons.js`/`supabase-config.js`/`render-events.js`.
+  supabase-js vendorizado (ver Convenções). Nenhuma página mudou — o legado segue
+  intacto. Todos os módulos passam `node --check` + import real no node.
 - **Fase B — Piloto.** Migrar **`admin/historias.html`** (porte médio, baixo risco)
   para `type="module"`: criar `data/stories.js` + `pages/admin-historias.js`, trocar
   os `<script>`. Validar a fundo (login+2FA, CRUD, upload de fotos, tema). Serve de
