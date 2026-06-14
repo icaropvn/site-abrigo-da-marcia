@@ -107,6 +107,12 @@ main #stories-list {
     background-color: var(--pretoPrincipal);
 }
 
+/* No modo escuro o hover vira branco (texto preto) p/ contrastar com o fundo. */
+[data-theme="dark"] #stories-list .story-card:hover .story-card-button {
+    background-color: var(--brancoPrincipal);
+    color: var(--pretoPrincipal);
+}
+
 [data-theme="dark"] #stories-list .story-card {
     background-color: #1e1e1e;
     box-shadow: 0 0 20px 2px rgba(0, 0, 0, 0.4);
