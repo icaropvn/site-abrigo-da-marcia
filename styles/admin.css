@@ -1159,7 +1159,54 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
     margin-bottom: 8px;
 }
 .prod-attr-row .js-attr-name    { flex: 0 0 38%; min-width: 0; }
-.prod-attr-row .js-attr-options { flex: 1; min-width: 0; }
+/* Caixa de chips: parece um input e cresce com as opções */
+.prod-attr-row .js-attr-chips {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+}
+.prod-attr-row .js-attr-chips:focus-within { border-color: var(--red); }
+.prod-attr-row .js-attr-chip-input {
+    flex: 1;
+    min-width: 90px;
+    border: none;
+    padding: 2px 0;
+    font-size: 15px;
+    font-family: inherit;
+    background: transparent;
+}
+.prod-attr-row .js-attr-chip-input:focus { outline: none; }
+.attr-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px 2px 9px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+}
+.attr-chip-x {
+    border: none;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    opacity: .65;
+}
+.attr-chip-x:hover { opacity: 1; }
+[data-theme="dark"] .prod-attr-row .js-attr-chips { background: #262830; }
+[data-theme="dark"] .prod-attr-row .js-attr-chip-input { color: var(--dark); }
+[data-theme="dark"] .attr-chip { background: #2a2c34; color: #cbd2dc; }
 
 /* ── Galeria de imagens do produto (até 3) ── */
 .ev-product-media { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; }

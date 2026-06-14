@@ -12,7 +12,7 @@
             document.documentElement.setAttribute('data-theme', t);
         })();
     </script>
-    <link rel="stylesheet" href="../../styles/admin.css?v=8">
+    <link rel="stylesheet" href="../../styles/admin.css?v=9">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/supabase-config.js"></script>
     <script src="../../js/admin-common.js?v=2"></script>
@@ -1472,11 +1472,34 @@
         function attrRow(attr) {
             const row = document.createElement('div');
             row.className = 'prod-attr-row';
+            const chips = (attr && Array.isArray(attr.options) ? attr.options : [])
+                .map(function(o) { return attrChipHtml(o); }).join('');
             row.innerHTML =
                 '<input type="text" class="js-attr-name" maxlength="40" placeholder="Variação (ex: Tamanho)" value="' + (attr ? esc(attr.name) : '') + '">' +
-                '<input type="text" class="js-attr-options" maxlength="200" placeholder="Opções por vírgula (ex: P, M, G)" value="' + (attr ? esc((attr.options || []).join(', ')) : '') + '">' +
+                '<div class="js-attr-chips attr-chips">' + chips +
+                    '<input type="text" class="js-attr-chip-input" maxlength="40" placeholder="Opção + Enter (ex: P)">' +
+                '</div>' +
                 '<button type="button" class="btn btn-ghost btn-sm js-remove-attr" aria-label="Remover variação">&times;</button>';
             return row;
+        }
+
+        function attrChipHtml(val) {
+            return '<span class="attr-chip" data-val="' + esc(val) + '">' + esc(val) +
+                   '<button type="button" class="attr-chip-x js-chip-remove" aria-label="Remover opção">&times;</button></span>';
+        }
+
+        // Adiciona um ou mais chips (aceita vírgulas) na variação; ignora vazios
+        // e duplicatas (case-insensitive). Insere antes do input de digitação.
+        function commitChipInput(input) {
+            const box = input.closest('.js-attr-chips');
+            input.value.split(',').forEach(function(part) {
+                const val = part.trim();
+                if (!val) return;
+                const dup = Array.prototype.some.call(box.querySelectorAll('.attr-chip'),
+                    function(c) { return c.dataset.val.toLowerCase() === val.toLowerCase(); });
+                if (!dup) input.insertAdjacentHTML('beforebegin', attrChipHtml(val));
+            });
+            input.value = '';
         }
 
         function sizeRow(r) {
@@ -1532,6 +1555,7 @@
             if (e.target.closest('.js-prod-remove'))   { card.remove(); return; }
             if (e.target.closest('.js-add-attr'))       { card.querySelector('.prod-attrs-list').appendChild(attrRow(null)); return; }
             if (e.target.closest('.js-remove-attr'))    { e.target.closest('.prod-attr-row').remove(); return; }
+            if (e.target.closest('.js-chip-remove'))     { e.target.closest('.attr-chip').remove(); return; }
             if (e.target.closest('.js-prod-img-add'))   { card.querySelector('.js-prod-img-file').click(); return; }
             const rmImg = e.target.closest('.js-prod-img-remove');
             if (rmImg) {
@@ -1542,6 +1566,21 @@
             if (e.target.closest('.js-size-img-wrap'))  { card.querySelector('.js-size-img-file').click(); return; }
             if (e.target.closest('.js-size-add-row'))    { card.querySelector('.js-size-rows').appendChild(sizeRow(null)); return; }
             if (e.target.closest('.js-size-remove-row')) { e.target.closest('.size-row').remove(); return; }
+        });
+        // Chips das variações: Enter/vírgula confirma, Backspace em campo vazio
+        // apaga o último chip; ao sair do campo, confirma o texto pendente.
+        document.getElementById('ev-products-list').addEventListener('keydown', function(e) {
+            const input = e.target.closest('.js-attr-chip-input');
+            if (!input) return;
+            if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitChipInput(input); }
+            else if (e.key === 'Backspace' && !input.value) {
+                const chips = input.closest('.js-attr-chips').querySelectorAll('.attr-chip');
+                if (chips.length) chips[chips.length - 1].remove();
+            }
+        });
+        document.getElementById('ev-products-list').addEventListener('focusout', function(e) {
+            const input = e.target.closest('.js-attr-chip-input');
+            if (input) commitChipInput(input);
         });
         document.getElementById('ev-products-list').addEventListener('change', async function(e) {
             const card = e.target.closest('.ev-product-card');
@@ -1583,13 +1622,13 @@
             const attrs = [];
             rows.forEach(function(row) {
                 const name = row.querySelector('.js-attr-name').value.trim();
-                const options = row.querySelector('.js-attr-options').value
-                    .split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
-                const uniq = [];
-                options.forEach(function(o) { if (uniq.indexOf(o) === -1) uniq.push(o); });
+                const chipsBox = row.querySelector('.js-attr-chips');
+                commitChipInput(chipsBox.querySelector('.js-attr-chip-input'));   // captura texto não confirmado
+                const options = Array.prototype.map.call(chipsBox.querySelectorAll('.attr-chip'),
+                    function(c) { return c.dataset.val; });
                 if (!name) return;   // variação sem nome: ignorada
-                if (!uniq.length) throw new Error('A variação "' + name + '" precisa de ao menos uma opção.');
-                attrs.push({ name: name, options: uniq });
+                if (!options.length) throw new Error('A variação "' + name + '" precisa de ao menos uma opção.');
+                attrs.push({ name: name, options: options });
             });
             const names = attrs.map(function(a) { return a.name.toLowerCase(); });
             if (new Set(names).size !== names.length)
