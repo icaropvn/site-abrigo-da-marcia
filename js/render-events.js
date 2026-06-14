@@ -734,18 +734,20 @@
     }
 
     // Galeria do card (até 3 imagens): trilho deslizante + pontos.
-    // Navegação por swipe (mobile) e pelos pontos (clicáveis). Sem setas:
-    // cobriam a imagem e os pontos já sinalizam que há mais fotos.
+    // Mobile: swipe + pontos. Desktop: também setas (em hover, via CSS) e
+    // arrastar com o mouse. As setas ficam escondidas no mobile.
     function saleGalleryHtml(imgs, name) {
         var slides = imgs.map(function(u) {
             return '<img src="' + esc(u) + '" alt="' + esc(name) + '" loading="lazy" draggable="false">';
         }).join('');
-        var dots = imgs.length > 1 ?
+        var extras = imgs.length > 1 ?
             '<div class="sale-gallery-dots">' + imgs.map(function(_u, i) {
                 return '<span class="sale-gallery-dot' + (i === 0 ? ' is-active' : '') + '" data-i="' + i + '"></span>';
-            }).join('') + '</div>' : '';
+            }).join('') + '</div>' +
+            '<button type="button" class="sale-gallery-arrow sale-gallery-prev" aria-label="Imagem anterior">‹</button>' +
+            '<button type="button" class="sale-gallery-arrow sale-gallery-next" aria-label="Próxima imagem">›</button>' : '';
         return '<div class="sale-card-gallery" data-idx="0" data-count="' + imgs.length + '">' +
-                  '<div class="sale-gallery-track">' + slides + '</div>' + dots +
+                  '<div class="sale-gallery-track">' + slides + '</div>' + extras +
                '</div>';
     }
 
@@ -760,11 +762,17 @@
         });
     }
 
-    // Liga setas, pontos e swipe (mobile) das galerias dentro de `root`.
+    // Liga setas, pontos, swipe (mobile) e arrastar-com-mouse (desktop) das
+    // galerias dentro de `root`.
     function wireGalleries(root) {
         root.querySelectorAll('.sale-card-gallery').forEach(function(gallery) {
-            var swiped = false;   // evita abrir o lightbox ao terminar um swipe
+            var swiped = false;   // evita abrir o lightbox ao terminar swipe/drag
+            function go(dir) { setSlide(gallery, (+gallery.dataset.idx) + dir); }
+            function markSwiped() { swiped = true; setTimeout(function() { swiped = false; }, 50); }
+
             gallery.addEventListener('click', function(e) {
+                var arrow = e.target.closest('.sale-gallery-arrow');
+                if (arrow) { go(arrow.classList.contains('sale-gallery-next') ? 1 : -1); return; }
                 var dot = e.target.closest('.sale-gallery-dot');
                 if (dot) { setSlide(gallery, parseInt(dot.dataset.i, 10)); return; }
                 if (!swiped && e.target.closest('.sale-gallery-track')) {
@@ -774,17 +782,32 @@
                     openLightbox(srcs, +gallery.dataset.idx);
                 }
             });
+
+            // Swipe (mobile).
             var x0 = null;
             gallery.addEventListener('touchstart', function(e) { x0 = e.touches[0].clientX; }, { passive: true });
             gallery.addEventListener('touchend', function(e) {
                 if (x0 === null) return;
                 var dx = e.changedTouches[0].clientX - x0;
-                if (Math.abs(dx) > 40) {
-                    setSlide(gallery, (+gallery.dataset.idx) + (dx < 0 ? 1 : -1));
-                    swiped = true;
-                    setTimeout(function() { swiped = false; }, 50);
-                }
+                if (Math.abs(dx) > 40) { go(dx < 0 ? 1 : -1); markSwiped(); }
                 x0 = null;
+            });
+
+            // Arrastar com o mouse (desktop), espelhando o swipe. O listener de
+            // mouseup é ligado só durante o arraste (não vaza ao re-renderizar).
+            var mx0 = null;
+            function onUp(e) {
+                document.removeEventListener('mouseup', onUp);
+                if (mx0 === null) return;
+                var dx = e.clientX - mx0;
+                mx0 = null;
+                if (Math.abs(dx) > 40) { go(dx < 0 ? 1 : -1); markSwiped(); }
+            }
+            gallery.addEventListener('mousedown', function(e) {
+                if (e.button !== 0 || !e.target.closest('.sale-gallery-track')) return;
+                mx0 = e.clientX;
+                e.preventDefault();   // impede seleção/arraste-fantasma da imagem
+                document.addEventListener('mouseup', onUp);
             });
         });
     }
