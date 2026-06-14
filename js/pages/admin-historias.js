@@ -159,8 +159,11 @@ function renderPhotos() {
     photoItems.forEach(function(item, i) {
         const cell = document.createElement('div');
         cell.className = 'photo-thumb';
+        cell.dataset.idx = i;   // índice estável p/ reconstruir a ordem após o arraste
+        // A primeira foto é a capa. Arraste para reordenar (toque/mouse).
         cell.innerHTML = `
-            <img src="${esc(item.preview)}" alt="Foto ${i + 1}">
+            <img src="${esc(item.preview)}" alt="Foto ${i + 1}" draggable="false">
+            ${i === 0 ? '<span class="photo-cover-badge">Capa</span>' : ''}
             <button type="button" class="photo-remove" data-index="${i}" aria-label="Remover foto">&times;</button>`;
         grid.appendChild(cell);
     });
@@ -185,6 +188,48 @@ document.getElementById('photos-grid').addEventListener('click', function(e) {
         document.getElementById('f-photos').click();
     }
 });
+
+// ── Reordenar fotos arrastando (Pointer Events: toque + mouse) ──
+// Move o nó no DOM durante o arraste; ao soltar, reconstrói photoItems pela
+// nova ordem dos data-idx e re-renderiza (capa = 1ª foto).
+(function setupPhotoDrag() {
+    const grid = document.getElementById('photos-grid');
+    let dragCell = null;
+    let pointerId = null;
+
+    grid.addEventListener('pointerdown', function(e) {
+        const cell = e.target.closest('.photo-thumb');
+        // Não inicia arraste ao tocar no X (remover).
+        if (!cell || e.target.closest('.photo-remove')) return;
+        dragCell = cell;
+        pointerId = e.pointerId;
+        cell.setPointerCapture(pointerId);
+        cell.classList.add('dragging');
+    });
+
+    grid.addEventListener('pointermove', function(e) {
+        if (!dragCell) return;
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+        const overCell = target && target.closest('.photo-thumb');
+        if (!overCell || overCell === dragCell || overCell.parentNode !== grid) return;
+        const rect = overCell.getBoundingClientRect();
+        const after = e.clientX > rect.left + rect.width / 2;
+        grid.insertBefore(dragCell, after ? overCell.nextSibling : overCell);
+    });
+
+    function endDrag() {
+        if (!dragCell) return;
+        dragCell.classList.remove('dragging');
+        try { dragCell.releasePointerCapture(pointerId); } catch (_) {}
+        dragCell = null;
+        // Reconstrói o array pela ordem atual dos nós e re-renderiza.
+        const cells = Array.prototype.slice.call(grid.querySelectorAll('.photo-thumb'));
+        photoItems = cells.map(function(c) { return photoItems[parseInt(c.dataset.idx, 10)]; });
+        renderPhotos();
+    }
+    grid.addEventListener('pointerup', endDrag);
+    grid.addEventListener('pointercancel', endDrag);
+})();
 
 document.getElementById('f-photos').addEventListener('change', function() {
     const files = Array.from(this.files || []);
