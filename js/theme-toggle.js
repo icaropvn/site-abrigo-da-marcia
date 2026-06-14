@@ -18,13 +18,14 @@
         });
     }
 
-    // Acompanha o tema do sistema ao vivo, mas só enquanto o usuário não tiver
-    // escolhido manualmente (sem 'tema' salvo). Depois de clicar no toggle, a
-    // escolha manual passa a prevalecer.
+    // Acompanha o tema do sistema ao vivo: quando o SO muda de claro/escuro, o
+    // site segue e descarta qualquer escolha manual salva (assim o reload também
+    // passa a seguir o sistema). O toggle manual continua valendo, mas só até a
+    // próxima mudança do SO.
     var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     if (media) {
         var onSystemChange = function(e) {
-            if (localStorage.getItem('tema')) return;   // respeita a escolha manual
+            localStorage.removeItem('tema');   // volta a seguir o sistema
             html.setAttribute('data-theme', e.matches ? 'dark' : 'light');
             updateAriaLabels(getCurrentTheme());
         };
