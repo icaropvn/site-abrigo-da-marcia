@@ -4,41 +4,11 @@
 // Dados vêm do Supabase (tabelas events/event_totals/raffle_board).
 // Eventos de venda (type='venda') mostram a vitrine de produtos com
 // carrinho (variação + quantidade) e reservam pela mesma RPC.
+// Módulo ES (Fase D): leitura/RPC anon via core/rest.js (fetchJson). PixBRCode
+// (js/pix.js) e QRCode (qrcodejs) continuam globais clássicos.
+import { fetchJson } from './core/rest.js';
 
 (function() {
-    function eventsConfigured() {
-        return typeof SUPABASE_URL !== 'undefined' &&
-               typeof SUPABASE_ANON_KEY !== 'undefined' &&
-               SUPABASE_URL      !== 'PREENCHER_URL_DO_PROJETO' &&
-               SUPABASE_ANON_KEY !== 'PREENCHER_ANON_KEY';
-    }
-
-    async function fetchJson(path, options) {
-        var url = SUPABASE_URL + '/rest/v1/' + path;
-        var controller = new AbortController();
-        var timeoutId  = setTimeout(function() { controller.abort(); }, 8000);
-        var headers = {
-            'apikey':        SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-        };
-        var init = { signal: controller.signal, headers: headers };
-        if (options && options.body) {
-            init.method = 'POST';
-            headers['Content-Type'] = 'application/json';
-            init.body = JSON.stringify(options.body);
-        }
-        var response = await fetch(url, init);
-        clearTimeout(timeoutId);
-        var data = null;
-        try { data = await response.json(); } catch (e) { /* respostas vazias */ }
-        if (!response.ok) {
-            var err = new Error((data && data.message) || ('Supabase retornou ' + response.status));
-            err.code = data && data.message;
-            throw err;
-        }
-        return data;
-    }
-
     // Mensagens amigáveis para os códigos de erro da RPC
     var ERROR_MESSAGES = {
         'NUMERO_INDISPONIVEL':    'Esse número acabou de ser reservado por outra pessoa. Escolha outro número.',
@@ -1124,12 +1094,6 @@
         var banner = document.getElementById('event-banner');
         var area   = document.getElementById('event-area');
         if (!banner && !area) return;
-
-        if (!eventsConfigured()) {
-            if (banner) banner.closest('#events-section').style.display = 'none';
-            if (area) renderEmpty(area);
-            return;
-        }
 
         try {
             var active = await fetchJson('events?status=eq.ativo&limit=1');
