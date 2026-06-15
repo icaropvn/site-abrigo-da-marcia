@@ -449,7 +449,10 @@ main #donation-section #donation-buttons-container .donation-button-most-chosen:
     white-space: nowrap;
 }
 
-/* ── Doação única: botão grande (CTA primário) ── */
+/* ── Doação única ── */
+/* Segue o estilo dos demais botões de pagamento (fundo branco/texto preto,
+   hover preto/branco — tudo herdado da regra base, tema-independente). Só
+   ajusta a largura para o texto caber numa linha, centralizado. */
 main #donation-section #donation-buttons-container .donation-single-line {
     justify-content: center;
 }
@@ -457,22 +460,6 @@ main #donation-section #donation-buttons-container .donation-single-line {
 main #donation-section #donation-buttons-container .donation-button-single {
     width: auto;
     max-width: 100%;
-    padding: 18px 48px;
-    font-size: 26px;
-    font-weight: 400;
-    line-height: 1.2;
-    background-color: var(--vermelhoPrincipal);
-    color: var(--brancoPrincipal);
-}
-
-/* Hover = máximo contraste com o fundo (preto no claro, branco no escuro) */
-main #donation-section #donation-buttons-container .donation-button-single:hover {
-    background-color: var(--pretoPrincipal);
-    color: var(--brancoPrincipal);
-}
-[data-theme="dark"] main #donation-section #donation-buttons-container .donation-button-single:hover {
-    background-color: var(--brancoPrincipal);
-    color: var(--pretoPrincipal);
 }
 
 /* ── Modal de doação única via PIX ── */
