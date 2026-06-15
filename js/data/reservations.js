@@ -26,6 +26,18 @@ export function deleteReservation(id) {
     return sb.from('reservations').delete().eq('id', id);
 }
 
+// Lista os números de rifa elegíveis ao sorteio de um evento: não liberados,
+// com número definido e cuja reserva está paga/entregue. Traz o nome do cliente
+// (join inner). Devolve { data, error }.
+export function listPaidRaffleNumbers(eventId) {
+    return sb.from('reservation_items')
+        .select('raffle_number, reservation:reservations!inner(customer_name, status)')
+        .eq('event_id', eventId)
+        .eq('released', false)
+        .not('raffle_number', 'is', null)
+        .in('reservation.status', ['pago', 'entregue']);
+}
+
 // ── Itens da reserva (números da rifa / produtos) ───────────────
 // Insere uma lista de itens. Devolve { error }.
 export function insertReservationItems(rows) {

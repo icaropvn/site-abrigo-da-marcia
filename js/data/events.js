@@ -13,6 +13,15 @@ export function listEvents() {
     return sb.from('events').select('*').order('created_at', { ascending: false });
 }
 
+// Lista as rifas elegíveis para sorteio (tipo rifa, status ativo/encerrado),
+// mais recentes primeiro. Devolve { data, error }.
+export function listRaffles() {
+    return sb.from('events').select('*')
+        .eq('type', 'rifa')
+        .in('status', ['ativo', 'encerrado'])
+        .order('created_at', { ascending: false });
+}
+
 // Insere um evento e devolve o id criado. Devolve { data, error }.
 export function insertEvent(payload) {
     return sb.from('events').insert(payload).select('id').single();
