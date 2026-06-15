@@ -458,13 +458,15 @@ js/
   (+ `data/events.js`, `data/reservations.js`), `index`/cães (+ `data/dogs.js`),
   `sorteio`, `seguranca` e `login`. `compressImage`→`core/image.js`,
   `adminToast`→`ui/toast.js`. Todos validados com `node --check`.
-- **Fase D — Páginas públicas.** `catalogo`, `eventos`, `historias`, home. Reusar os
-  repositórios de `data/` (leitura anon via `core/rest.js` ou client supabase-js
-  anon — **decidir o peso** na fase).
-- **Fase E — Limpeza. PARCIAL (2026-06-14).** `js/admin-common.js` removido (ficou
-  órfão após a Fase C). `supabase-config.js` e `js/icons.js` ainda são usados pelas
-  páginas públicas — remover só ao concluir a Fase D. Convenções do CLAUDE.md
-  atualizadas.
+- **Fase D — Páginas públicas. ✅ CONCLUÍDA (2026-06-14).** `historias`, `eventos`,
+  home e `catalogo` migradas. Decisão de peso: **mantido REST** (sem supabase-js nas
+  públicas) — os `render-*.js`/`carousel.js`/`dog-modal.js` passaram a `type=module`
+  importando `core/rest.js` (fetchJson) + `core/icons.js`; `PixBRCode`/`QRCode`
+  seguem globais clássicos (pix.js/qrcodejs). `catalog-filters`/`favorites`/
+  `lazy-load`/`date`/`mobile-menu`/`theme-toggle` continuam clássicos.
+- **Fase E — Limpeza. ✅ CONCLUÍDA (2026-06-14).** Removidos `js/admin-common.js`
+  (Fase C) e, após a Fase D, `js/supabase-config.js` e `js/icons.js` (órfãos).
+  Convenções do CLAUDE.md atualizadas. Migração de arquitetura COMPLETA.
 
 ### Riscos e mitigação
 - **`file://` não carrega módulos** (CORS). Dev local passa a exigir um server
