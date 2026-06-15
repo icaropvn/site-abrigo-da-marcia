@@ -35,7 +35,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="styles/index.css?v=6">
+    <link rel="stylesheet" href="styles/index.css?v=7">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -160,17 +160,24 @@
                 <p>O abrigo é mantido através de trabalho voluntário e doações. Quer ajudar também?  Faça uma doação para conseguirmos manter nossos cães saudáveis e de barriga cheia!</p>
                 <p id="donation-disclaimer">*As doações são recorrentes e cobradas mensalmente, mas podem ser canceladas a qualquer momento.</p>
                 <div id="donation-buttons-container">
-                    <div class="donation-buttons-container-line">
-                        <a target="_blank" href="https://pag.ae/7_LnotP-u"><button class="donation-button-value">doe 5 reais/mês</button></a>
-                        <a target="_blank" href="https://pag.ae/7_Lnn25Ev"><button class="donation-button-value donation-button-most-chosen">doe 10 reais/mês</button></a>
-                    </div>
-                    <div class="donation-buttons-container-line">
-                        <a target="_blank" href="https://pag.ae/7_LnnApVx"><button class="donation-button-value">doe 30 reais/mês</button></a>
-                        <a target="_blank" href="https://pag.ae/7_LnnQN7R"><button class="donation-button-value">doe 50 reais/mês</button></a>
+                    <!-- Doações recorrentes (mensais) -->
+                    <div class="donation-group">
+                        <p class="donation-group-label">Contribua todo mês</p>
+                        <div class="donation-buttons-container-line">
+                            <a target="_blank" href="https://pag.ae/7_LnotP-u"><button class="donation-button-value">doe 5 reais/mês</button></a>
+                            <a target="_blank" href="https://pag.ae/7_Lnn25Ev"><button class="donation-button-value donation-button-most-chosen">doe 10 reais/mês</button></a>
+                        </div>
+                        <div class="donation-buttons-container-line">
+                            <a target="_blank" href="https://pag.ae/7_LnnApVx"><button class="donation-button-value">doe 30 reais/mês</button></a>
+                            <a target="_blank" href="https://pag.ae/7_LnnQN7R"><button class="donation-button-value">doe 50 reais/mês</button></a>
+                        </div>
                     </div>
                     <!-- Doação única via PIX (o doador escolhe o valor) -->
-                    <div class="donation-buttons-container-line donation-single-line">
-                        <button type="button" id="donation-single-btn" class="donation-button-single">Doação única via PIX</button>
+                    <div class="donation-group">
+                        <p class="donation-group-label">Ou apenas uma vez</p>
+                        <div class="donation-buttons-container-line donation-single-line">
+                            <button type="button" id="donation-single-btn" class="donation-button-single">Doação Única</button>
+                        </div>
                     </div>
                 </div>
             </div>

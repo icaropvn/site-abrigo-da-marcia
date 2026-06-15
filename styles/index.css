@@ -449,17 +449,23 @@ main #donation-section #donation-buttons-container .donation-button-most-chosen:
     white-space: nowrap;
 }
 
-/* ── Doação única ── */
-/* Segue o estilo dos demais botões de pagamento (fundo branco/texto preto,
-   hover preto/branco — tudo herdado da regra base, tema-independente). Só
-   ajusta a largura para o texto caber numa linha, centralizado. */
-main #donation-section #donation-buttons-container .donation-single-line {
-    justify-content: center;
+/* ── Grupos de doação (recorrente / única), cada um com seu rótulo ── */
+main #donation-section #donation-buttons-container .donation-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
-main #donation-section #donation-buttons-container .donation-button-single {
-    width: auto;
-    max-width: 100%;
+main #donation-section #donation-buttons-container .donation-group-label {
+    color: var(--brancoPrincipal);
+    font-size: clamp(22px, 2vw, 30px);
+    font-weight: 400;
+}
+
+/* Doação única: mesmo visual e tamanho dos demais botões (branco/preto, hover
+   preto/branco, 250px) — herdado da regra base. Só fica alinhado à esquerda. */
+main #donation-section #donation-buttons-container .donation-single-line {
+    justify-content: flex-start;
 }
 
 /* ── Modal de doação única via PIX ── */
@@ -1394,14 +1400,29 @@ main #donation-section button:focus-visible {
     }
 
     main #donation-section #donation-buttons-container {
-        gap: 14px;
+        gap: 30px;
         margin-top: 28px;
+    }
+
+    /* Grupos empilhados e centralizados, com rótulo centralizado acima */
+    main #donation-section #donation-buttons-container .donation-group {
+        align-items: center;
+        gap: 14px;
+    }
+
+    main #donation-section #donation-buttons-container .donation-group-label {
+        text-align: center;
+        font-size: clamp(20px, 6vw, 26px);
     }
 
     main #donation-section #donation-buttons-container .donation-buttons-container-line {
         flex-direction: column;
         align-items: center;
         gap: 16px;
+    }
+
+    main #donation-section #donation-buttons-container .donation-single-line {
+        justify-content: center;
     }
 
     main #donation-section #donation-buttons-container button {
