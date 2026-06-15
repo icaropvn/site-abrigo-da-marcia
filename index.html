@@ -35,7 +35,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="styles/index.css?v=4">
+    <link rel="stylesheet" href="styles/index.css?v=5">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -168,6 +168,10 @@
                         <a target="_blank" href="https://pag.ae/7_LnnApVx"><button class="donation-button-value">doe 30 reais/mês</button></a>
                         <a target="_blank" href="https://pag.ae/7_LnnQN7R"><button class="donation-button-value">doe 50 reais/mês</button></a>
                     </div>
+                    <!-- Doação única via PIX (o doador escolhe o valor) -->
+                    <div class="donation-buttons-container-line donation-single-line">
+                        <button type="button" id="donation-single-btn" class="donation-button-single">Doe uma vez via PIX — você escolhe o valor</button>
+                    </div>
                 </div>
             </div>
             <picture>
@@ -248,6 +252,17 @@
         </div>
     </footer>
 
+    <!-- Modal: doação única via PIX -->
+    <div class="donation-pix-overlay" id="donation-pix-modal" aria-hidden="true">
+        <div class="donation-pix-box" role="dialog" aria-modal="true" aria-labelledby="donation-pix-title">
+            <button type="button" class="donation-pix-close" id="donation-pix-close" aria-label="Fechar">&times;</button>
+            <p class="donation-pix-title" id="donation-pix-title">Doação única via PIX</p>
+            <div id="donation-pix-qrcode" aria-label="QR Code para doação via PIX"></div>
+            <button type="button" id="donation-pix-copy">Copiar código PIX</button>
+            <p class="donation-pix-instructions">Escaneie o QR Code ou copie o código no app do seu banco e <strong>escolha o valor</strong> que quiser doar. 💚</p>
+        </div>
+    </div>
+
     <script src="js/supabase-config.js"></script>
     <script src="js/icons.js"></script>
     <script src="js/theme-toggle.js?v=2"></script>
@@ -256,5 +271,8 @@
     <script src="js/animations.js"></script>
     <script src="js/render-stories.js?v=4"></script>
     <script src="js/render-events.js?v=6"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/pix.js?v=1"></script>
+    <script src="js/donation-pix.js?v=1"></script>
 </body>
 </html>

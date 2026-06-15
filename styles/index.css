@@ -449,6 +449,111 @@ main #donation-section #donation-buttons-container .donation-button-most-chosen:
     white-space: nowrap;
 }
 
+/* ── Doação única: botão grande (CTA primário) ── */
+main #donation-section #donation-buttons-container .donation-single-line {
+    justify-content: center;
+}
+
+main #donation-section #donation-buttons-container .donation-button-single {
+    width: auto;
+    max-width: 100%;
+    padding: 18px 48px;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    background-color: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+}
+
+/* Hover = máximo contraste com o fundo (preto no claro, branco no escuro) */
+main #donation-section #donation-buttons-container .donation-button-single:hover {
+    background-color: var(--pretoPrincipal);
+    color: var(--brancoPrincipal);
+}
+[data-theme="dark"] main #donation-section #donation-buttons-container .donation-button-single:hover {
+    background-color: var(--brancoPrincipal);
+    color: var(--pretoPrincipal);
+}
+
+/* ── Modal de doação única via PIX ── */
+.donation-pix-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.donation-pix-overlay.open { display: flex; }
+
+.donation-pix-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+    padding: 32px 28px;
+    border-radius: 14px;
+    background-color: var(--brancoPrincipal);
+    color: var(--pretoPrincipal);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.donation-pix-close {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    border: none;
+    background: none;
+    color: var(--pretoPrincipal);
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.donation-pix-title {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+#donation-pix-qrcode img,
+#donation-pix-qrcode canvas {
+    border-radius: 6px;
+}
+
+#donation-pix-copy {
+    border: 2px solid var(--vermelhoPrincipal);
+    background: none;
+    color: var(--vermelhoPrincipal);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+#donation-pix-copy:hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+.donation-pix-instructions {
+    max-width: 280px;
+    font-size: 14px;
+    text-align: center;
+}
+
+[data-theme="dark"] .donation-pix-box {
+    background-color: #2a2a2a;
+    color: var(--brancoPrincipal);
+}
+[data-theme="dark"] .donation-pix-close { color: var(--brancoPrincipal); }
+
 main #about-us-section {
     position: relative;
     display: flex;
