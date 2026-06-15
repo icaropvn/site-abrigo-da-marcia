@@ -1,32 +1,18 @@
 // Histórias do Abrigo — prévia compacta na home (#stories-preview) e
 // grid de cards na página dedicada (#stories-list) com modal de história completa.
-// Dados vêm do Supabase (tabela `stories`). Sem libs externas.
+// Dados vêm do Supabase (tabela `stories`). Módulo ES (Fase D): leitura anon via
+// core/rest.js; ícone de core/icons.js — sem depender de globais.
+import { fetchJson } from './core/rest.js';
+import { ICON_DOG_SVG } from './core/icons.js';
 
 (function() {
-    // Placeholder de cão sem foto — vem de js/icons.js (carregar antes deste)
+    // Placeholder de cão sem foto (ícone compartilhado).
     var DOG_PLACEHOLDER_SVG = ICON_DOG_SVG;
 
-    function storiesConfigured() {
-        return typeof SUPABASE_URL !== 'undefined' &&
-               typeof SUPABASE_ANON_KEY !== 'undefined' &&
-               SUPABASE_URL      !== 'PREENCHER_URL_DO_PROJETO' &&
-               SUPABASE_ANON_KEY !== 'PREENCHER_ANON_KEY';
-    }
-
-    async function fetchStories(query) {
-        var url = SUPABASE_URL + '/rest/v1/stories?' + query;
-        var controller = new AbortController();
-        var timeoutId  = setTimeout(function() { controller.abort(); }, 5000);
-        var response = await fetch(url, {
-            signal: controller.signal,
-            headers: {
-                'apikey':        SUPABASE_ANON_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-            }
-        });
-        clearTimeout(timeoutId);
-        if (!response.ok) throw new Error('Supabase retornou ' + response.status);
-        return await response.json();
+    // Busca histórias na REST (anon). `query` é a query string após "stories?"
+    // (ex.: 'order=created_at.desc&limit=3').
+    function fetchStories(query) {
+        return fetchJson('stories?' + query);
     }
 
     function firstPhoto(story) {
@@ -225,11 +211,6 @@
         var preview = document.getElementById('stories-preview');
         var list    = document.getElementById('stories-list');
         if (!preview && !list) return;
-        if (!storiesConfigured()) {
-            if (preview) preview.closest('#stories-section').style.display = 'none';
-            if (list) renderList(list, []);
-            return;
-        }
 
         try {
             if (preview) {
