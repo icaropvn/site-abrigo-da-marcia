@@ -1,3 +1,8 @@
+// Catálogo de cães (módulo ES, Fase D): leitura anon via core/rest.js e carrossel
+// compartilhado de carousel.js. initLazyLoad/initFavorites seguem globais clássicos.
+import { fetchJson } from './core/rest.js';
+import { buildCarousel } from './carousel.js';
+
 function calcAge(birthYear) {
     if (!birthYear) return '—';
     var years = new Date().getFullYear() - birthYear;
@@ -106,45 +111,19 @@ function normalizeDog(dog) {
     };
 }
 
-function isSupabaseConfigured() {
-    return typeof SUPABASE_URL !== 'undefined' &&
-           typeof SUPABASE_ANON_KEY !== 'undefined' &&
-           SUPABASE_URL      !== 'PREENCHER_URL_DO_PROJETO' &&
-           SUPABASE_ANON_KEY !== 'PREENCHER_ANON_KEY';
-}
-
 async function fetchFromSupabase() {
-    var url = SUPABASE_URL +
-        '/rest/v1/dogs?status=eq.available&order=featured.desc,created_at.desc';
-
-    var controller = new AbortController();
-    var timeoutId  = setTimeout(function() { controller.abort(); }, 5000);
-
-    var response = await fetch(url, {
-        signal: controller.signal,
-        headers: {
-            'apikey':        SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-        }
-    });
-    clearTimeout(timeoutId);
-
-    if (!response.ok) throw new Error('Supabase retornou ' + response.status);
-
-    var dogs = await response.json();
+    var dogs = await fetchJson('dogs?status=eq.available&order=featured.desc,created_at.desc');
     return dogs.map(normalizeDog);
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-    if (isSupabaseConfigured()) {
-        try {
-            var dogs = await fetchFromSupabase();
-            if (dogs.length > 0) {
-                renderDogs(dogs);
-                return;
-            }
-        } catch (_) {}
-    }
+    try {
+        var dogs = await fetchFromSupabase();
+        if (dogs.length > 0) {
+            renderDogs(dogs);
+            return;
+        }
+    } catch (_) {}
 
     // Fallback local: dados estáticos quando o Supabase está indisponível.
     // (O fallback intermediário via backend Express legado foi removido em

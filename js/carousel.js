@@ -5,10 +5,14 @@
 // options.imgFit          — 'cover' (default) ou 'contain'
 // options.lazy            — true: usa data-src + class 'carousel-lazy' para carregamento tardio
 
-// Placeholder de cão sem foto — vem de js/icons.js (carregar antes deste)
+// Módulo ES (Fase D): ícone de core/icons.js; `buildCarousel` é exportado e
+// importado por render-dogs.js e dog-modal.js.
+import { ICON_DOG_SVG } from './core/icons.js';
+
+// Placeholder de cão sem foto (ícone compartilhado).
 var CAROUSEL_DOG_SVG = ICON_DOG_SVG;
 
-function buildCarousel(photos, name, options) {
+export function buildCarousel(photos, name, options) {
     photos = (photos || []).filter(Boolean);
     var opts = options || {};
     var containerClass = opts.containerClass || 'dog-carousel';

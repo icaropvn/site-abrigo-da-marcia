@@ -1,3 +1,7 @@
+// Módulo ES (Fase D): importa o carrossel compartilhado de carousel.js.
+// A lista de cães vem de window._catalogDogs (definida por render-dogs.js).
+import { buildCarousel } from './carousel.js';
+
 function safeUrl(url) {
     try {
         var u = new URL(url);
