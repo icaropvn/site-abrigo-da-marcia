@@ -454,14 +454,17 @@ js/
   para `type="module"`: criar `data/stories.js` + `pages/admin-historias.js`, trocar
   os `<script>`. Validar a fundo (login+2FA, CRUD, upload de fotos, tema). Serve de
   modelo para as demais.
-- **Fase C — Rollout admin.** `eventos` (+ `data/events.js`, `data/reservations.js`),
-  `sorteio`, `index` (+ `data/dogs.js`), `seguranca`, `login`. Extrair `ui/` à
-  medida que a repetição aparecer (modal, photo-uploader).
+- **Fase C — Rollout admin. ✅ CONCLUÍDA (2026-06-14).** Migrados `eventos`
+  (+ `data/events.js`, `data/reservations.js`), `index`/cães (+ `data/dogs.js`),
+  `sorteio`, `seguranca` e `login`. `compressImage`→`core/image.js`,
+  `adminToast`→`ui/toast.js`. Todos validados com `node --check`.
 - **Fase D — Páginas públicas.** `catalogo`, `eventos`, `historias`, home. Reusar os
   repositórios de `data/` (leitura anon via `core/rest.js` ou client supabase-js
   anon — **decidir o peso** na fase).
-- **Fase E — Limpeza.** Remover `admin-common.js`/`supabase-config.js`/`icons.js`
-  antigos quando ninguém mais os usar; atualizar a seção "Convenções" do CLAUDE.md.
+- **Fase E — Limpeza. PARCIAL (2026-06-14).** `js/admin-common.js` removido (ficou
+  órfão após a Fase C). `supabase-config.js` e `js/icons.js` ainda são usados pelas
+  páginas públicas — remover só ao concluir a Fase D. Convenções do CLAUDE.md
+  atualizadas.
 
 ### Riscos e mitigação
 - **`file://` não carrega módulos** (CORS). Dev local passa a exigir um server

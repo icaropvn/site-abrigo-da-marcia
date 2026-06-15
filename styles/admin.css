@@ -535,7 +535,7 @@ svg.icon { width: 1em; height: 1em; vertical-align: -0.125em; }
 .alert-error   { background: #fee2e2; color: #dc2626; }
 .alert-success { background: #dcfce7; color: #16a34a; }
 
-/* ── Toasts (notificações flutuantes, via adminToast em admin-common.js) ── */
+/* ── Toasts (notificações flutuantes, via adminToast em js/ui/toast.js) ── */
 .admin-toasts {
     position: fixed;
     top: 16px;
