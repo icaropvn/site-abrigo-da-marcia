@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hnbbjohjobvclinxclbw.supabase.co wss://hnbbjohjobvclinxclbw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <title>Admin — Abrigo da Márcia</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="../../styles/admin.css?v=8">
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
+            <h1>Painel Admin</h1>
+            <nav class="admin-nav">
+                <a href="index.html" class="active">Cães</a>
+                <a href="historias.html">Histórias</a>
+                <a href="eventos.html">Eventos</a>
+                <a href="seguranca.html">Segurança</a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="theme-toggle" aria-label="Alternar tema"></button>
+            <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+        </div>
+    </header>
+
+    <!-- ── Main ── -->
+    <main class="admin-main">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">—</div>
+                <div class="stat-label">Total de cães</div>
+            </div>
+            <div class="stat-card available">
+                <div class="stat-value" id="stat-available">—</div>
+                <div class="stat-label">Disponíveis</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-value" id="stat-pending">—</div>
+                <div class="stat-label">Em processo</div>
+            </div>
+            <div class="stat-card adopted">
+                <div class="stat-value" id="stat-adopted">—</div>
+                <div class="stat-label">Adotados</div>
+            </div>
+            <div class="stat-card deceased">
+                <div class="stat-value" id="stat-deceased">—</div>
+                <div class="stat-label">Falecidos</div>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="section-header">
+            <h2>Cães cadastrados</h2>
+            <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn btn-ghost btn-sm" id="toggle-archived-btn">Mostrar arquivados</button>
+                <button class="btn btn-primary" id="add-dog-btn">+ Adicionar cão</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="t-dogs">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nome</th>
+                        <th>Gênero / Porte</th>
+                        <th>Idade</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="dogs-tbody">
+                    <tr class="loading-row"><td colspan="6">Carregando…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- ── Modal: formulário adicionar/editar ── -->
+    <div class="modal-overlay" id="dog-modal">
+        <div class="modal-box">
+            <button class="modal-close-btn" id="modal-close">&times;</button>
+            <h2 id="modal-title">Adicionar cão</h2>
+
+            <div id="form-alert" class="alert"></div>
+
+            <form id="dog-form">
+                <input type="hidden" id="dog-id">
+
+                <div class="form-group">
+                    <label for="f-name">Nome *</label>
+                    <input id="f-name" type="text" required placeholder="Ex: Thor">
+                    <small id="slug-hint" style="color:var(--gray);display:none">ID gerado: <strong id="slug-hint-value"></strong></small>
+                </div>
+                <input type="hidden" id="f-slug">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="f-gender">Gênero *</label>
+                        <select id="f-gender" required>
+                            <option value="">Selecionar</option>
+                            <option value="Macho">Macho</option>
+                            <option value="Fêmea">Fêmea</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="f-size">Porte *</label>
+                        <select id="f-size" required>
+                            <option value="">Selecionar</option>
+                            <option value="Porte pequeno">Pequeno</option>
+                            <option value="Porte médio">Médio</option>
+                            <option value="Porte grande">Grande</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="f-birth-year">Ano de nascimento (aprox.) * <span class="tooltip-icon" tabindex="0" data-tip="Informe o ano estimado de nascimento. A idade é calculada automaticamente e fica sempre atualizada — sem precisar editar o cadastro todo ano.">?</span></label>
+                        <div class="birth-year-row">
+                            <input id="f-birth-year" type="number" min="1995" required placeholder="Ex: 2021">
+                            <span class="age-preview-badge" id="f-age-preview">—</span>
+                        </div>
+                        <div class="age-quick-row">
+                            <span>Ou informe a idade:</span>
+                            <input id="f-age-quick" type="number" min="0" max="30" placeholder="0">
+                            <span>anos</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="f-status">Status * <span class="tooltip-icon" tabindex="0" data-tip="Disponível: aparece no catálogo. Em processo: adoção em andamento (oculto do catálogo). Para marcar como Adotado ou Falecido, use os botões na tabela.">?</span></label>
+                        <select id="f-status" required>
+                            <option value="available">Disponível</option>
+                            <option value="pending">Em processo</option>
+                        </select>
+                        <div id="inactive-status-notice" class="alert alert-success" style="display:none; padding:8px 12px; font-size:13px; margin:6px 0 0;"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="f-description">Descrição *</label>
+                    <textarea id="f-description" required placeholder="Conte um pouco sobre o cão…"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="f-form-url">Link do formulário de adoção <span class="tooltip-icon" tabindex="0" data-tip="URL para onde o visitante é redirecionado ao clicar em "Quero adotar". Normalmente um link do Google Forms. Deixe em branco para usar o formulário padrão do abrigo.">?</span></label>
+                    <input id="f-form-url" type="url" placeholder="https://forms.gle/…">
+                </div>
+
+                <div class="form-group">
+                    <label style="flex-direction:row;cursor:pointer">
+                        <input type="checkbox" id="f-featured"> Destaque no catálogo
+                        <span class="tooltip-icon" tabindex="0" data-tip="Cães em destaque aparecem no topo do catálogo público, antes dos demais.">?</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>Fotos <span class="photos-counter" id="photos-counter">(0/5)</span></label>
+                    <div class="photos-grid" id="photos-grid"></div>
+                    <input type="file" id="f-photos" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">
+                    <small style="color:#868686">Até 5 fotos. A primeira é usada como capa. Formatos: JPG, PNG, WebP. Máximo 5 MB cada.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Confirm delete ── -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3 id="confirm-title">Remover cão?</h3>
+            <p id="confirm-msg">Esta ação não pode ser desfeita.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-ok">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../js/pages/admin-dogs.js?v=1"></script>
+    <script src="../../js/theme-toggle.js?v=2"></script>
+</body>
+</html>

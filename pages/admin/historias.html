@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hnbbjohjobvclinxclbw.supabase.co wss://hnbbjohjobvclinxclbw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <title>Admin · Histórias — Abrigo da Márcia</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="../../styles/admin.css?v=8">
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
+            <h1>Painel Admin</h1>
+            <nav class="admin-nav">
+                <a href="index.html">Cães</a>
+                <a href="historias.html" class="active">Histórias</a>
+                <a href="eventos.html">Eventos</a>
+                <a href="seguranca.html">Segurança</a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="theme-toggle" aria-label="Alternar tema"></button>
+            <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+        </div>
+    </header>
+
+    <!-- ── Main ── -->
+    <main class="admin-main">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">—</div>
+                <div class="stat-label">Total de histórias</div>
+            </div>
+            <div class="stat-card available">
+                <div class="stat-value" id="stat-featured">—</div>
+                <div class="stat-label">Em destaque na home</div>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="section-header">
+            <h2>Histórias cadastradas</h2>
+            <button class="btn btn-primary" id="add-story-btn">+ Adicionar história</button>
+        </div>
+
+        <div class="table-wrap">
+            <table class="t-stories">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Cão</th>
+                        <th>Fotos</th>
+                        <th>Destaque</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="stories-tbody">
+                    <tr class="loading-row"><td colspan="5">Carregando…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- ── Modal: formulário adicionar/editar ── -->
+    <div class="modal-overlay" id="story-modal">
+        <div class="modal-box">
+            <button class="modal-close-btn" id="modal-close">&times;</button>
+            <h2 id="modal-title">Adicionar história</h2>
+
+            <div id="form-alert" class="alert"></div>
+
+            <form id="story-form">
+                <input type="hidden" id="story-id">
+
+                <div class="form-group">
+                    <label for="f-dog-name">Nome do cão *</label>
+                    <input id="f-dog-name" type="text" required placeholder="Ex: Thor">
+                </div>
+
+                <div class="form-group">
+                    <label for="f-description">História *</label>
+                    <textarea id="f-description" required maxlength="600" placeholder="Conte a história deste cão e como ele encontrou um lar…"></textarea>
+                    <small id="desc-counter" style="color:var(--gray);align-self:flex-end">0/600</small>
+                </div>
+
+                <div class="form-group">
+                    <label style="flex-direction:row;cursor:pointer">
+                        <input type="checkbox" id="f-featured"> Destacar na home
+                        <span class="tooltip-icon" tabindex="0" data-tip="Histórias em destaque aparecem na prévia da página inicial (até 3).">?</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>Fotos <span class="photos-counter" id="photos-counter">(0/5)</span></label>
+                    <div class="photos-grid" id="photos-grid"></div>
+                    <input type="file" id="f-photos" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">
+                    <small style="color:#868686">Até 5 fotos. Formatos: JPG, PNG, WebP. Máximo 5 MB cada.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Confirm delete ── -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3>Remover história?</h3>
+            <p id="confirm-msg">Esta ação não pode ser desfeita.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-ok">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../js/pages/admin-historias.js?v=2"></script>
+    <script src="../../js/theme-toggle.js?v=2"></script>
+</body>
+</html>

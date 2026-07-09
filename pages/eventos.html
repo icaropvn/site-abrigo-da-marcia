@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hnbbjohjobvclinxclbw.supabase.co wss://hnbbjohjobvclinxclbw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 
-    <title>Catálogo de Cães para Adoção — Abrigo da Márcia</title>
-    <meta name="description" content="Conheça todos os cães disponíveis para adoção no Abrigo da Márcia em Ribeirão Preto. Filtre por gênero e porte e encontre seu novo melhor amigo.">
-    <meta name="keywords" content="adoção de cães, catálogo, abrigo de animais, Ribeirão Preto">
+    <title>Eventos do Abrigo — Abrigo da Márcia</title>
+    <meta name="description" content="Participe dos eventos de arrecadação do Abrigo da Márcia: rifas e vendas beneficentes que ajudam a manter nossos cães em Ribeirão Preto.">
+    <meta name="keywords" content="rifa beneficente, eventos de arrecadação, abrigo de animais, Ribeirão Preto">
     <meta name="author" content="Abrigo da Márcia">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph -->
     <meta property="og:type"        content="website">
-    <meta property="og:url"         content="https://abrigodamarcia.com.br/pages/catalogo.html">
-    <meta property="og:title"       content="Catálogo de Cães — Abrigo da Márcia">
-    <meta property="og:description" content="Encontre seu novo melhor amigo entre os cães disponíveis para adoção.">
+    <meta property="og:url"         content="https://abrigodamarcia.com.br/pages/eventos.html">
+    <meta property="og:title"       content="Eventos do Abrigo — Abrigo da Márcia">
+    <meta property="og:description" content="Rifas e vendas beneficentes que ajudam a manter o abrigo.">
     <meta property="og:image"       content="https://abrigodamarcia.com.br/assets/images/AbrigodaMarcia_logo.png">
 
     <!-- Canonical -->
-    <link rel="canonical" href="https://abrigodamarcia.com.br/pages/catalogo.html">
+    <link rel="canonical" href="https://abrigodamarcia.com.br/pages/eventos.html">
 
     <script>
         (function(){
@@ -30,6 +30,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="../styles/catalogo.css?v=5">
+    <link rel="stylesheet" href="../styles/eventos.css?v=8">
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -75,55 +76,24 @@
                 <li><a href="../index.html#about-us-section">Sobre nós</a></li>
             </ul>
         </nav>
-        <a href="#donation-section"><button>Doe Agora</button></a>
+        <a href="../index.html#donation-section"><button>Doe Agora</button></a>
     </div>
     <label for="menu-toggle" class="menu-overlay"></label>
-    
+
     <!-- ========================== -->
 
     <main id="main-content">
-        <h1>Adote um amigo</h1>
-        <p>Seu próximo companheiro está esperando por você!</p>
+        <h1>Eventos do Abrigo</h1>
+        <p>Rifas e vendas beneficentes que ajudam a manter nossos cães.</p>
 
-        <div id="filters-container">
-            <div class="filter-group">
-                <label for="filter-gender">Gênero</label>
-                <select id="filter-gender">
-                    <option value="">Todos</option>
-                    <option value="Macho">Macho</option>
-                    <option value="Fêmea">Fêmea</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filter-size">Tamanho</label>
-                <select id="filter-size">
-                    <option value="">Todos</option>
-                    <option value="Porte pequeno">Pequeno</option>
-                    <option value="Porte médio">Médio</option>
-                    <option value="Porte grande">Grande</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filter-sort">Ordenar por</label>
-                <select id="filter-sort">
-                    <option value="default">Destaque</option>
-                    <option value="name-az">Nome (A–Z)</option>
-                    <option value="name-za">Nome (Z–A)</option>
-                    <option value="size-sm">Porte (pequeno → grande)</option>
-                    <option value="size-lg">Porte (grande → pequeno)</option>
-                    <option value="age-young">Idade (mais novo → mais velho)</option>
-                    <option value="age-old">Idade (mais velho → mais novo)</option>
-                </select>
-            </div>
-            <button id="filter-reset">Limpar filtros</button>
-        </div>
-        <div id="filter-results" style="display: none;">
-            <p id="filter-results-text"></p>
+        <div id="event-area">
+            <p class="events-empty">Carregando evento…</p>
         </div>
 
-        <div id="catalog">
-            <p class="catalog-loading">Carregando…</p>
-        </div>
+        <section id="past-events" style="display: none;">
+            <h2>Eventos anteriores</h2>
+            <div id="past-events-list"></div>
+        </section>
     </main>
 
     <footer>
@@ -169,31 +139,55 @@
         </div>
     </footer>
 
-    <div id="dog-detail-modal" class="modal" style="display: none;">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-dog-name">
-            <button class="modal-close" aria-label="Fechar">&times;</button>
-            <div id="modal-dog-media"></div>
-            <div id="modal-dog-info">
-                <h2 id="modal-dog-name"></h2>
-                <div class="modal-tags">
-                    <span id="modal-dog-gender"></span>
-                    <span id="modal-dog-age"></span>
-                    <span id="modal-dog-size"></span>
+    <!-- Modal: reserva de número da rifa -->
+    <div id="reserve-modal" class="reserve-modal" style="display: none;">
+        <div class="reserve-modal-content" role="dialog" aria-modal="true" aria-labelledby="reserve-title">
+            <button class="reserve-modal-close" id="reserve-modal-close" aria-label="Fechar">&times;</button>
+
+            <!-- Passo 1: formulário -->
+            <div id="reserve-form-step">
+                <h2 id="reserve-title">Reservar número</h2>
+                <p id="reserve-subtitle"></p>
+                <form id="reserve-form" novalidate>
+                    <label for="reserve-name">Nome completo
+                        <input type="text" id="reserve-name" maxlength="100" autocomplete="name" required>
+                    </label>
+                    <label for="reserve-contact">Telefone ou e-mail
+                        <input type="text" id="reserve-contact" maxlength="100" inputmode="text" autocomplete="off" required>
+                    </label>
+                    <!-- Honeypot anti-bot: humanos não veem este campo -->
+                    <div class="hp-field" aria-hidden="true">
+                        <label for="reserve-website">Não preencha este campo
+                            <input type="text" id="reserve-website" tabindex="-1" autocomplete="off">
+                        </label>
+                    </div>
+                    <p class="reserve-lgpd">Seus dados serão usados apenas para o controle deste evento e removidos após o encerramento.</p>
+                    <p id="reserve-error" class="reserve-error" style="display: none;" role="alert"></p>
+                    <button type="submit" id="reserve-submit">Confirmar reserva</button>
+                </form>
+            </div>
+
+            <!-- Passo 2: confirmação + pagamento -->
+            <div id="reserve-success-step" style="display: none;">
+                <h2>Reserva confirmada!</h2>
+                <p id="reserve-success-summary"></p>
+                <div id="pix-box">
+                    <p id="pix-box-title">Garanta sua reserva pagando via PIX:</p>
+                    <div id="pix-qrcode" aria-label="QR Code para pagamento PIX"></div>
+                    <button type="button" id="pix-copy">Copiar código PIX</button>
+                    <p id="pix-instructions"></p>
                 </div>
-                <p id="modal-dog-description"></p>
-                <a rel="noopener noreferrer" id="modal-dog-button" href="" target="_blank" class="catalog-card-button">Quero adotar</a>
+                <p class="reserve-after-pay">Após o pagamento, o abrigo fará a confirmação manual da sua reserva. Qualquer dúvida, fale com a gente pelo e-mail ou redes sociais.</p>
+                <button type="button" id="reserve-done">Fechar</button>
             </div>
         </div>
     </div>
 
     <script src="../js/theme-toggle.js?v=2"></script>
-    <script src="../js/lazy-load.js"></script>
-    <script src="../js/favorites.js"></script>
-    <script type="module" src="../js/carousel.js?v=1"></script>
-    <script type="module" src="../js/render-dogs.js?v=3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="../js/pix.js?v=1"></script>
+    <script type="module" src="../js/render-events.js?v=9"></script>
     <script src="../js/date.js"></script>
     <script src="../js/mobile-menu.js"></script>
-    <script src="../js/catalog-filters.js?v=2"></script>
-    <script type="module" src="../js/dog-modal.js?v=1"></script>
 </body>
 </html>

@@ -1,0 +1,1165 @@
+/* ========= EVENTOS DO ABRIGO — página dedicada ========= */
+/* Carrega junto de catalogo.css (header, footer, menu, theme-toggle).
+   Evento ativo (cabeçalho + grade da rifa + modal de reserva com PIX)
+   e histórico de eventos anteriores. */
+
+.events-empty {
+    text-align: center;
+    color: var(--cinzaFooter, #868686);
+    font-size: 22px;
+    width: 100%;
+    margin-top: 40px;
+}
+
+/* ── Cabeçalho do evento ativo ── */
+main .event-header {
+    margin-top: 50px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--brancoPrincipal);
+    box-shadow: 0 0 20px 2px #0000002c;
+}
+
+main .event-cover {
+    width: 100%;
+    max-height: 340px;
+    object-fit: cover;
+    display: block;
+}
+
+main .event-info {
+    padding: 30px 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+main .event-info h2 {
+    font-size: 42px;
+    line-height: 1.1;
+    color: var(--vermelhoPrincipal);
+    margin: 0;
+}
+
+main .event-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+main .event-tags span {
+    background-color: var(--vermelhoBackgroundTags);
+    color: var(--vermelhoPrincipal);
+    padding: 5px 14px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+main .event-description {
+    font-size: 18px;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-line;
+}
+
+main .event-prizes {
+    font-size: 18px;
+    text-align: left;
+}
+
+main .event-prize-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+main .event-prize {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background-color: #fff8ef;
+}
+
+main .event-prize img {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+/* Barra de progresso da meta */
+main .event-goal {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+main .event-goal-bar {
+    width: 100%;
+    height: 14px;
+    border-radius: 7px;
+    background-color: #e3e3e3;
+    overflow: hidden;
+}
+
+main .event-goal-fill {
+    height: 100%;
+    border-radius: 7px;
+    background-color: var(--amareloDestaque);
+    transition: width 0.6s ease-out;
+}
+
+main .event-goal-text {
+    font-size: 15px;
+    color: var(--cinzaFooter);
+}
+
+/* Galeria de divulgação */
+main .event-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 35px 30px 35px;
+}
+
+main .event-gallery img {
+    width: 140px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ── Grade da rifa ── */
+main .raffle-section {
+    margin-top: 50px;
+}
+
+main .raffle-section h3 {
+    font-size: 32px;
+    color: var(--pretoPrincipal);
+    margin-bottom: 6px;
+}
+
+main .raffle-hint {
+    font-size: 15px;
+    color: var(--cinzaFooter);
+    margin-bottom: 16px;
+}
+
+main .raffle-winner {
+    background-color: var(--amareloDestaque);
+    color: #3d2a00;
+    font-size: 22px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 30px;
+}
+
+main .raffle-legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    font-size: 15px;
+}
+
+main .raffle-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+main .raffle-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+main .raffle-dot-free     { background-color: var(--brancoPrincipal); border: 2px solid var(--vermelhoPrincipal); }
+main .raffle-dot-selected { background-color: var(--vermelhoPrincipal); }
+main .raffle-dot-taken    { background-color: #dcdcdc; border: 2px solid #cfcfcf; opacity: 0.7; }
+
+main .raffle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 8px;
+}
+
+/* Disponível: fundo claro, texto vermelho */
+main .raffle-cell {
+    min-height: 52px;
+    border: 2px solid var(--vermelhoPrincipal);
+    border-radius: 8px;
+    background-color: var(--brancoPrincipal);
+    color: var(--vermelhoPrincipal);
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 4px 2px;
+    transition: background-color 0.12s ease-out, transform 0.12s ease-out;
+}
+
+main .raffle-cell:not(:disabled):hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+main .raffle-cell:focus-visible {
+    outline: 3px solid var(--pretoPrincipal);
+    outline-offset: 2px;
+}
+
+main .raffle-cell-number {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+main .raffle-cell-name {
+    font-size: 10px;
+    line-height: 1.1;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Selecionado pelo usuário (ainda não reservado): fundo vermelho */
+main .raffle-cell.is-selected {
+    background-color: var(--vermelhoPrincipal);
+    border-color: var(--vermelhoPrincipal);
+    color: #fff;
+    font-weight: 700;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(241, 90, 85, 0.45);
+}
+
+main .raffle-cell.is-selected:hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+/* Esmaecido quando o limite por reserva foi atingido */
+main .raffle-cell.is-limited {
+    opacity: 0.4;
+    cursor: default;
+}
+main .raffle-cell.is-limited:hover {
+    background-color: var(--brancoPrincipal);
+    color: var(--vermelhoPrincipal);
+    transform: none;
+}
+
+/* Reservado: esmaecido, com a palavra "Reservado" (sem expor quem reservou) */
+main .raffle-cell.is-taken {
+    background-color: #ededed;
+    border-color: #dcdcdc;
+    color: var(--cinzaFooter);
+    opacity: 0.65;
+    cursor: default;
+}
+
+main .raffle-cell.is-taken .raffle-cell-name {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+main .raffle-cell:disabled:not(.is-taken) {
+    opacity: 0.45;
+    cursor: default;
+}
+
+main .raffle-cell.is-winner {
+    border-color: var(--amareloDestaque);
+    box-shadow: 0 0 0 3px var(--amareloDestaque);
+}
+
+main .raffle-closed {
+    margin-top: 24px;
+    color: var(--cinzaFooter);
+    font-size: 17px;
+}
+
+/* Espaço extra no rodapé enquanto a barra de seleção está visível,
+   para ela não cobrir as últimas linhas da grade (sobretudo no mobile) */
+body.has-raffle-bar { padding-bottom: 120px; }
+
+/* ── Barra de ação da seleção (fixa no rodapé) ── */
+.raffle-actionbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+    animation: raffle-bar-up 0.2s ease-out;
+}
+
+@keyframes raffle-bar-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+.raffle-actionbar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.raffle-actionbar-info strong { font-size: 16px; }
+
+.raffle-actionbar-nums {
+    font-size: 14px;
+    opacity: 0.9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60vw;
+}
+
+.raffle-actionbar-total { font-size: 15px; font-weight: 700; }
+
+.raffle-actionbar-limit { font-size: 12.5px; opacity: 0.85; }
+
+.raffle-actionbar-buttons {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.raffle-clear,
+.raffle-reserve {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.raffle-clear {
+    background-color: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+.raffle-clear:hover { background-color: rgba(255, 255, 255, 0.3); }
+
+.raffle-reserve {
+    background-color: #fff;
+    color: var(--vermelhoPrincipal);
+}
+.raffle-reserve:hover { background-color: var(--amareloDestaque); color: #3d2a00; }
+
+/* Desktop: barra flutuante centralizada em vez de full-width */
+@media (width >= 800px) {
+    .raffle-actionbar {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        bottom: 24px;
+        max-width: 720px;
+        width: calc(100% - 48px);
+        border-radius: 14px;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    }
+    @keyframes raffle-bar-up {
+        from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+        to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+}
+
+main .event-sale-note {
+    margin-top: 40px;
+    font-size: 18px;
+    color: var(--cinzaFooter);
+}
+
+/* ── Venda de produtos: vitrine + carrinho ── */
+main .sale-section { margin-top: 40px; }
+
+main .sale-grid {
+    display: grid;
+    grid-template-columns: 1fr;   /* mobile: 1 card por linha (full-width) */
+    gap: 20px;
+}
+@media (min-width: 720px) {
+    /* desktop/tablet: cards maiores; a imagem cresce junto com o card */
+    main .sale-grid { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+}
+
+main .sale-card {
+    border: 1px solid rgba(241, 90, 85, 0.4);
+    border-radius: 18px;
+    background-color: #fff;
+    padding: 20px;
+}
+
+/* Cabeçalho "Nome | Preço" */
+main .sale-card-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 12px;
+    margin-bottom: 18px;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 800;
+    line-height: 1.1;
+}
+main .sale-card-name { color: var(--pretoPrincipal); }
+main .sale-card-sep  { color: rgba(0, 0, 0, .22); font-weight: 400; }
+
+/* Corpo: imagem (esq.) + opções (dir.); cresce na vertical conforme as opções */
+main .sale-card-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 18px;
+    align-items: start;
+}
+main .sale-card-main--nomedia { display: block; }
+main .sale-card-media { min-width: 0; }
+main .sale-card-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+main .sale-options-head {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cinzaFooter);
+}
+
+/* ── Galeria do card de produto (até 3 imagens) ── */
+main .sale-card-gallery {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.04);
+}
+main .sale-gallery-track img { cursor: zoom-in; }
+main .sale-gallery-track {
+    display: flex;
+    height: 100%;
+    transition: transform .3s ease;
+}
+main .sale-gallery-track img {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+}
+main .sale-gallery-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+main .sale-gallery-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .6);
+    box-shadow: 0 0 3px rgba(0, 0, 0, .5);
+    cursor: pointer;
+}
+main .sale-gallery-dot.is-active { background: #fff; }
+
+/* Setas: só no desktop com mouse; surgem ao passar o cursor na galeria */
+main .sale-gallery-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .45);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .15s;
+}
+main .sale-gallery-prev { left: 8px; }
+main .sale-gallery-next { right: 8px; }
+main .sale-gallery-arrow:hover { background: rgba(0, 0, 0, .65); }
+@media (hover: hover) and (min-width: 800px) {
+    main .sale-gallery-arrow { display: block; }
+    main .sale-card-gallery:hover .sale-gallery-arrow { opacity: 1; }
+}
+
+/* ── Botão "Medidas" (secundário discreto → vermelho no hover) ── */
+main .sale-measure-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    border: 1px solid rgba(0, 0, 0, .18);
+    border-radius: 999px;
+    background: none;
+    color: var(--cinzaFooter);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+main .sale-measure-btn:hover {
+    border-color: var(--vermelhoPrincipal);
+    color: var(--vermelhoPrincipal);
+}
+
+/* ── Modal de medidas ── */
+.measure-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, .6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.measure-modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 460px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+.measure-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--cinzaFooter);
+    cursor: pointer;
+}
+.measure-modal-title { margin: 0 28px 16px 0; font-size: 18px; color: var(--pretoPrincipal); }
+.measure-img { width: 100%; height: auto; border-radius: 8px; display: block; }
+
+/* Estado de carregamento / erro da imagem da tabela */
+.measure-loading,
+.measure-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 36px 8px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--cinzaFooter);
+}
+.measure-error { color: var(--vermelhoPrincipal); }
+.measure-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(0, 0, 0, .12);
+    border-top-color: var(--vermelhoPrincipal);
+    border-radius: 50%;
+    animation: measure-spin .8s linear infinite;
+}
+@keyframes measure-spin { to { transform: rotate(360deg); } }
+.measure-retry {
+    border: 1px solid var(--vermelhoPrincipal);
+    border-radius: 999px;
+    padding: 7px 16px;
+    background: none;
+    color: var(--vermelhoPrincipal);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.measure-retry:hover { background: var(--vermelhoPrincipal); color: #fff; }
+.measure-table { width: 100%; border-collapse: collapse; }
+.measure-table th,
+.measure-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    font-size: 14px;
+}
+.measure-table th { font-weight: 600; color: var(--pretoPrincipal); width: 45%; }
+.measure-table td { color: var(--cinzaFooter); }
+
+[data-theme="dark"] main .sale-card-gallery { background-color: #262626; }
+[data-theme="dark"] .measure-modal-content { background: #1f1f24; }
+[data-theme="dark"] .measure-spinner { border-color: rgba(255, 255, 255, .15); border-top-color: var(--vermelhoPrincipal); }
+[data-theme="dark"] .measure-modal-title { color: #f0f0f0; }
+[data-theme="dark"] .measure-table th { color: #f0f0f0; }
+[data-theme="dark"] .measure-table th,
+[data-theme="dark"] .measure-table td { border-bottom-color: rgba(255, 255, 255, .12); }
+[data-theme="dark"] main .sale-measure-btn { border-color: rgba(255, 255, 255, .2); }
+
+/* ── Lightbox (toque para ampliar as imagens do produto) ── */
+.sale-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0, 0, 0, .9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.sale-lightbox-img {
+    max-width: 92vw;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 8px;
+    user-select: none;
+}
+.sale-lightbox-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    border: none;
+    background: none;
+    color: #fff;
+    font-size: 34px;
+    line-height: 1;
+    cursor: pointer;
+}
+.sale-lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+.sale-lightbox-prev { left: 14px; }
+.sale-lightbox-next { right: 14px; }
+.sale-lightbox-arrow:hover { background: rgba(255, 255, 255, .3); }
+
+/* Guarda p/ telas muito estreitas: empilha imagem sobre as opções */
+@media (max-width: 340px) {
+    main .sale-card-main { grid-template-columns: 1fr; }
+    main .sale-card-media { max-width: 240px; }
+}
+
+main .sale-card-price { color: var(--vermelhoPrincipal); }
+
+main .sale-attr {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--cinzaFooter);
+}
+
+main .sale-attr-select,
+main .sale-qty {
+    font-size: 16px;
+    padding: 9px 10px;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    border-radius: 8px;
+    font-family: inherit;
+    background-color: #fff;
+    color: var(--pretoPrincipal);
+}
+
+main .sale-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: stretch;
+    margin-top: 4px;
+}
+main .sale-qty { width: 64px; flex: 0 0 auto; }
+
+main .sale-add {
+    flex: 1 1 120px;
+    min-width: 0;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 14px;
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out;
+}
+main .sale-add:hover { background-color: var(--pretoPrincipal); }
+
+main .sale-card-msg {
+    font-size: 13.5px;
+    color: var(--vermelhoPrincipal);
+    margin: 0;
+}
+main .sale-card-closed { color: var(--cinzaFooter); }
+
+/* Carrinho */
+main .sale-order {
+    margin-top: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    padding: 18px 20px;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+main .sale-order h3 {
+    font-size: 20px;
+    color: var(--pretoPrincipal);
+    margin: 0 0 12px;
+}
+
+main .sale-order-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+main .sale-order-name { color: var(--pretoPrincipal); }
+main .sale-order-name small { color: var(--cinzaFooter); font-weight: 400; }
+main .sale-order-qty  { color: var(--cinzaFooter); font-size: 14px; }
+main .sale-order-line { font-weight: 700; color: var(--pretoPrincipal); }
+
+main .sale-order-remove {
+    border: none;
+    background: none;
+    color: var(--cinzaFooter);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+}
+main .sale-order-remove:hover { color: var(--vermelhoPrincipal); }
+
+/* ── Histórico de eventos anteriores ── */
+main #past-events {
+    margin-top: 80px;
+}
+
+main #past-events h2 {
+    font-size: 36px;
+    color: var(--pretoPrincipal);
+    margin-bottom: 30px;
+}
+
+main #past-events-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+.past-event-card {
+    width: 300px;
+    max-width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--brancoPrincipal);
+    box-shadow: 0 0 20px 2px #0000002c;
+    display: flex;
+    flex-direction: column;
+}
+
+.past-event-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.past-event-body {
+    padding: 18px 20px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.past-event-name {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--vermelhoPrincipal);
+    line-height: 1.15;
+}
+
+.past-event-period {
+    font-size: 14px;
+    color: var(--cinzaFooter);
+}
+
+.past-event-result {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+/* ── Modal de reserva ── */
+.reserve-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background-color: rgba(0, 0, 0, 0.65);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.reserve-modal-content {
+    background-color: var(--brancoPrincipal);
+    border-radius: 16px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 34px 30px 30px 30px;
+    text-align: left;
+}
+
+.reserve-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease-out;
+}
+
+.reserve-modal-close:hover { background: rgba(0, 0, 0, 0.7); }
+
+.reserve-modal-content h2 {
+    font-size: 30px;
+    color: var(--vermelhoPrincipal);
+    margin: 0 0 6px 0;
+    line-height: 1.1;
+}
+
+#reserve-subtitle {
+    font-size: 16px;
+    color: var(--cinzaFooter);
+    text-align: left;
+    margin-bottom: 18px;
+}
+
+#reserve-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+#reserve-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+#reserve-form input {
+    padding: 11px 12px;
+    border: 1px solid var(--vermelhoPrincipal);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 16px;
+    background-color: #fff;
+    color: var(--pretoPrincipal);
+}
+
+#reserve-form input:focus-visible {
+    outline: 3px solid var(--vermelhoPrincipal);
+    outline-offset: 1px;
+}
+
+/* Honeypot: fora da tela para humanos, visível para bots */
+.hp-field {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+}
+
+.reserve-lgpd {
+    font-size: 13px;
+    color: var(--cinzaFooter);
+    text-align: left;
+    line-height: 1.45;
+}
+
+.reserve-error {
+    background-color: #fdecea;
+    color: #b3261e;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+    text-align: left;
+}
+
+#reserve-submit,
+#reserve-done {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 0;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out;
+    width: 100%;
+}
+
+#reserve-submit:hover,
+#reserve-done:hover { background-color: var(--pretoPrincipal); }
+
+#reserve-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+#reserve-success-summary {
+    font-size: 17px;
+    text-align: left;
+    margin-bottom: 18px;
+}
+
+#pix-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    background-color: #fff;
+    border: 2px dashed var(--vermelhoPrincipal);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 18px;
+}
+
+#pix-box-title {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+#pix-qrcode img,
+#pix-qrcode canvas {
+    border-radius: 6px;
+}
+
+#pix-copy {
+    background: none;
+    border: 2px solid var(--vermelhoPrincipal);
+    color: var(--vermelhoPrincipal);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.12s ease-out;
+}
+
+#pix-copy:hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+#pix-instructions {
+    font-size: 14px;
+    color: var(--cinzaFooter);
+    text-align: center;
+    white-space: pre-line;
+}
+
+.reserve-after-pay {
+    font-size: 14px;
+    color: var(--cinzaFooter);
+    text-align: left;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+/* ── Dark mode ── */
+[data-theme="dark"] main .event-header,
+[data-theme="dark"] .past-event-card,
+[data-theme="dark"] .reserve-modal-content {
+    background-color: #1e1e1e;
+    box-shadow: 0 0 20px 2px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] main .event-description,
+[data-theme="dark"] main .event-prize,
+[data-theme="dark"] .past-event-result,
+[data-theme="dark"] #reserve-success-summary {
+    color: #e8e8e8;
+}
+
+[data-theme="dark"] main .event-prize {
+    background-color: #262626;
+    border-color: #333;
+}
+
+[data-theme="dark"] main .event-goal-bar { background-color: #333; }
+
+[data-theme="dark"] main .raffle-cell {
+    background-color: #1e1e1e;
+    color: var(--vermelhoPrincipal);
+}
+
+[data-theme="dark"] main .raffle-cell.is-selected {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+[data-theme="dark"] main .raffle-cell.is-limited:hover {
+    background-color: #1e1e1e;
+    color: var(--vermelhoPrincipal);
+}
+
+[data-theme="dark"] main .raffle-cell.is-taken {
+    background-color: #262626;
+    border-color: #3a3a3a;
+    color: #8a8a8a;
+}
+
+[data-theme="dark"] main .raffle-dot-free  { background-color: #1e1e1e; }
+[data-theme="dark"] main .raffle-dot-taken { background-color: #3a3a3a; border-color: #4a4a4a; }
+
+/* Venda — dark */
+[data-theme="dark"] main .sale-card {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+[data-theme="dark"] main .sale-card-name { color: #f0f0f0; }
+[data-theme="dark"] main .sale-card-sep  { color: rgba(255, 255, 255, .3); }
+[data-theme="dark"] main .sale-attr-select,
+[data-theme="dark"] main .sale-qty {
+    background-color: #262626;
+    border-color: #3a3a3a;
+    color: #f0f0f0;
+}
+[data-theme="dark"] main .sale-add:hover { background-color: #fff; color: var(--vermelhoPrincipal); }
+[data-theme="dark"] main .sale-order {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+[data-theme="dark"] main .sale-order h3,
+[data-theme="dark"] main .sale-order-name,
+[data-theme="dark"] main .sale-order-line { color: #f0f0f0; }
+[data-theme="dark"] main .sale-order-row { border-color: #333; }
+
+[data-theme="dark"] #reserve-form input {
+    background-color: #2a2a2a;
+    color: #f0f0f0;
+}
+
+[data-theme="dark"] #pix-box { background-color: #2a2a2a; }
+
+[data-theme="dark"] .reserve-error {
+    background-color: #3a1a1a;
+    color: #ffb0ad;
+}
+
+/* ── Mobile ── */
+@media (width < 800px) {
+    main .event-header { margin-top: 30px; }
+    main .event-info { padding: 22px 18px; }
+    main .event-info h2 { font-size: 30px; }
+    main .event-tags span { font-size: 14px; padding: 4px 12px; }
+    main .event-description,
+    main .event-prize { font-size: 16px; }
+    main .event-gallery { padding: 0 18px 22px 18px; }
+    main .event-gallery img { width: 105px; height: 76px; }
+
+    main .raffle-section h3 { font-size: 26px; }
+    main .raffle-winner { font-size: 18px; padding: 14px 16px; }
+    main .raffle-grid {
+        grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+        gap: 6px;
+    }
+    main .raffle-cell { min-height: 48px; }
+
+    main #past-events { margin-top: 56px; }
+    main #past-events h2 { font-size: 28px; }
+    .past-event-card { width: min(300px, 88vw); }
+
+    /* Modal de reserva: aproveita melhor a tela pequena */
+    .reserve-modal { padding: 12px; }
+    .reserve-modal-content { padding: 28px 20px 24px 20px; max-height: 94vh; }
+    .reserve-modal-content h2 { font-size: 26px; }
+
+    /* Textos do checkout (reserva + PIX) um pouco maiores no mobile,
+       para leitura mais confortável */
+    #reserve-subtitle        { font-size: 17px; }
+    #reserve-form label      { font-size: 16px; }
+    .reserve-lgpd            { font-size: 14px; }
+    #reserve-success-summary { font-size: 18px; }
+    #pix-box-title           { font-size: 17px; }
+    #pix-instructions        { font-size: 15px; }
+    .reserve-after-pay       { font-size: 15px; }
+    .reserve-error           { font-size: 16px; }
+
+    /* Alvos de toque generosos no fluxo de pagamento */
+    #pix-copy { width: 100%; padding: 13px 18px; font-size: 17px; }
+
+    /* Barra de seleção: info em cima, botões dividindo a linha de baixo */
+    .raffle-actionbar { padding: 12px 16px; gap: 10px; }
+    .raffle-actionbar-info { flex: 1 1 100%; }
+    .raffle-actionbar-nums { max-width: 100%; }
+    .raffle-actionbar-buttons { flex: 1 1 100%; }
+    .raffle-clear { flex: 0 0 auto; }
+    .raffle-reserve { flex: 1; }
+}

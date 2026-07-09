@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hnbbjohjobvclinxclbw.supabase.co wss://hnbbjohjobvclinxclbw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <title>Admin · Eventos — Abrigo da Márcia</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="../../styles/admin.css?v=12">
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
+            <h1>Painel Admin</h1>
+            <nav class="admin-nav">
+                <a href="index.html">Cães</a>
+                <a href="historias.html">Histórias</a>
+                <a href="eventos.html" class="active">Eventos</a>
+                <a href="seguranca.html">Segurança</a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="theme-toggle" aria-label="Alternar tema"></button>
+            <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+        </div>
+    </header>
+
+    <!-- ── Main ── -->
+    <main class="admin-main">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">—</div>
+                <div class="stat-label">Total de eventos</div>
+            </div>
+            <div class="stat-card available">
+                <div class="stat-value" id="stat-active">—</div>
+                <div class="stat-label">Evento ativo</div>
+            </div>
+        </div>
+
+        <!-- Tabela de eventos -->
+        <div class="section-header">
+            <h2>Eventos</h2>
+            <div class="actions">
+                <button class="btn btn-primary" id="add-event-btn">+ Novo evento</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="t-events">
+                <thead>
+                    <tr>
+                        <th>Capa</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Período</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="events-tbody">
+                    <tr class="loading-row"><td colspan="6">Carregando…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ── Seção de reservas (oculta até escolher um evento) ── -->
+        <section id="reservations-section" style="display:none; margin-top:42px">
+            <div class="event-context">
+                <div>
+                    <h2 id="rc-event-name">—</h2>
+                    <div class="event-context-meta" id="rc-event-meta"></div>
+                </div>
+                <button class="btn btn-ghost btn-sm" id="rc-close">Fechar reservas</button>
+            </div>
+
+            <!-- Painel de totais -->
+            <div class="totals-panel" id="totals-panel"></div>
+
+            <!-- Toolbar -->
+            <div class="res-toolbar">
+                <input type="search" id="res-search" placeholder="Buscar por nome, contato ou número…">
+                <select id="res-filter-status">
+                    <option value="">Todos os status</option>
+                    <option value="reservado">Reservado</option>
+                    <option value="pago">Pago</option>
+                    <option value="entregue">Entregue</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+                <span class="res-toolbar-spacer"></span>
+                <button class="btn btn-ghost btn-sm" id="export-csv-btn">Exportar CSV</button>
+                <button class="btn btn-primary btn-sm" id="add-reservation-btn">+ Nova reserva</button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="t-reservations">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Contato</th>
+                            <th id="th-items">Itens</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservations-tbody">
+                        <tr class="loading-row"><td colspan="6">Carregando…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- ══════════ Modal: evento ══════════ -->
+    <div class="modal-overlay" id="event-modal">
+        <div class="modal-box">
+            <button class="modal-close-btn" id="ev-modal-close">&times;</button>
+            <h2 id="ev-modal-title">Novo evento</h2>
+
+            <div id="ev-form-alert" class="alert"></div>
+
+            <form id="event-form">
+                <input type="hidden" id="ev-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ev-type">Tipo *</label>
+                        <select id="ev-type" required>
+                            <option value="rifa">Rifa</option>
+                            <option value="venda">Venda de produtos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ev-name">Nome *</label>
+                        <input id="ev-name" type="text" required maxlength="120" placeholder="Ex: Rifa do Dia das Mães">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ev-description">Descrição</label>
+                    <textarea id="ev-description" maxlength="800" placeholder="Detalhes do evento, divulgação…"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ev-starts">Início *</label>
+                        <input id="ev-starts" type="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ev-ends">Fim *</label>
+                        <input id="ev-ends" type="date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ev-goal">Meta de arrecadação (R$)
+                        <span class="tooltip-icon" tabindex="0" data-tip="Opcional. A meta pode ser ultrapassada — serve só para a barra de progresso.">?</span>
+                    </label>
+                    <input id="ev-goal" type="number" min="0" step="0.01" placeholder="Ex: 2000.00">
+                </div>
+
+                <!-- ── Campos de rifa ── -->
+                <div id="ev-raffle-fields">
+                    <div class="form-section-title">Rifa</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ev-raffle-total">Quantidade de números *</label>
+                            <input id="ev-raffle-total" type="number" min="1" max="10000" placeholder="Ex: 100">
+                        </div>
+                        <div class="form-group">
+                            <label for="ev-raffle-price">Valor por número (R$) *</label>
+                            <input id="ev-raffle-price" type="number" min="0.01" step="0.01" placeholder="Ex: 10.00">
+                            <small class="muted-hint" id="ev-price-hint"></small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ev-raffle-max">Máx. de números por reserva
+                                <span class="tooltip-icon" tabindex="0" data-tip="Quantos números uma mesma pessoa pode reservar de uma vez. Padrão: 5.">?</span>
+                            </label>
+                            <input id="ev-raffle-max" type="number" min="1" max="50" value="5" placeholder="5">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Prêmios da rifa</label>
+                        <div id="ev-raffle-prizes-list"></div>
+                        <button type="button" class="btn btn-ghost btn-sm" id="ev-add-raffle-prize">+ Adicionar prêmio</button>
+                        <small class="muted-hint">Até 3 prêmios. Cada prêmio é sorteado separadamente.</small>
+                    </div>
+                </div>
+
+                <!-- ── Produtos (venda) ── -->
+                <div id="ev-products-section" style="display:none">
+                    <div class="form-section-title">Produtos</div>
+                    <p class="muted-hint" style="margin:0 0 10px">
+                        Cadastre ao menos um produto. Cada produto pode ter variações (ex:
+                        <em>Tamanho: P, M, G</em> · <em>Sabor: calabresa, mussarela</em>). Variação com
+                        uma única opção (ex: <em>Tamanho: único</em>) é registrada como informação fixa.
+                    </p>
+                    <div id="ev-products-list"></div>
+                    <button type="button" class="btn btn-ghost btn-sm" id="ev-add-product">+ Adicionar produto</button>
+                </div>
+
+                <!-- ── PIX ── -->
+                <div class="form-section-title">Pagamento (PIX)</div>
+                <p class="muted-hint" style="margin:0 0 4px">
+                    Informe a chave + nome + cidade (o site gera o QR Code), <strong>ou</strong> cole um copia-e-cola pronto.
+                </p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ev-pix-key">Chave PIX</label>
+                        <input id="ev-pix-key" type="text" maxlength="120" placeholder="e-mail, telefone, CPF/CNPJ ou aleatória">
+                    </div>
+                    <div class="form-group">
+                        <label for="ev-pix-city">Cidade do recebedor</label>
+                        <input id="ev-pix-city" type="text" maxlength="60" placeholder="Ex: Ribeirao Preto">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ev-pix-name">Nome do recebedor</label>
+                    <input id="ev-pix-name" type="text" maxlength="60" placeholder="Ex: Abrigo da Marcia">
+                </div>
+                <div class="form-group">
+                    <label for="ev-pix-payload">Copia-e-cola pronto (opcional)
+                        <span class="tooltip-icon" tabindex="0" data-tip="Se preenchido, tem prioridade sobre os campos acima. Útil para colar o código do PagSeguro.">?</span>
+                    </label>
+                    <textarea id="ev-pix-payload" maxlength="600" placeholder="00020126…"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ev-pay-instructions">Instruções de pagamento</label>
+                    <input id="ev-pay-instructions" type="text" maxlength="200" placeholder="Ex: Envie o comprovante no WhatsApp (16) 99999-0000">
+                </div>
+
+                <!-- ── Imagens ── -->
+                <div class="form-section-title">Imagens</div>
+                <div class="form-group">
+                    <label>Capa</label>
+                    <div class="img-preview-wrap" id="ev-cover-wrap" style="cursor:pointer">
+                        <img id="ev-cover-img" alt="Capa" style="display:none">
+                        <div class="img-preview-placeholder" id="ev-cover-placeholder">Clique para escolher a capa</div>
+                    </div>
+                    <input type="file" id="ev-cover-file" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none">
+                    <small class="muted-hint">JPG, PNG ou WebP. Máximo 5 MB.</small>
+                </div>
+                <div class="form-group">
+                    <label>Galeria de divulgação <span class="photos-counter" id="ev-photos-counter">(0/5)</span></label>
+                    <div class="photos-grid" id="ev-photos-grid"></div>
+                    <input type="file" id="ev-photos-file" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">
+                    <small class="muted-hint">Até 5 imagens. Máximo 5 MB cada.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="ev-modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="ev-save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ══════════ Modal: reserva ══════════ -->
+    <div class="modal-overlay" id="reservation-modal">
+        <div class="modal-box">
+            <button class="modal-close-btn" id="res-modal-close">&times;</button>
+            <h2 id="res-modal-title">Nova reserva</h2>
+
+            <div id="res-form-alert" class="alert"></div>
+
+            <form id="reservation-form">
+                <input type="hidden" id="res-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="res-name">Cliente *</label>
+                        <input id="res-name" type="text" required maxlength="100" placeholder="Nome do cliente">
+                    </div>
+                    <div class="form-group">
+                        <label for="res-contact">Contato *</label>
+                        <input id="res-contact" type="text" required maxlength="100" placeholder="Telefone ou e-mail">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="res-status">Status</label>
+                        <select id="res-status">
+                            <option value="reservado">Reservado</option>
+                            <option value="pago">Pago</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="res-notes">Anotações (interno)</label>
+                        <input id="res-notes" type="text" maxlength="300" placeholder="Ex: pagou via WhatsApp">
+                    </div>
+                </div>
+
+                <!-- Itens da rifa -->
+                <div id="res-raffle-block">
+                    <div class="form-section-title">Números da rifa</div>
+                    <div id="res-numbers-list"></div>
+                    <button type="button" class="btn btn-ghost btn-sm" id="res-add-number">+ Adicionar número</button>
+                    <small class="muted-hint" style="display:block;margin-top:6px" id="res-numbers-hint"></small>
+                </div>
+
+                <!-- Itens da venda (produtos + variação + quantidade) -->
+                <div id="res-venda-block" style="display:none">
+                    <div class="form-section-title">Itens do pedido</div>
+                    <div id="res-products-list"></div>
+                    <button type="button" class="btn btn-ghost btn-sm" id="res-add-product">+ Adicionar item</button>
+                    <div class="res-order-total" id="res-order-total"></div>
+                    <small class="muted-hint" id="res-venda-empty" style="display:none;margin-top:6px">
+                        Este evento ainda não tem produtos cadastrados. Use "Gerenciar produtos" antes de criar reservas.
+                    </small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="res-modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="res-save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ══════════ Confirmação genérica ══════════ -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3 id="confirm-title">Confirmar</h3>
+            <p id="confirm-msg">Tem certeza?</p>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../js/pages/admin-eventos.js?v=2"></script>
+    <script src="../../js/theme-toggle.js?v=2"></script>
+</body>
+</html>

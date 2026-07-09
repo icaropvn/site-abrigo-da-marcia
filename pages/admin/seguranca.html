@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hnbbjohjobvclinxclbw.supabase.co wss://hnbbjohjobvclinxclbw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <title>Admin · Segurança — Abrigo da Márcia</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="../../styles/admin.css?v=6">
+</head>
+<body>
+
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <img src="../../assets/images/AbrigodaMarcia_logo.png" alt="Logo">
+            <h1>Painel Admin</h1>
+            <nav class="admin-nav">
+                <a href="index.html">Cães</a>
+                <a href="historias.html">Histórias</a>
+                <a href="eventos.html">Eventos</a>
+                <a href="seguranca.html" class="active">Segurança</a>
+            </nav>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="theme-toggle" aria-label="Alternar tema"></button>
+            <button class="btn btn-ghost btn-sm" id="logout-btn">Sair</button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="section-header">
+            <h2>Verificação em duas etapas (2FA)</h2>
+        </div>
+
+        <div class="table-wrap" style="padding:24px; max-width:560px">
+            <div id="mfa-alert" class="alert"></div>
+
+            <!-- Estado: carregando -->
+            <p id="mfa-loading" class="muted-hint">Carregando…</p>
+
+            <!-- Estado: 2FA ativo -->
+            <div id="mfa-active" style="display:none">
+                <p style="margin-bottom:14px">
+                    <span class="badge badge-ativo">2FA ativo</span>
+                </p>
+                <p class="muted-hint" style="margin-bottom:18px">
+                    Seu login exige o código do aplicativo autenticador. Mantenha o app instalado;
+                    sem ele você não conseguirá entrar.
+                </p>
+                <button class="btn btn-danger" id="disable-btn">Desativar 2FA</button>
+            </div>
+
+            <!-- Estado: 2FA inativo (iniciar cadastro) -->
+            <div id="mfa-inactive" style="display:none">
+                <p class="muted-hint" style="margin-bottom:18px">
+                    Proteja o painel com um segundo fator. Você vai precisar de um aplicativo
+                    autenticador (Google Authenticator, Authy, 1Password, etc.).
+                </p>
+                <button class="btn btn-primary" id="enable-btn">Ativar 2FA</button>
+            </div>
+
+            <!-- Estado: cadastro em andamento (QR + código) -->
+            <div id="mfa-enroll" style="display:none">
+                <p style="margin-bottom:12px">1. Escaneie o QR Code no seu aplicativo autenticador:</p>
+                <div id="qr-box" style="background:#fff; padding:16px; border-radius:10px; width:fit-content; margin-bottom:12px"></div>
+                <p class="muted-hint" style="margin-bottom:18px">
+                    Não consegue escanear? Digite este código no app:<br>
+                    <code id="mfa-secret" style="font-size:15px; letter-spacing:.04em; word-break:break-all"></code>
+                </p>
+                <p style="margin-bottom:8px">2. Digite o código de 6 dígitos gerado pelo app:</p>
+                <form id="verify-form" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+                    <input id="verify-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+                           placeholder="000000" required
+                           style="padding:10px 12px; border:1px solid var(--border); border-radius:8px; font:inherit; font-size:18px; letter-spacing:.3em; text-align:center; width:140px; background:#fff; color:var(--dark)">
+                    <button type="submit" class="btn btn-primary" id="verify-btn">Confirmar</button>
+                    <button type="button" class="btn btn-ghost" id="enroll-cancel">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmação de desativação -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-box">
+            <h3>Desativar 2FA?</h3>
+            <p>Seu login voltará a exigir só e-mail e senha. Você pode reativar a qualquer momento.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-ok">Desativar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../js/pages/admin-seguranca.js?v=1"></script>
+    <script src="../../js/theme-toggle.js?v=2"></script>
+</body>
+</html>

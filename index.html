@@ -3,30 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hnbbjohjobvclinxclbw.supabase.co wss://hnbbjohjobvclinxclbw.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 
-    <title>Abrigo da Márcia</title>
+    <title>Abrigo da Márcia — Adote um amigo, mude uma vida</title>
+    <meta name="description" content="Abrigo da Márcia — Adote um cão e mude uma vida. Conheça nossos cães em Ribeirão Preto e ajude a dar um lar a quem precisa.">
+    <meta name="keywords" content="adoção de cães, abrigo de animais, cão para adotar, Ribeirão Preto, São Paulo">
+    <meta name="author" content="Abrigo da Márcia">
+    <meta name="robots" content="index, follow">
 
-    <link rel="stylesheet" href="styles/index.css">
+    <!-- Open Graph / redes sociais -->
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="https://abrigodamarcia.com.br/">
+    <meta property="og:title"       content="Abrigo da Márcia — Adote um amigo, mude uma vida">
+    <meta property="og:description" content="Conheça nossos cães aguardando por um lar em Ribeirão Preto.">
+    <meta property="og:image"       content="https://abrigodamarcia.com.br/assets/images/AbrigodaMarcia_logo.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Abrigo da Márcia">
+    <meta name="twitter:description" content="Adote um cão e mude uma vida. Ribeirão Preto — SP.">
+    <meta name="twitter:image"       content="https://abrigodamarcia.com.br/assets/images/AbrigodaMarcia_logo.png">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://abrigodamarcia.com.br/">
+
+    <script>
+        (function(){
+            var t = localStorage.getItem('tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="styles/index.css?v=7">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite"/>
 </head>
 <body>
+    <a href="#main-content" class="skip-to-main">Pular para conteúdo principal</a>
     <header>
         <div id="container-header">
-            <a href="#"><img src="assets/images/AbrigodaMarcia_logo.png"></a>
+            <a href="#"><img src="assets/images/AbrigodaMarcia_logo.png" alt="Abrigo da Márcia"></a>
 
             <div id="container-header-nav">
                 <nav>
                     <ul>
-                        <li><a href="#adoption-section">Adoção</a></li>
+                        <li><a href="pages/catalogo.html">Adoção</a></li>
                         <li><a href="#donation-section">Doação</a></li>
+                        <li><a href="pages/historias.html">Histórias</a></li>
+                        <li><a href="pages/eventos.html">Eventos</a></li>
                         <li><a href="#about-us-section">Sobre nós</a></li>
                         <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
                 </nav>
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
                 <a href="#donation-section"><button>Doe Agora</button></a>
             </div>
             <div id="menu-mobile">
+                <button class="theme-toggle" aria-label="Alternar tema"></button>
                 <label for="menu-toggle">
                     <img id="menu-icon-mobile" src="assets/images/icone-menu.png" alt="Ícone menu">
                 </label>
@@ -40,8 +73,10 @@
     <div class="menu">
         <nav>
             <ul>
-                <li><a href="#adoption-section">Adoção</a></li>
+                <li><a href="pages/catalogo.html">Adoção</a></li>
                 <li><a href="#donation-section">Doação</a></li>
+                <li><a href="pages/historias.html">Histórias</a></li>
+                <li><a href="pages/eventos.html">Eventos</a></li>
                 <li><a href="#volunteer-section">Voluntários</a></li>
                 <li><a href="#about-us-section">Sobre nós</a></li>
             </ul>
@@ -52,7 +87,7 @@
     
     <!-- ========================== -->
 
-    <main>
+    <main id="main-content">
         <section id="main-section">
             <div>
                 <h1>Adotar é bom para cachorro!</h1>
@@ -60,10 +95,16 @@
                 <p>Com o seu apoio, podemos continuar proporcionando bem-estar, cuidados veterinários e a esperança de um novo lar para esses animais. Faça parte dessa missão!</p>
                 <a href="#donation-section"><button>Faça uma doação</button></a>
             </div>
-            <img src="assets/images/icone-abrigo-secao-inicial.png" alt="Ícone do abrigo. Uma pata em formato de coração na cor vermelha.">
+            <picture>
+                <source srcset="assets/images/icone-abrigo-secao-inicial.webp" type="image/webp">
+                <img src="assets/images/icone-abrigo-secao-inicial.png" alt="Ícone do abrigo. Uma pata em formato de coração na cor vermelha.">
+            </picture>
         </section>
         <section id="adoption-section">
-            <img src="assets/images/cachorro-secao-adocao.png" alt="Imagem de um dos cachorros do abrigo. Ele possui pelos amarronzados com manchas mais claras no peito. Com a boca levemente aberta, ele olha para a direita.">
+            <picture>
+                <source srcset="assets/images/cachorro-secao-adocao.webp" type="image/webp">
+                <img src="assets/images/cachorro-secao-adocao.png" alt="Imagem de um dos cachorros do abrigo. Ele possui pelos amarronzados com manchas mais claras no peito. Com a boca levemente aberta, ele olha para a direita." loading="lazy">
+            </picture>
             <div>
                 <h2>Adote um amigo</h2>
                 <p>Nossos cães estão em busca de um lar cheio de amor e carinho!</p>
@@ -71,6 +112,17 @@
                 <p>Nosso maior sonho é que cada cãozinho encontre seu final feliz em um lar onde possa receber o afeto e a dedicação que merece.</p>
                 <a target="_self" href="pages/catalogo.html"><button>Adote agora</button></a>
             </div>
+        </section>
+        <section id="stories-section">
+            <h2>Histórias do Abrigo</h2>
+            <p>Cães que encontraram um lar e ganharam um final feliz.</p>
+            <div id="stories-preview"></div>
+            <a href="pages/historias.html"><button>Conheça todas as histórias</button></a>
+        </section>
+        <section id="events-section" style="display: none;">
+            <h2>Eventos do Abrigo</h2>
+            <p>Participe da nossa campanha de arrecadação e ajude a manter nossos cães.</p>
+            <div id="event-banner"></div>
         </section>
         <section id="care-approach-section">
             <h2>Nossos Cuidados</h2>
@@ -108,20 +160,37 @@
                 <p>O abrigo é mantido através de trabalho voluntário e doações. Quer ajudar também?  Faça uma doação para conseguirmos manter nossos cães saudáveis e de barriga cheia!</p>
                 <p id="donation-disclaimer">*As doações são recorrentes e cobradas mensalmente, mas podem ser canceladas a qualquer momento.</p>
                 <div id="donation-buttons-container">
-                    <div class="donation-buttons-container-line">
-                        <a target="_blank" href="https://pag.ae/7_LnotP-u"><button class="donation-button-value">doe 5 reais/mês</button></a>
-                        <a target="_blank" href="https://pag.ae/7_Lnn25Ev"><button class="donation-button-value donation-button-most-chosen">doe 10 reais/mês</button></a>
+                    <!-- Doações recorrentes (mensais) -->
+                    <div class="donation-group">
+                        <p class="donation-group-label">Contribua todo mês</p>
+                        <div class="donation-buttons-container-line">
+                            <a rel="noopener noreferrer" target="_blank" href="https://pag.ae/7_LnotP-u"><button class="donation-button-value">doe 5 reais/mês</button></a>
+                            <a rel="noopener noreferrer" target="_blank" href="https://pag.ae/7_Lnn25Ev"><button class="donation-button-value donation-button-most-chosen">doe 10 reais/mês</button></a>
+                        </div>
+                        <div class="donation-buttons-container-line">
+                            <a rel="noopener noreferrer" target="_blank" href="https://pag.ae/7_LnnApVx"><button class="donation-button-value">doe 30 reais/mês</button></a>
+                            <a rel="noopener noreferrer" target="_blank" href="https://pag.ae/7_LnnQN7R"><button class="donation-button-value">doe 50 reais/mês</button></a>
+                        </div>
                     </div>
-                    <div class="donation-buttons-container-line">
-                        <a target="_blank" href="https://pag.ae/7_LnnApVx"><button class="donation-button-value">doe 30 reais/mês</button></a>
-                        <a target="_blank" href="https://pag.ae/7_LnnQN7R"><button class="donation-button-value">doe 50 reais/mês</button></a>
+                    <!-- Doação única via PIX (o doador escolhe o valor) -->
+                    <div class="donation-group">
+                        <p class="donation-group-label">Ou apenas uma vez</p>
+                        <div class="donation-buttons-container-line donation-single-line">
+                            <button type="button" id="donation-single-btn" class="donation-button-single">Doação Única</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <img src="assets/images/cachorro-secao-doacao.png" alt="Imagem de um cachorro do abrigo. Ele está sendo abraçado por uma pessoa. Sua cor é caramelo com manchas brancas pelo corpo.">
+            <picture>
+                <source srcset="assets/images/cachorro-secao-doacao.webp" type="image/webp">
+                <img src="assets/images/cachorro-secao-doacao.png" alt="Imagem de um cachorro do abrigo. Ele está sendo abraçado por uma pessoa. Sua cor é caramelo com manchas brancas pelo corpo." loading="lazy">
+            </picture>
         </section>
         <section id="about-us-section">
-            <img src="assets/images/cachorros-brincando-no-abrigo.png" alt="Três cachorros correndo em direção à câmera. Dois voluntários aparecem ao fundo.">
+            <picture>
+                <source srcset="assets/images/cachorros-brincando-no-abrigo.webp" type="image/webp">
+                <img src="assets/images/cachorros-brincando-no-abrigo.png" alt="Três cachorros correndo em direção à câmera. Dois voluntários aparecem ao fundo." loading="lazy">
+            </picture>
             <div id="about-us-content">
                 <h2>Conheça o abrigo</h2>
                 <p>O Abrigo da Márcia, fundado há mais de 20 anos, resgata cães abandonados em Ribeirão Preto, no estado de São Paulo.</p>
@@ -135,17 +204,12 @@
                 <p>Não pode adotar um cão nem doar agora? Faça parte do abrigo!</p>
                 <p>Há diversas formas de ajudar a cuidar do abrigo: limpeza, auxílio em campanhas de arrecadação, participação nas redes sociais e muito mais.</p>
                 <p>Você pode ajudar o abrigo da sua maneira e deixar a vida dos nossos cães cada vez melhor.</p>
-                <button>Voluntarie-se agora</button>
+                <a rel="noopener noreferrer" href="https://docs.google.com/forms/d/1dxCq2TutTT5Y78cq6SXBdqMvRVqSzvORznuwah3NDUc/viewform" target="_blank"><button type="button">Voluntarie-se agora</button></a>
             </div>
-            <img src="assets/images/voluntarios-abrigo.png" alt="Foto dos voluntários do abrigo.">
-        </section>
-        <section id="gallery-section">
-            <h2>Galeria</h2>
-            <div id="photos-gallery-container">
-                <div id="gallery-photo1" class="gallery-photo"></div>
-                <div id="gallery-photo2" class="gallery-photo"></div>
-                <div id="gallery-photo3" class="gallery-photo"></div>
-            </div>
+            <picture>
+                <source srcset="assets/images/voluntarios-abrigo.webp" type="image/webp">
+                <img src="assets/images/voluntarios-abrigo.png" alt="Foto dos voluntários do abrigo." loading="lazy">
+            </picture>
         </section>
         <section id="donation-cta-section">
             <span>Faça uma doação e ajude a manter nosso trabalho!</span>
@@ -171,17 +235,19 @@
                 <div id="section-links">
                     <span>LINKS</span>
                     <ul>
-                        <li><a href="#adoption-section">Adoção</a></li>
+                        <li><a href="pages/catalogo.html">Adoção</a></li>
                         <li><a href="#donation-section">Doação</a></li>
+                        <li><a href="pages/historias.html">Histórias</a></li>
+                        <li><a href="pages/eventos.html">Eventos</a></li>
                         <li><a href="#about-us-section">Sobre Nós</a></li>
                         <li><a href="#volunteer-section">Voluntários</a></li>
                     </ul>
                 </div>
                 <div id="social-media-links">
-                    <a target="_blank" href="https://www.facebook.com/abrigodamarcia">
+                    <a rel="noopener noreferrer" target="_blank" href="https://www.facebook.com/abrigodamarcia">
                         <img src="assets/images/facebook-logo.png" alt="Logo do Facebook">
                     </a>
-                    <a target="_blank" href="https://www.instagram.com/abrigodamarcia/">
+                    <a rel="noopener noreferrer" target="_blank" href="https://www.instagram.com/abrigodamarcia/">
                         <img src="assets/images/instagram-logo.png" alt="Logo do Instagram">
                     </a>
                 </div>
@@ -189,10 +255,29 @@
         </div>
         <div id="footer-credits">
             <span id="copyright-text">&copy; 2025 Abrigo da Márcia.</span>
-            <span>Site criado por <a target="_blank" href="https://www.linkedin.com/in/icaro-pavan/">Ícaro C. Pavan</a> e <a target="_blank" href="https://www.linkedin.com/in/jeferson-tomaz-2a901b83/">Jeferson T. Querino</a></span>
+            <span>Site criado por <a rel="noopener noreferrer" target="_blank" href="https://www.linkedin.com/in/icaro-pavan/">Ícaro C. Pavan</a> e <a rel="noopener noreferrer" target="_blank" href="https://www.linkedin.com/in/jeferson-tomaz-2a901b83/">Jeferson T. Querino</a></span>
         </div>
     </footer>
 
+    <!-- Modal: doação única via PIX -->
+    <div class="donation-pix-overlay" id="donation-pix-modal" aria-hidden="true">
+        <div class="donation-pix-box" role="dialog" aria-modal="true" aria-labelledby="donation-pix-title">
+            <button type="button" class="donation-pix-close" id="donation-pix-close" aria-label="Fechar">&times;</button>
+            <p class="donation-pix-title" id="donation-pix-title">Doação única via PIX</p>
+            <div id="donation-pix-qrcode" aria-label="QR Code para doação via PIX"></div>
+            <button type="button" id="donation-pix-copy">Copiar código PIX</button>
+            <p class="donation-pix-instructions">Escaneie o QR Code ou copie o código no app do seu banco e <strong>escolha o valor</strong> que quiser doar. 💚</p>
+        </div>
+    </div>
+
+    <script src="js/theme-toggle.js?v=2"></script>
     <script src="js/date.js"></script>
+    <script src="js/mobile-menu.js"></script>
+    <script src="js/animations.js"></script>
+    <script type="module" src="js/render-stories.js?v=5"></script>
+    <script type="module" src="js/render-events.js?v=8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/pix.js?v=1"></script>
+    <script src="js/donation-pix.js?v=1"></script>
 </body>
 </html>

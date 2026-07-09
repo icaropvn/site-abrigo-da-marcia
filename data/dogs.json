@@ -1,0 +1,70 @@
+{
+  "dogs": [
+    {
+      "id": "charlie",
+      "name": "Charlie",
+      "gender": "Macho",
+      "age": "1 ano",
+      "size": "Porte médio",
+      "description": "Charlie é um dos novatos do abrigo, sempre muito esperto e animado para brincar.",
+      "image": "../assets/images/catalogo/foto-charlie.webp",
+      "formUrl": "https://forms.gle/nLSjXJyeLGUJXZj27",
+      "status": "available"
+    },
+    {
+      "id": "meg",
+      "name": "Meg",
+      "gender": "Fêmea",
+      "age": "4 anos",
+      "size": "Porte médio",
+      "description": "Meg é uma veterana do abrigo. Conhece todo mundo e sempre se dá bem, seja com outros cães ou pessoas.",
+      "image": "../assets/images/catalogo/foto-meg.webp",
+      "formUrl": "https://forms.gle/nLSjXJyeLGUJXZj27",
+      "status": "available"
+    },
+    {
+      "id": "negao",
+      "name": "Negão",
+      "gender": "Macho",
+      "age": "3 anos",
+      "size": "Porte grande",
+      "description": "Negão é cheio de paixão e amor para todos. Muito sociável, ele está sempre pronto para brincar e receber carinho.",
+      "image": "../assets/images/catalogo/foto-negao.webp",
+      "formUrl": "https://forms.gle/nLSjXJyeLGUJXZj27",
+      "status": "available"
+    },
+    {
+      "id": "thor",
+      "name": "Thor",
+      "gender": "Macho",
+      "age": "6 anos",
+      "size": "Porte médio",
+      "description": "Thor é um cão que passou por momentos difíceis. Ele pode ser um pouco arisco inicialmente, mas com o tempo é possível conquistar seu coração, se tornando dócil com quem confia.",
+      "image": "../assets/images/catalogo/foto-thor.webp",
+      "formUrl": "https://forms.gle/nLSjXJyeLGUJXZj27",
+      "status": "available"
+    },
+    {
+      "id": "zeca",
+      "name": "Zeca",
+      "gender": "Macho",
+      "age": "5 anos",
+      "size": "Porte grande",
+      "description": "Zeca nasceu com uma pata com má formação, mas isso nunca o impediu de ser um brincalhão e sempre curioso para conhecer pessoas novas.",
+      "image": "../assets/images/catalogo/foto-zeca.webp",
+      "formUrl": "https://forms.gle/nLSjXJyeLGUJXZj27",
+      "status": "available"
+    },
+    {
+      "id": "zuzu",
+      "name": "Zuzu",
+      "gender": "Fêmea",
+      "age": "6 anos",
+      "size": "Porte grande",
+      "description": "Veterana do abrigo, Zuzu é super tranquila e muito dócil, sempre se dando bem com os outros cães.",
+      "image": "../assets/images/catalogo/foto-zuzu.webp",
+      "formUrl": "https://forms.gle/nLSjXJyeLGUJXZj27",
+      "status": "available"
+    }
+  ]
+}

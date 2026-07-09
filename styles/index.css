@@ -1,12 +1,24 @@
 @charset "UTF-8";
 
 /* Import da fonte Afacad */
-@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Arapey:ital@0;1&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Afacad:wght@400;700;900&display=swap');
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }
 
 :root {
@@ -15,23 +27,53 @@
     --brancoPrincipal: #F6F6F6;
     --amareloDestaque: #FFAD28;
     --cinzaFooter: #868686;
+
+    /* Sistema de layout desktop */
+    --content-max: 1440px;                          /* largura da coluna de conteúdo (header + seções + hero) */
+    --gutter: clamp(24px, 5vw, 80px);               /* respiro lateral fluido */
+    --space-section: clamp(88px, 9vw, 132px);       /* ritmo vertical padrão */
 }
 
-html, body {
+/* Container: fundo full-bleed, conteúdo centralizado numa coluna de --content-max */
+main #adoption-section,
+main #care-approach-section,
+main #donation-section,
+main #about-us-section,
+main #volunteer-section,
+main #stories-section,
+main #donation-cta-section,
+footer {
+    padding-inline: max(var(--gutter), calc((100% - var(--content-max)) / 2));
+}
+
+[data-theme="dark"] body {
+    background-color: #111111;
+    color: #f0f0f0;
+}
+
+html {
     overflow-x: hidden;
     scroll-behavior: smooth;
 }
 
 body {
     font-family: afacad, arial, sans-serif;
-    overflow-y: hidden;
+    scroll-behavior: smooth;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Empurra o footer para o fim quando o conteúdo é curto (sticky footer) */
+body > main {
+    flex: 1 0 auto;
 }
 
 header {
     background-color: var(--vermelhoPrincipal);
     display: flex;
     justify-content: center;
-    padding: 20px 30px;
+    padding: 20px max(var(--gutter), calc((100% - var(--content-max)) / 2));
     position: fixed;
     width: 100%;
     z-index: 2;
@@ -41,7 +83,6 @@ header div#container-header {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1300px;
 }
 
 header img {
@@ -106,11 +147,45 @@ header #menu-mobile, .menu {
     display: none;
 }
 
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    font-size: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease-out;
+    padding: 0;
+}
+
+.theme-toggle::before {
+    content: '';
+    width: 22px;
+    height: 22px;
+    background-color: var(--brancoPrincipal);
+    -webkit-mask: url(../assets/images/icon-moon.svg) center / contain no-repeat;
+    mask: url(../assets/images/icon-moon.svg) center / contain no-repeat;
+}
+
+[data-theme="dark"] .theme-toggle::before {
+    -webkit-mask-image: url(../assets/images/icon-sun.svg);
+    mask-image: url(../assets/images/icon-sun.svg);
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
 main #main-section {
     display: flex;
     width: 110%;
     gap: 100px;
-    padding: 10vw 0px 0px 8vw;
+    padding: 10vw 0 0 max(var(--gutter), calc((100% - var(--content-max)) / 2));
     font-size: 24px;
     z-index: 0;
     position: relative;
@@ -119,14 +194,16 @@ main #main-section {
 
 main #main-section h1 {
     font-size: clamp(60px, 7.5vw, 200px);
-    line-height: 110px;
+    line-height: 1.1;
     margin-bottom: 70px;
     flex-grow: 2;
 }
 
 main #main-section p {
-    max-width: 700px;
-    text-align: justify;
+    max-width: 640px;
+    text-align: left;
+    line-height: 1.6;
+    font-size: clamp(18px, 1.4vw, 22px);
 }
 
 main #main-section p:first-of-type {
@@ -168,19 +245,18 @@ main #adoption-section {
     position: relative;
     display: flex;
     gap: 100px;
-    width: 110%;
-    margin-left: -10%;
     background-color: var(--vermelhoPrincipal);
-    font-size: 24px;
-    padding: 120px 300px 120px 0;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
     z-index: 0;
 }
 
 main #adoption-section img {
     flex: 0 0 auto;
     align-self: center;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 560px;
+    height: auto;
 }
 
 main #adoption-section div {
@@ -188,18 +264,19 @@ main #adoption-section div {
 }
 
 main #adoption-section h2 {
-    font-size: 100px;
-    line-height: 80px;
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
     color: var(--brancoPrincipal);
-    margin-bottom: 50px;
+    margin-bottom: clamp(24px, 3vw, 48px);
     text-align: right;
 }
 
 main #adoption-section p {
     color: var(--brancoPrincipal);
-    margin: 0 0 20px auto;
-    text-align: justify;
-    max-width: 800px;
+    margin: 0 0 16px auto;
+    text-align: left;
+    line-height: 1.6;
+    max-width: 640px;
 }
 
 main #adoption-section a {
@@ -210,12 +287,12 @@ main #adoption-section button {
     display: block;
     border: none;
     padding: 10px 40px;
-    margin: 80px 0 0 auto;
+    margin: clamp(32px, 4vw, 56px) 0 0 auto;
     border-radius: 10px;
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
     font-family: afacad, arial, sans-serif;
-    font-size: 26px;
+    font-size: clamp(20px, 1.6vw, 24px);
     font-weight: 100;
     cursor: pointer;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -231,8 +308,8 @@ main #care-approach-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 24px;
-    padding: 120px 300px 200px 300px;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section) clamp(140px, 14vw, 200px);
 }
 
 main #care-approach-section #cares-container {
@@ -244,9 +321,9 @@ main #care-approach-section #cares-container {
 }
 
 main #care-approach-section h2 {
-    font-size: 100px;
+    font-size: clamp(56px, 6.5vw, 100px);
     text-align: center;
-    line-height: 90px
+    line-height: 1.02;
 }
 
 main #care-approach-section .care-card {
@@ -262,9 +339,9 @@ main #care-approach-section .care-card img {
 
 main #care-approach-section .card-title {
     text-align: center;
-    font-size: 50px;
+    font-size: clamp(30px, 3vw, 44px);
     font-weight: 900;
-    line-height: 50px;
+    line-height: 1.05;
     margin-top: 30px;
 }
 
@@ -280,17 +357,18 @@ main #care-approach-section > img {
     bottom: -25%;
     height: 400px;
     width: 950px;
+    max-width: 90%;
+    object-fit: contain;
     z-index: -1;
 }
 
 main #donation-section {
     display: flex;
     gap: 50px;
-    width: 110%;
     position: relative;
     background-color: var(--vermelhoPrincipal);
-    font-size: 24px;
-    padding: 120px 0 160px 300px;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
 }
 
 main #donation-section > div {
@@ -298,34 +376,36 @@ main #donation-section > div {
 }
 
 main #donation-section h2 {
-    font-size: 100px;
-    line-height: 90px;
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
     color: var(--brancoPrincipal);
 }
 
 main #donation-section p {
     color: var(--brancoPrincipal);
-    text-align: justify;
-    max-width: 700px;
-    margin: 50px 0 0 0;
+    text-align: left;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: clamp(24px, 3vw, 40px) 0 0 0;
 }
 
 main #donation-section #donation-disclaimer {
-    font-size: 20px;
+    font-size: clamp(15px, 1.1vw, 18px);
 }
 
 main #donation-section img {
     flex: 0 0 auto;
     align-self: center;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 520px;
+    height: auto;
 }
 
 main #donation-section #donation-buttons-container {
     display: flex;
     flex-direction: column;
-    gap: 50px;
-    margin-top: 80px;
+    gap: clamp(20px, 2.5vw, 40px);
+    margin-top: clamp(32px, 4vw, 56px);
 }
 
 main #donation-section #donation-buttons-container .donation-buttons-container-line {
@@ -352,21 +432,6 @@ main #donation-section #donation-buttons-container button:hover {
     color: var(--brancoPrincipal);
 }
 
-main #donation-section #donation-buttons-container #donation-button-generic {
-    background-color: transparent;
-    outline-color: var(--brancoPrincipal);
-    outline-width: 2px;
-    outline-style: solid;
-    color: var(--brancoPrincipal);
-    transition: outline-width 0.1s ease-in-out;
-}
-
-main #donation-section #donation-buttons-container #donation-button-generic:hover {
-    background-color: var(--pretoPrincipal);
-    color: var(--brancoPrincipal);
-    outline-width: 0;
-}
-
 main #donation-section #donation-buttons-container .donation-button-most-chosen {
     position: relative;
 }
@@ -384,21 +449,116 @@ main #donation-section #donation-buttons-container .donation-button-most-chosen:
     white-space: nowrap;
 }
 
+/* ── Grupos de doação (recorrente / única), cada um com seu rótulo ── */
+main #donation-section #donation-buttons-container .donation-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+main #donation-section #donation-buttons-container .donation-group-label {
+    color: var(--brancoPrincipal);
+    font-size: clamp(22px, 2vw, 30px);
+    font-weight: 400;
+}
+
+/* Doação única: mesmo visual e tamanho dos demais botões (branco/preto, hover
+   preto/branco, 250px) — herdado da regra base. Só fica alinhado à esquerda. */
+main #donation-section #donation-buttons-container .donation-single-line {
+    justify-content: flex-start;
+}
+
+/* ── Modal de doação única via PIX ── */
+.donation-pix-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.donation-pix-overlay.open { display: flex; }
+
+.donation-pix-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+    padding: 32px 28px;
+    border-radius: 14px;
+    background-color: var(--brancoPrincipal);
+    color: var(--pretoPrincipal);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.donation-pix-close {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    border: none;
+    background: none;
+    color: var(--pretoPrincipal);
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.donation-pix-title {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+#donation-pix-qrcode img,
+#donation-pix-qrcode canvas {
+    border-radius: 6px;
+}
+
+#donation-pix-copy {
+    border: 2px solid var(--vermelhoPrincipal);
+    background: none;
+    color: var(--vermelhoPrincipal);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+#donation-pix-copy:hover {
+    background-color: var(--vermelhoPrincipal);
+    color: #fff;
+}
+
+.donation-pix-instructions {
+    max-width: 280px;
+    font-size: 14px;
+    text-align: center;
+}
+
+[data-theme="dark"] .donation-pix-box {
+    background-color: #2a2a2a;
+    color: var(--brancoPrincipal);
+}
+[data-theme="dark"] .donation-pix-close { color: var(--brancoPrincipal); }
+
 main #about-us-section {
     position: relative;
     display: flex;
-    width: 108%;
-    margin-left: -8%;
     gap: 100px;
-    font-size: 24px;
-    padding: 120px 300px 160px 0;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
 }
 
 main #about-us-section img {
-    max-width: 750px;
-    min-width: 400px;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 560px;
+    height: auto;
     align-self: center;
 }
 
@@ -408,51 +568,52 @@ main #about-us-section > div {
 
 main #about-us-section h2 {
     color: var(--vermelhoPrincipal);
-    line-height: 90px;
-    font-size: 100px;
+    line-height: 1.02;
+    font-size: clamp(56px, 6.5vw, 100px);
     text-align: right;
-    margin-bottom: 50px;
+    margin-bottom: clamp(24px, 3vw, 48px);
 }
 
 main #about-us-section p {
-    max-width: 800px;
-    text-align: justify;
-    margin: 0 0 20px auto;
+    max-width: 640px;
+    text-align: left;
+    line-height: 1.6;
+    margin: 0 0 16px auto;
 }
 
 main #volunteer-section {
     position: relative;
     display: flex;
     gap: 100px;
-    width: 110%;
     background-color: var(--vermelhoPrincipal);
-    font-size: 24px;
-    padding: 120px 0 160px 300px;
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
 }
 
 main #volunteer-section h2 {
     color: var(--brancoPrincipal);
-    font-size: 100px;
-    line-height: 90px;
-    margin-bottom: 50px;
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
+    margin-bottom: clamp(24px, 3vw, 48px);
 }
 
 main #volunteer-section p {
     color: var(--brancoPrincipal);
-    text-align: justify;
-    max-width: 700px;
-    margin: 0 0 20px 0;
+    text-align: left;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 0 16px 0;
 }
 
 main #volunteer-section button {
     border: none;
     padding: 10px 40px;
-    margin: 80px 0 0 0;
+    margin: clamp(32px, 4vw, 56px) 0 0 0;
     border-radius: 10px;
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
     font-family: afacad, arial, sans-serif;
-    font-size: 26px;
+    font-size: clamp(20px, 1.6vw, 24px);
     font-weight: 100;
     cursor: pointer;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -465,25 +626,32 @@ main #volunteer-section button:hover {
 
 main #volunteer-section img {
     align-self: center;
-    max-width: 750px;
-    min-width: 600px;
-    width: 50%;
-    height: 50%;
+    width: 46%;
+    max-width: 560px;
+    height: auto;
 }
 
-main #gallery-section {
-    font-size: 24px;
-    padding: 120px 300px 160px 300px;
+main #stories-section {
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
+    text-align: center;
 }
 
-main #gallery-section h2 {
-    font-size: 100px;
+main #stories-section h2 {
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
     color: var(--vermelhoPrincipal);
     width: fit-content;
     margin: 0 auto;
 }
 
-main #gallery-section #photos-gallery-container {
+main #stories-section > p {
+    margin: 16px auto 0 auto;
+    max-width: 700px;
+    color: var(--pretoPrincipal);
+}
+
+main #stories-section #stories-preview {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -492,36 +660,137 @@ main #gallery-section #photos-gallery-container {
     margin-top: 70px;
 }
 
-main #gallery-section .gallery-photo {
-    background-color: #101010;
-    background-size: cover;
+main #stories-section .story-card {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    max-width: 100%;
     border-radius: 10px;
-    width: 375px;
-    height: 550px;
+    overflow: hidden;
+    background-color: var(--brancoPrincipal);
+    box-shadow: 0 0 20px 2px #0000002c;
+    text-decoration: none;
+    text-align: left;
+    transition: transform 0.1s ease-out;
 }
 
-main #gallery-photo1 {
-    background-image: url("../assets/images/gallery-photo1.jpg");
+main #stories-section .story-card:hover {
+    transform: translateY(-10px);
 }
 
-main #gallery-photo2 {
-    background-image: url("../assets/images/gallery-photo2.jpg");
+main #stories-section .story-card-photo {
+    background-color: #e8e8e8;
+    height: 220px;
+    overflow: hidden;
+    flex: 0 0 auto;
 }
 
-main #gallery-photo3 {
-    background-image: url("../assets/images/gallery-photo3.jpg");
+main #stories-section .story-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
+
+main #stories-section .story-card-photo.is-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+}
+
+main #stories-section .story-card-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 25px 25px 20px;
+}
+
+main #stories-section .story-card-name {
+    display: block;
+    font-size: 25px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--vermelhoPrincipal);
+}
+
+main #stories-section .story-card-desc {
+    margin: 15px 0 20px 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--pretoPrincipal);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+main #stories-section .story-card-button {
+    display: block;
+    margin-top: auto;
+    font-size: 18px;
+    background-color: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    border-radius: 10px;
+    padding: 8px 0;
+    text-align: center;
+    transition: background-color 0.1s ease-out;
+}
+
+main #stories-section .story-card:hover .story-card-button {
+    background-color: var(--pretoPrincipal);
+}
+
+[data-theme="dark"] main #stories-section .story-card {
+    background-color: #1e1e1e;
+}
+
+[data-theme="dark"] main #stories-section .story-card-desc {
+    color: #d8d8d8;
+}
+
+main #stories-section > a {
+    display: inline-block;
+    text-decoration: none;
+    margin-top: 60px;
+}
+
+main #stories-section > a button {
+    border: none;
+    padding: 12px 40px;
+    border-radius: 10px;
+    background-color: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    font-family: afacad, arial, sans-serif;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+main #stories-section > a button:hover {
+    background-color: var(--pretoPrincipal);
+}
+
+main #main-section picture,
+main #adoption-section picture,
+main #donation-section picture,
+main #about-us-section picture,
+main #volunteer-section picture {
+    display: contents;
+}
+
 
 main #donation-cta-section {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 30px;
     background-color: var(--vermelhoPrincipal);
-    padding: 60px 300px;
+    padding-block: clamp(48px, 6vw, 72px);
 }
 
 main #donation-cta-section span {
-    font-size: 40px;
+    font-size: clamp(26px, 3vw, 38px);
     font-weight: 900;
     color: var(--brancoPrincipal);
 }
@@ -533,9 +802,10 @@ main #donation-cta-section button {
     background-color: var(--brancoPrincipal);
     color: var(--pretoPrincipal);
     font-family: afacad, arial, sans-serif;
-    font-size: 26px;
+    font-size: clamp(20px, 1.6vw, 24px);
     font-weight: 100;
     cursor: pointer;
+    white-space: nowrap;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
@@ -546,7 +816,7 @@ main #donation-cta-section button:hover {
 
 footer {
     background-color: var(--pretoPrincipal);
-    padding: 80px 300px;
+    padding-block: clamp(64px, 8vw, 96px);
 }
 
 footer #footer-main-content {
@@ -680,6 +950,73 @@ footer #footer-credits a:hover {
 
 
 
+/* ========= ACESSIBILIDADE - FOCUS STATES ========= */
+
+.skip-to-main {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+    z-index: 100;
+    transition: top 0.2s ease;
+}
+
+.skip-to-main:focus {
+    top: 0;
+}
+
+header li a:focus-visible {
+    outline: 2px solid var(--brancoPrincipal);
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+header button:focus-visible {
+    outline: 3px solid var(--pretoPrincipal);
+    outline-offset: 2px;
+}
+
+main #main-section button:focus-visible,
+main #adoption-section button:focus-visible,
+main #volunteer-section button:focus-visible,
+main #donation-cta-section button:focus-visible {
+    outline: 3px solid var(--vermelhoPrincipal);
+    outline-offset: 3px;
+}
+
+main #donation-section button:focus-visible {
+    outline: 3px solid var(--pretoPrincipal);
+    outline-offset: 3px;
+}
+
+/* ========= ANIMAÇÕES ========= */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.in-view {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /* ========= MEDIA QUERIES DE TELA ========= */
 
 
@@ -771,25 +1108,13 @@ footer #footer-credits a:hover {
         line-height: 70px
     }
 
-    main #gallery-section {
+    main #stories-section {
         padding: 100px 8vw 100px 8vw;
     }
 
-    main #gallery-section h2 {
+    main #stories-section h2 {
         font-size: 70px;
         line-height: 70px;
-    }
-
-    main #gallery-section .gallery-photo {
-        height: 350px;
-    }
-
-    main #gallery-photo2 {
-        background-position: 50% -80px;
-    }
-
-    main #gallery-photo3 {
-        background-position: 50% -100px;
     }
 
     main #donation-cta-section {
@@ -798,6 +1123,103 @@ footer #footer-credits a:hover {
 
     footer {
         padding: 80px 8vw;
+    }
+}
+
+/* Media Query de dispositivos MÉDIOS-GRANDES (breakpoint intermediário) */
+
+@media (1300px >= width > 800px) {
+    main #main-section {
+        padding: 130px 10vw 0 10vw;
+        width: 100%;
+    }
+
+    main #main-section h1 {
+        font-size: 80px;
+        line-height: 70px;
+    }
+
+    main #adoption-section {
+        width: 100%;
+        margin-left: 0;
+        padding: 80px 10vw;
+    }
+
+    main #adoption-section h2 {
+        font-size: 80px;
+        line-height: 70px;
+    }
+
+    main #care-approach-section {
+        padding: 80px 10vw;
+    }
+
+    main #care-approach-section h2 {
+        font-size: 80px;
+    }
+
+    main #care-approach-section .care-card {
+        width: 350px;
+    }
+
+    main #donation-section {
+        width: 100%;
+        padding: 80px 10vw;
+    }
+
+    main #donation-section h2 {
+        font-size: 80px;
+        line-height: 70px;
+    }
+
+    main #about-us-section {
+        width: 100%;
+        margin-left: 0;
+        padding: 80px 10vw;
+    }
+
+    main #about-us-section h2 {
+        font-size: 80px;
+        line-height: 70px;
+    }
+
+    main #volunteer-section {
+        width: 100%;
+        padding: 80px 10vw;
+    }
+
+    main #volunteer-section h2 {
+        font-size: 80px;
+        line-height: 70px;
+    }
+
+    main #volunteer-section img {
+        min-width: unset;
+        width: 45%;
+    }
+
+    main #about-us-section img {
+        min-width: unset;
+        width: 45%;
+    }
+
+    main #stories-section {
+        padding: 80px 10vw;
+    }
+
+    main #stories-section h2 {
+        font-size: 80px;
+    }
+
+    main #donation-cta-section {
+        padding: 40px 10vw;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    footer {
+        padding: 60px 10vw;
     }
 }
 
@@ -815,11 +1237,13 @@ footer #footer-credits a:hover {
     header #menu-mobile {
         display: flex;
         align-items: center;
+        gap: 14px;
     }
 
     header #menu-icon-mobile {
         width: 30px;
         height: auto;
+        transition: transform 0.3s ease-in-out;
     }
 
     .menu-overlay {
@@ -889,86 +1313,131 @@ footer #footer-credits a:hover {
     }
 
     main #main-section h1 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(30px, 9.5vw, 44px);
+        line-height: 1.1;
+        margin-bottom: 16px;
         width: 100%;
         text-align: center;
     }
 
     main #main-section p {
         width: 100%;
+        text-align: left;
+        font-size: 17px;
+        line-height: 1.6;
     }
 
     main #main-section button {
         display: block;
-        margin: 50px auto 80px auto;
+        margin: 20px auto 0 auto;
+        font-size: 20px;
+        padding: 12px 32px;
     }
 
     main #main-section img {
-        margin-top: 50px;
-        width: 400px;
-        height: 330px;
-        transform: translateY(-50px) rotate(0);
+        margin-top: 28px;
+        width: min(220px, 60vw);
+        height: auto;
+        transform: none;
     }
 
     main #adoption-section {
         width: 100%;
         margin-left: 0;
+        margin-top: 0;
         padding-left: 5vw;
         padding-right: 5vw;
-        flex-direction: column-reverse;
+        flex-direction: column;
+        gap: 40px;
     }
 
     main #adoption-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
+        margin-bottom: 16px;
     }
 
     main #adoption-section button {
         margin-left: auto;
         margin-right: auto;
+        font-size: 20px;
+        padding: 10px 32px;
+        margin-top: 20px;
     }
 
     main #adoption-section img {
-        width: 400px;
+        width: min(240px, 68vw);
     }
 
     main #care-approach-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
     }
 
+    main #care-approach-section .care-card {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    main #stories-section .story-card {
+        width: min(300px, 88vw);
+    }
+
     main #donation-section {
-        flex-direction: column;
+        flex-direction: column-reverse;
+        gap: 40px;
         width: 100%;
         padding-right: 5vw;
         padding-left: 5vw;
     }
 
     main #donation-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
     }
 
     main #donation-section #donation-buttons-container {
-        gap: 25px;
-        margin-top: 60px;
+        gap: 30px;
+        margin-top: 28px;
+    }
+
+    /* Grupos empilhados e centralizados, com rótulo centralizado acima */
+    main #donation-section #donation-buttons-container .donation-group {
+        align-items: center;
+        gap: 14px;
+    }
+
+    main #donation-section #donation-buttons-container .donation-group-label {
+        text-align: center;
+        font-size: clamp(20px, 6vw, 26px);
+    }
+
+    main #donation-section #donation-buttons-container .donation-buttons-container-line {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    main #donation-section #donation-buttons-container .donation-single-line {
+        justify-content: center;
     }
 
     main #donation-section #donation-buttons-container button {
+        width: min(280px, 80vw);
         padding: 10px;
         font-size: 20px;
     }
 
     main #donation-section img {
-        width: 400px;
+        width: min(240px, 68vw);
     }
 
     main #about-us-section {
-        flex-direction: column-reverse;
+        flex-direction: column;
+        gap: 40px;
         width: 100%;
         margin-left: 0;
         padding-left: 5vw;
@@ -976,49 +1445,59 @@ footer #footer-credits a:hover {
     }
 
     main #about-us-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
+        margin-bottom: 16px;
     }
 
     main #about-us-section img {
-        width: 400px;
+        width: min(240px, 68vw);
     }
 
     main #volunteer-section {
-        flex-direction: column;
+        flex-direction: column-reverse;
+        gap: 40px;
         width: 100%;
         padding-right: 5vw;
         padding-left: 5vw;
     }
 
     main #volunteer-section h2 {
-        font-size: 60px;
-        line-height: 60px;
+        font-size: clamp(26px, 8vw, 38px);
+        line-height: 1.1;
         text-align: center;
+        margin-bottom: 16px;
     }
 
     main #volunteer-section button {
         display: block;
         margin-left: auto;
         margin-right: auto;
+        font-size: 20px;
+        padding: 10px 32px;
+        margin-top: 20px;
     }
 
     main #volunteer-section img {
-        width: 400px;
-        min-width: 400px;
+        width: min(240px, 68vw);
+        min-width: unset;
     }
 
     main #donation-cta-section {
         flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     main #donation-cta-section span {
+        font-size: 20px;
         text-align: center;
     }
 
     main #donation-cta-section button {
-        width: 200px;
+        font-size: 18px;
+        width: 180px;
         margin: 0 auto;
     }
 
@@ -1036,6 +1515,10 @@ footer #footer-credits a:hover {
         align-items: center;
     }
 
+    /* Fonte do rodapé herdava tamanhos de desktop (22/30px) — grande demais no mobile */
+    footer #footer-info #contact-info { font-size: 18px; }
+    footer #footer-links ul { font-size: 18px; }
+
     footer #footer-links {
         align-items: center;
     }
@@ -1044,6 +1527,7 @@ footer #footer-credits a:hover {
         display: block;
         width: fit-content;
         margin: 0 auto;
+        font-size: 22px;
     }
 
     footer #section-links ul {
@@ -1056,4 +1540,210 @@ footer #footer-credits a:hover {
         flex-direction: column;
         gap: 30px;
     }
+
+    /* Padding top do hero ajustado ao header menor no mobile;
+       padding-bottom contém a pata decorativa dentro do fundo escuro */
+    main #main-section {
+        padding-top: 110px;
+        padding-bottom: 48px;
+    }
+
+    /* Ritmo vertical consistente: espaço uniforme entre imagem e texto */
+    main #adoption-section,
+    main #donation-section,
+    main #about-us-section,
+    main #volunteer-section { gap: 32px; }
+
+    /* Padding vertical reduzido e uniforme em todas as seções */
+    main #adoption-section   { padding-top: 56px; padding-bottom: 56px; }
+    main #care-approach-section { padding: 56px 6vw; }
+    main #donation-section   { padding-top: 56px; padding-bottom: 56px; }
+    main #about-us-section   { padding-top: 56px; padding-bottom: 56px; }
+    main #volunteer-section  { padding-top: 56px; padding-bottom: 56px; }
+    main #stories-section    { padding: 56px 6vw; }
+    main #donation-cta-section { padding: 36px 5vw; gap: 14px; }
+
+    /* Texto do corpo das seções — herança de 24px do desktop é grande demais.
+       Alinhamento à esquerda evita os vãos irregulares do "justify" em telas estreitas */
+    main #adoption-section p,
+    main #donation-section p,
+    main #about-us-section p,
+    main #volunteer-section p { font-size: 17px; line-height: 1.6; text-align: left; }
+
+    main #donation-section #donation-disclaimer { font-size: 15px; opacity: 0.9; }
+
+    /* Botões de ação — tamanho único (18px) em todo o site, bom alvo de toque */
+    main #main-section button,
+    main #adoption-section button,
+    main #volunteer-section button,
+    main #donation-section #donation-buttons-container button {
+        font-size: 18px;
+    }
+
+    /* Imagens das seções — tamanho único e consistente entre seções */
+    main #adoption-section img,
+    main #donation-section img,
+    main #about-us-section img,
+    main #volunteer-section img {
+        width: min(230px, 64vw);
+        min-width: unset;
+        max-width: unset;
+    }
+
+    /* Stories h2 */
+    main #stories-section h2 { font-size: clamp(26px, 8vw, 38px); line-height: 1.1; }
+    main #stories-section > a button { font-size: 18px; }
+
+    /* Selo "mais escolhido!" — centralizado sobre o botão (empilhados no mobile) */
+    main #donation-section #donation-buttons-container .donation-button-most-chosen::before {
+        top: -11px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 13px;
+    }
+
+    /* Cards de cuidados — ícone, título e descrição compactos */
+    main #care-approach-section #cares-container { gap: 24px; margin-top: 28px; }
+    main #care-approach-section .care-card img   { width: 100px; }
+    main #care-approach-section .card-title      { font-size: 18px; line-height: 1.2; margin-top: 10px; }
+    main #care-approach-section .card-description { font-size: 15px; margin-top: 6px; }
+}
+/* =========== Seção: Eventos do Abrigo (banner do evento ativo) =========== */
+/* A seção fica oculta (display: none inline) e o render-events.js a exibe
+   quando há um evento com status 'ativo' no Supabase. */
+
+main #events-section {
+    font-size: clamp(18px, 1.4vw, 22px);
+    padding-block: var(--space-section);
+    padding-inline: max(var(--gutter), calc((100% - var(--content-max)) / 2));
+    text-align: center;
+}
+
+main #events-section h2 {
+    font-size: clamp(56px, 6.5vw, 100px);
+    line-height: 1.02;
+    color: var(--vermelhoPrincipal);
+    width: fit-content;
+    margin: 0 auto;
+}
+
+main #events-section > p {
+    margin: 16px auto 0 auto;
+    max-width: 700px;
+    color: var(--pretoPrincipal);
+}
+
+main #event-banner {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+main .event-banner-card {
+    display: flex;
+    width: 760px;
+    max-width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--brancoPrincipal);
+    box-shadow: 0 0 20px 2px #0000002c;
+    text-decoration: none;
+    color: inherit;
+    text-align: left;
+    transition: transform 0.1s ease-out;
+}
+
+main .event-banner-card:hover {
+    transform: translateY(-8px);
+}
+
+main .event-banner-card:focus-visible {
+    outline: 3px solid var(--vermelhoPrincipal);
+    outline-offset: 3px;
+}
+
+main .event-banner-card img {
+    width: 42%;
+    min-height: 220px;
+    object-fit: cover;
+    flex: 0 0 auto;
+}
+
+main .event-banner-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 28px 30px;
+}
+
+main .event-banner-tag {
+    align-self: flex-start;
+    background-color: var(--vermelhoBackgroundTags);
+    color: var(--vermelhoPrincipal);
+    padding: 4px 12px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+main .event-banner-name {
+    font-size: 30px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: var(--vermelhoPrincipal);
+}
+
+main .event-banner-period {
+    font-size: 16px;
+    color: var(--cinzaFooter);
+}
+
+main .event-banner-button {
+    display: block;
+    margin-top: auto;
+    font-size: 18px;
+    background-color: var(--vermelhoPrincipal);
+    color: var(--brancoPrincipal);
+    border-radius: 10px;
+    padding: 9px 36px;
+    width: fit-content;
+    transition: background-color 0.1s ease-out;
+}
+
+main .event-banner-card:hover .event-banner-button {
+    background-color: var(--pretoPrincipal);
+}
+
+[data-theme="dark"] main .event-banner-card {
+    background-color: #1e1e1e;
+    box-shadow: 0 0 20px 2px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] main #events-section > p {
+    color: #f0f0f0;
+}
+
+@media (width < 800px) {
+    main #events-section h2 { font-size: clamp(26px, 8vw, 38px); line-height: 1.1; }
+
+    main #event-banner { margin-top: 30px; }
+
+    main .event-banner-card {
+        flex-direction: column;
+        width: min(340px, 88vw);
+    }
+
+    main .event-banner-card:hover { transform: none; }
+
+    main .event-banner-card img {
+        width: 100%;
+        min-height: 0;
+        height: 170px;
+    }
+
+    main .event-banner-body { padding: 20px 22px 24px 22px; }
+    main .event-banner-name { font-size: 24px; }
+    main .event-banner-button { width: 100%; text-align: center; }
 }
